@@ -1,12 +1,15 @@
 ;;; general usability
 
+;; lexical binding
+(setq lexical-binding t)
+
 ;; set up package archives
 (require 'package)
 
 (dolist (archive '(("nongnu" . "https://elpa.nongnu.org/nongnu/")
-		  ("melpa" . "https://melpa.org/packages/")
-		  ("org" . "https://orgmode.org/elpa/")))
-	(add-to-list 'package-archives archive))
+		   ("melpa" . "https://melpa.org/packages/")
+		   ("org" . "https://orgmode.org/elpa/")))
+  (add-to-list 'package-archives archive))
 
 ;; pull latest package info
 (package-initialize)
@@ -21,6 +24,9 @@
 (setq ring-bell-function 'ignore)
 
 ;; pls no more C-M-i
+(setq tabs-always-indent 'complete)
+
+;; pls no more tabs
 (setq-default indent-tabs-mode nil)
 
 ;; pls no more ugly wrap
@@ -44,6 +50,138 @@
       create-lockfiles nil)
 
 ;; adjust transient buffer behaviors to personal preference
+(defun my/display-buffer-in-side-window-and-select (buffer alist)
+  (let ((window (display-buffer-in-side-window buffer alist)))
+    (select-window window)))
+
+(setq window-sides-slots '(0 1 1 1)
+      display-buffer-alist
+      '(;; top bar interactive
+        ("^\\*[[:alnum:]-]*\\(shell\\|term\\|eshell\\|vterm\\|Python\\)\\*$"
+         (my/display-buffer-in-side-window-and-select)
+         (side . top)
+         (slot . 1)
+         (window-height . 15))
+        ;; top bar informational
+        ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
+         (my/display-buffer-in-side-window-and-select)
+         (select. t)
+         (side . top)
+         (slot . 1)
+         (window-height . 15))
+        ;; side bar information
+        ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\)"
+         (my/display-buffer-in-side-window-and-select)
+         (side . right)
+         (slot . 1)
+         (window-width . 0.25))
+        ("^\\*\\( docker container log\\)"
+         (my/display-buffer-in-side-window-and-select)
+         (side . right)
+         (slot . 1)
+         (window-width . 0.5))))
+
+;; get helpful prompts for keys
+(use-package which-key
+  :ensure t
+  :init
+  (which-key-mode))
+
+;; improved search and completion functionality
+;; vertical suggestions for many minibuffer operations
+(use-package vertico
+  :ensure t
+  :init
+  (vertico-mode)
+  (setq vertico-cycle t))
+
+;; additional data with suggestions
+(use-package marginalia
+  :ensure t
+  :bind (("M-A" . marginalia-cycle)
+         :map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+  :init
+  (marginalia-mode))
+
+;; completion engine supporting richer search
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+;; make searches interactive
+(use-package consult
+  ;; Replace bindings. Lazily loaded due by `use-package'.
+  :bind (;; C-c bindings (mode-specific-map)
+         ("C-c m x" . consult-mode-command)
+         ("C-c h i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ;; C-x indings (ctl-x-map)
+         ("C-x M-:" . consult-complex-command)
+         ("C-x b" . consult-buffer)
+         ("C-x 4 b" . consult-buffer-other-window)
+         ("C-x 5 b" . consult-buffer-other-frame)
+         ("C-x r b" . consult-bookmark)
+         ("C-x p b" . consult-project-buffer)
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-'" . consult-register-store)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)
+         ;; M-g bindings (goto-map)
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake)
+         ("M-g g" . consult-goto-line)
+         ("M-g M-g" . consult-goto-line)
+         ("M-g o" . consult-outline)
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings (search-map)
+         ("M-s f" . consult-find)
+         ("M-s D" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+  :init
+  ;; gnu locate is glocate using macports
+  (setq consult-locate-args "glocate --ignore-case")
+  
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+  :config
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   :preview-key '(:debounce 0.4 any))
+  
+  (setq consult-narrow-key "<"))
 
 ;;; mac usability tweaks
 
@@ -71,11 +209,11 @@
 
 ;; create after theme hook
 (defvar after-enable-theme-hook nil
-   "Normal hook run after enabling a theme.")
+  "Normal hook run after enabling a theme.")
 
 (defun run-after-enable-theme-hook (&rest _args)
-   "Run `after-enable-theme-hook'."
-   (run-hooks 'after-enable-theme-hook))
+  "Run `after-enable-theme-hook'."
+  (run-hooks 'after-enable-theme-hook))
 
 (advice-add 'enable-theme :after #'run-after-enable-theme-hook)
 
@@ -88,6 +226,10 @@
       tab-bar-tab-hints nil)
 
 (tab-bar-mode 1)
+
+(tab-rename "welcome" 0)
+
+(define-key global-map (kbd "C-x t t") #'tab-bar-switch-to-tab)
 
 ;; remove right fringe
 (fringe-mode (cons nil 0))
@@ -200,7 +342,23 @@
 
 ;;; general
 
-;; combobulate
+;; improved structural navigation and editing
+(use-package puni
+  :ensure t
+  :bind (:map prog-mode-map
+              ("C-M-f" . puni-forward-sexp-or-up-list)
+              ("C-M-b" . puni-backward-sexp-or-up-list)
+              ;; slurping & barfing
+              ("C-}" . puni-barf-forward)
+              ("C-)" . puni-slurp-forward)
+              ("C-(" . puni-slurp-backward)
+              ("C-{" . puni-barf-backward)
+              ;; depth changing
+              ("M-r" . puni-raise)
+              ("M-=" . puni-splice)
+              ("M-_" . puni-split)
+              ("M-<up>" . puni-splice-killing-backward)
+              ("M-<down>" . puni-splice-killing-forward)))
 
 ;; insert closing delimiters
 (electric-pair-mode 1)
@@ -208,8 +366,18 @@
 ;; completions nice-to-haves
 (setq tab-always-indent 'complete
       completion-auto-help 'always
-      completions-auto-wrap t
-      completions-auto-select 'second-tab)
+      completion-auto-wrap t
+      completion-auto-select 'second-tab)
+
+;; completions at cursor because I'm not emacs enough...
+(use-package corfu
+  :ensure t
+  :custom
+  (corfu-cycle t)
+  ;; (corfu-auto t)
+  (corfu-separator ?\s)
+  :init
+  (global-corfu-mode))
 
 ;;; elisp
 
@@ -270,7 +438,8 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("bfc0b9c3de0382e452a878a1fb4726e1302bf9da20e69d6ec1cd1d5d82f61e3d" default))
- '(package-selected-packages '(adaptive-wrap mood-line modus-themes)))
+ '(package-selected-packages
+   '(consult corfu orderless marginalia vertico which-key puni adaptive-wrap mood-line modus-themes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
