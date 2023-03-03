@@ -45,6 +45,12 @@
   :init
   (global-visual-line-mode 1))
 
+;; pls no more dangling ws
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;; pls delete highlighted regions on input
+(delete-selection-mode 1)
+
 ;; keep transient files tidy
 (setq tn/transient-files-backup-dir (expand-file-name "tmp/backups/" user-emacs-directory)
       tn/transient-files-auto-save-dir (expand-file-name "tmp/auto-saves/" user-emacs-directory)
@@ -57,6 +63,9 @@
       auto-save-file-name-transforms `((".*" ,tn/transient-files-auto-save-dir t))
       auto-save-list-file-prefix tn/transient-files-auto-save-prefix
       create-lockfiles nil)
+
+;; update buffers when files change
+(global-auto-revert-mode 1)
 
 ;; adjust transient buffer behaviors to personal preference
 (defun my/display-buffer-in-side-window-and-select (buffer alist)
