@@ -1,5 +1,9 @@
 ;;; general usability
 
+;; macos native compilation fix
+(when (eq system-type 'darwin)
+  (customize-set-variable 'native-comp-driver-options '("-Wl,-w")))
+
 ;; lexical binding
 (setq lexical-binding t)
 
@@ -15,6 +19,11 @@
 (package-initialize)
 (unless package-archive-contents
   (package-refresh-contents))
+
+;; for pre 29 emacs
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package)
+  (require 'use-package))
 
 ;; keep yes/no prompts brief
 ;; TODO: this doesn't work?
@@ -327,6 +336,7 @@
 
 ;; setup eglot
 (use-package eglot
+  :ensure t  ;; ensure required until 29
   :after project
   :custom
   (eglot-autoshutdown
