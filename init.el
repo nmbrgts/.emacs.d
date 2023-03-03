@@ -454,6 +454,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (global-corfu-mode))
 
+;; symbols for completion swag
+(use-package svg-lib
+  :ensure t)
+(use-package kind-icon
+  :ensure t
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default)
+  (kind-icon-use-icons nil)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
 ;;; elisp
 
 ;;; python
