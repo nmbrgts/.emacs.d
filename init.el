@@ -235,9 +235,9 @@
       tn/default-variable-pitch-font "Iosevka Aile")
 
 (defun my/apply-preferred-fonts ()
-  (set-face-attribute 'default nil :font tn/default-fixed-pitch-font :weight 'light :height 200)
-  (set-face-attribute 'fixed-pitch nil :font tn/default-fixed-pitch-font :weight 'light :height 200)
-  (set-face-attribute 'variable-pitch nil :font tn/default-variable-pitch-font :weight 'light :height 200)
+  (set-face-attribute 'default nil :font tn/default-fixed-pitch-font :weight 'light :height 250)
+  (set-face-attribute 'fixed-pitch nil :font tn/default-fixed-pitch-font :weight 'light :height 250)
+  (set-face-attribute 'variable-pitch nil :font tn/default-variable-pitch-font :weight 'light :height 250)
   (set-face-attribute 'bold nil :weight 'normal))
 
 ;; create after theme hook
