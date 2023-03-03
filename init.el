@@ -116,6 +116,10 @@
   :init
   (mini-frame-mode))
 
+;; define modal-like menus in a declarational style
+(use-package hydra
+  :ensure t)
+
 ;; improved search and completion functionality
 ;; vertical suggestions for many minibuffer operations
 (use-package vertico
@@ -307,7 +311,8 @@
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t)
 
   (define-key global-map (kbd "C-c g b") #'magit-blame-addition)
-  (define-key global-map (kbd "C-c g g") #'magit-status))
+  (define-key global-map (kbd "C-c g g") #'magit-status)
+  (define-key global-map (kbd "C-c g f") #'magit-file-dispatch))
 
 ;; forge integration
 (use-package forge
@@ -331,6 +336,46 @@
   :ensure t
   :config
   (define-key global-map (kbd "C-c g r") #'browse-at-remote))
+
+;; handle conflics with a quick menu
+(use-package smerge-mode
+    :ensure f
+    :after hydra
+    :config
+    (defhydra hydra-smerge (:color pink
+                            :hint nil
+                            :pre (smerge-mode 1)
+                            ;; Disable `smerge-mode' when quitting hydra if
+                            ;; no merge conflicts remain.
+                            :post (smerge-auto-leave))
+      "
+^Move^       ^Keep^               ^Diff^                 ^Other^
+^^-----------^^-------------------^^---------------------^^-------
+_n_ext       _b_ase               _<_: upper/base        _C_ombine
+_p_rev       _u_pper              _=_: upper/lower       _r_esolve
+^^           _l_ower              _>_: base/lower        _k_ill current
+^^           _a_ll                _R_efine
+^^           _RET_: current       _E_diff
+"
+      ("n" smerge-next)
+      ("p" smerge-prev)
+      ("b" smerge-keep-base)
+      ("u" smerge-keep-upper)
+      ("l" smerge-keep-lower)
+      ("a" smerge-keep-all)
+      ("RET" smerge-keep-current)
+      ("\C-m" smerge-keep-current)
+      ("<" smerge-diff-base-upper)
+      ("=" smerge-diff-upper-lower)
+      (">" smerge-diff-base-lower)
+      ("R" smerge-refine)
+      ("E" smerge-ediff)
+      ("C" smerge-combine-with-next)
+      ("r" smerge-resolve)
+      ("k" smerge-kill-current)
+      ("q" nil "cancel" :color blue))
+
+    (define-key global-map (kbd "C-c g s") '("smerge hydra" . hydra-smerge/body)))
 
 ;;; tree-sitter tweaks
 
