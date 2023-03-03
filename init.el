@@ -398,20 +398,21 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
    "Automatically shutdown when there are no buffers to manage")
   (eglot-extend-to-xref
    t
-   "Apply eglot on out-of-project xref jumps"))
+   "Apply eglot on out-of-project xref jumps")
+  :init
+  (setq my/lsp-keymap (make-sparse-keymap))
 
-;; common use lsp operations
-(setq my/lsp-keymap (make-sparse-keymap))
-(define-key my/code-keymap (kbd "l") `("lsp" . ,my/lsp-keymap))
-(define-key my/lsp-keymap (kbd "c") '("lsp-connect" . eglot-reconnect))
-(define-key my/lsp-keymap (kbd "s") '("lsp-shutdown" . eglot-shutdown))
+  ;; common use lsp operations
+  (define-key my/code-keymap (kbd "l") `("lsp" . ,my/lsp-keymap))
+  (define-key my/lsp-keymap (kbd "c") '("lsp-connect" . eglot-reconnect))
+  (define-key my/lsp-keymap (kbd "s") '("lsp-shutdown" . eglot-shutdown))
 
-;; lsp powered code actions
-(define-key my/code-keymap (kbd "r") '("rename-symbol" . eglot-rename))
-(define-key my/code-keymap (kbd "e") '("error-list" . flymake-show-buffer-diagnostics))
-(define-key my/code-keymap (kbd "d") '("jump-to-definition" . xref-find-definitions))
-(define-key my/code-keymap (kbd "n") '("navigate" . imenu))
-(define-key my/code-keymap (kbd "g") '("jump-to-references" . xref-find-references))
+  ;; lsp powered code actions
+  (define-key my/code-keymap (kbd "r") '("rename-symbol" . eglot-rename))
+  (define-key my/code-keymap (kbd "e") '("error-list" . flymake-show-buffer-diagnostics))
+  (define-key my/code-keymap (kbd "d") '("jump-to-definition" . xref-find-definitions))
+  (define-key my/code-keymap (kbd "n") '("navigate" . imenu))
+  (define-key my/code-keymap (kbd "g") '("jump-to-references" . xref-find-references)))
 
 ;;; language support
 
