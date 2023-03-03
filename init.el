@@ -87,6 +87,17 @@
   :init
   (which-key-mode))
 
+;; put minibuffer near top
+(use-package mini-frame
+  :ensure t
+  :custom
+  (mini-frame-show-parameters
+   '((top . 0.2)
+     (width . 0.7)
+     (left . 0.5)))
+  :init
+  (mini-frame-mode))
+
 ;; improved search and completion functionality
 ;; vertical suggestions for many minibuffer operations
 (use-package vertico
@@ -439,7 +450,7 @@
  '(custom-safe-themes
    '("bfc0b9c3de0382e452a878a1fb4726e1302bf9da20e69d6ec1cd1d5d82f61e3d" default))
  '(package-selected-packages
-   '(consult corfu orderless marginalia vertico which-key puni adaptive-wrap mood-line modus-themes)))
+   '(mini-frame mini-frame-mode consult corfu orderless marginalia vertico which-key puni adaptive-wrap mood-line modus-themes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
