@@ -262,10 +262,50 @@
 
 (tab-rename "welcome" 0)
 
-(define-key global-map (kbd "C-x t t") #'tab-bar-switch-to-tab)
+;; move tab-bar-map
+(define-key global-map (kbd "M-t") tab-prefix-map)
 
-;; remove right fringe
-(fringe-mode (cons nil 0))
+;; bind tab in a similar way to buffers
+(define-key global-map (kbd "C-x t") #'tab-bar-switch-to-tab)
+
+;; isolate tabs
+(use-package tabspaces
+  :ensure t
+  :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup.
+  :commands (tabspaces-switch-or-create-workspace
+             tabspaces-open-or-create-project-and-workspace)
+  :custom
+  (tabspaces-use-filtered-buffers-as-default t)
+  (tabspaces-default-tab "Default")
+  (tabspaces-remove-to-default t)
+  (tabspaces-include-buffers '("*scratch*"))
+  ;; sessions
+  ;; (tabspaces-session t)
+  ;; (tabspaces-session-auto-restore t)
+  :init
+  (define-key tab-prefix-map (kbd "s") tabspaces-command-map)
+  (define-key global-map [remap 'project-switch-project] #'tabspaces-open-or-create-project-and-workspace)
+  )
+
+;; Tab isolation w/ consult
+(with-eval-after-load 'consult
+  ;; hide full buffer list (still available with "b" prefix)
+  (consult-customize consult--source-buffer :hidden t :default nil)
+  ;; set consult-workspace buffer list
+  (defvar consult--source-workspace
+    (list :name     "Workspace Buffers"
+          :narrow   ?w
+          :history  'buffer-name-history
+          :category 'buffer
+          :state    #'consult--buffer-state
+          :default  t
+          :items    (lambda () (consult--buffer-query
+                                :predicate #'tabspaces--local-buffer-p
+                                :sort 'visibility
+                                :as #'buffer-name)))
+
+    "Set workspace buffer list for consult-buffer.")
+  (add-to-list 'consult-buffer-sources 'consult--source-workspace))
 
 ;; remove tool bar and scroll bar
 (tool-bar-mode -1)
