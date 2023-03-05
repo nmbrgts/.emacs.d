@@ -363,7 +363,12 @@
 (use-package diff-hl
   :ensure t
   :init
-  (global-diff-hl-mode))
+  (global-diff-hl-mode)
+  :config
+  (define-key diff-hl-command-map (kbd "s") #'diff-hl-show-hunk-stage-hunk)
+  (define-key diff-hl-inline-popup-transient-mode-map (kbd "s") #'diff-hl-show-hunk-stage-hunk)
+  (define-key global-map (kbd "C-c g H") #'diff-hl-show-hunk-next)
+  (define-key global-map (kbd "C-c g h") #'diff-hl-show-hunk-previous))
 
 ;; travel through time
 (use-package git-timemachine
