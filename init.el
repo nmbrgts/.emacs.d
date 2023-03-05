@@ -282,9 +282,10 @@
   ;; sessions
   ;; (tabspaces-session t)
   ;; (tabspaces-session-auto-restore t)
-  :init
+  :config
   (define-key tab-prefix-map (kbd "s") tabspaces-command-map)
-  (define-key global-map [remap 'project-switch-project] #'tabspaces-open-or-create-project-and-workspace))
+  (define-key project-prefix-map (kbd "p") #'tabspaces-open-or-create-project-and-workspace)
+  (define-key project-prefix-map (kbd "P") #'project-switch-project))
 
 ;; tab isolation w/ consult
 (with-eval-after-load 'consult
