@@ -588,7 +588,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(custom-safe-themes
    '("bfc0b9c3de0382e452a878a1fb4726e1302bf9da20e69d6ec1cd1d5d82f61e3d" default))
  '(package-selected-packages
-   '(mini-frame mini-frame-mode consult corfu orderless marginalia vertico which-key puni adaptive-wrap mood-line modus-themes)))
+   '(tabspaces project-tab-groups svg-lib kind-icon mini-frame mini-frame-mode consult corfu orderless marginalia vertico which-key puni adaptive-wrap mood-line modus-themes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
