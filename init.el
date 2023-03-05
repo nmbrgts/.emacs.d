@@ -287,6 +287,14 @@
   (define-key project-prefix-map (kbd "p") #'tabspaces-open-or-create-project-and-workspace)
   (define-key project-prefix-map (kbd "P") #'project-switch-project))
 
+;; rename current tab when switching projects within tabspace
+;; TODO: Can this integrate with tabspace buffer narrowing?
+(defun my/switch-tab-name-with-project (&rest _)
+  (let ((pname (project-name (project-current))))
+    (tab-bar-rename-tab pname)))
+
+(advice-add #'project-switch-project :after 'my/switch-tab-name-with-project)
+
 ;; tab isolation w/ consult
 (with-eval-after-load 'consult
   ;; hide full buffer list (still available with "b" prefix)
