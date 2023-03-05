@@ -284,10 +284,9 @@
   ;; (tabspaces-session-auto-restore t)
   :init
   (define-key tab-prefix-map (kbd "s") tabspaces-command-map)
-  (define-key global-map [remap 'project-switch-project] #'tabspaces-open-or-create-project-and-workspace)
-  )
+  (define-key global-map [remap 'project-switch-project] #'tabspaces-open-or-create-project-and-workspace))
 
-;; Tab isolation w/ consult
+;; tab isolation w/ consult
 (with-eval-after-load 'consult
   ;; hide full buffer list (still available with "b" prefix)
   (consult-customize consult--source-buffer :hidden t :default nil)
