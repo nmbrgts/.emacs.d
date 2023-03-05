@@ -529,10 +529,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; python
 
 ;; use tree-sitter mode by default
-(add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
+(when (and (fboundp 'treesit-available-p)
+           (treesit-available-p))
+  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
 
 ;; start eglot automatically
 (add-hook 'python-ts-mode-hook #'eglot-ensure)
+
+(add-hook 'python-mode-hook #'eglot-ensure)
 
 ;; make eglot unquestioningly use pyright
 (with-eval-after-load 'eglot
