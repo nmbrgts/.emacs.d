@@ -439,6 +439,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; add mac-ports installed tree-sitter grammars
 (setq treesit-extra-load-path '("/opt/local/lib"))
 
+;; create a flag for checking for treesit
+(setq my/treesit-enabled  (and (fboundp 'treesit-available-p)
+                               (treesit-available-p)))
+
 ;;; language server
 
 ;; shared keymap setup
@@ -529,12 +533,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; python
 
 ;; use tree-sitter mode by default
-(when (and (fboundp 'treesit-available-p)
-           (treesit-available-p))
+(when my/treesit-enabled
   (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
 
 ;; start eglot automatically
-(add-hook 'python-ts-mode-hook #'eglot-ensure)
+(when my/treesit-enabled
+  (add-hook 'python-ts-mode-hook #'eglot-ensure))
 
 (add-hook 'python-mode-hook #'eglot-ensure)
 
