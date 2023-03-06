@@ -578,6 +578,20 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; c
 
+;; use tree-sitter mode by default
+(when my/treesit-enabled
+  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode)))
+
+;; enable eglot automatically
+(when my/treesit-enabled
+  (add-hook 'c-ts-mode-hook #'eglot-ensure))
+
+;; use k&r style
+(setq c-default-style '((java-mode . "java")
+                        (awk-mode . "awk")
+                        (other . "k&r")))
+
+
 ;; elixir
 
 ;; javascript
