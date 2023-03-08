@@ -1,5 +1,8 @@
 ;;; general usability
 
+;; set up external custom file
+(setq custom-file (locate-user-emacs-file "custom.el"))
+
 ;; macos native compilation fix
 (when (eq system-type 'darwin)
   (customize-set-variable 'native-comp-driver-options '("-Wl,-w")))
@@ -598,18 +601,5 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; org
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("bfc0b9c3de0382e452a878a1fb4726e1302bf9da20e69d6ec1cd1d5d82f61e3d" default))
- '(package-selected-packages
-   '(tabspaces project-tab-groups svg-lib kind-icon mini-frame mini-frame-mode consult corfu orderless marginalia vertico which-key puni adaptive-wrap mood-line modus-themes)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;; load external custom file
+(load custom-file)
