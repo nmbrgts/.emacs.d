@@ -78,18 +78,18 @@
 (setq window-sides-slots '(0 1 1 1)
       display-buffer-alist
       '(;; top bar interactive
-        ("^\\*[[:alnum:]-]*\\(shell\\|term\\|eshell\\|vterm\\|Python\\)\\*$"
+        ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|Python\\)\\*$"
          (my/display-buffer-in-side-window-and-select)
          (side . top)
          (slot . 1)
-         (window-height . 15))
+         (window-height . 0.20))
         ;; top bar informational
         ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
          (my/display-buffer-in-side-window-and-select)
          (select. t)
          (side . top)
          (slot . 1)
-         (window-height . 15))
+         (window-height . 0.20))
         ;; side bar information
         ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\)"
          (my/display-buffer-in-side-window-and-select)
@@ -101,6 +101,8 @@
          (side . right)
          (slot . 1)
          (window-width . 0.5))))
+
+(define-key global-map (kbd "C-c t p") #'window-toggle-side-windows)
 
 ;; get helpful prompts for keys
 (use-package which-key
@@ -348,6 +350,33 @@
   :config
   (setq mood-line-glyph-alist  mood-line-glyphs-fira-code)
   (mood-line-mode))
+
+;;; terminal
+
+;; vterm
+(use-package vterm
+  :ensure t
+  :after project
+  :bind (:map project-prefix-map
+              ("t" . project-vterm))
+  :preface
+  (defun project-vterm ()
+    (interactive)
+    (defvar vterm-buffer-name)
+    (let* ((default-directory (project-root     (project-current t)))
+           (vterm-buffer-name (project-prefixed-buffer-name "vterm"))
+           (vterm-buffer (get-buffer vterm-buffer-name)))
+      (if (and vterm-buffer (not current-prefix-arg))
+          (pop-to-buffer vterm-buffer  (bound-and-true-p display-comint-buffer-action))
+        (vterm))))
+  :init
+  (add-to-list 'project-switch-commands     '(project-vterm "Vterm") t)
+  (add-to-list 'project-kill-buffer-conditions  '(major-mode . vterm-mode))
+  :config
+  (setq vterm-copy-exclude-prompt t)
+  (setq vterm-max-scrollback 100000)
+  (setq vterm-tramp-shells '(("ssh" "/bin/bash")
+                             ("podman" "/bin/bash"))))
 
 ;;; git tooling
 
