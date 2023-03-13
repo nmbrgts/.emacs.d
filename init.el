@@ -393,6 +393,10 @@
 
 (advice-add #'project-switch-project :after 'my/switch-tab-name-with-project)
 
+;; tabs open to scratch buffer
+;; TODO: it would be neat to set this dynamically
+(setq tab-bar-new-tab-choice "*scratch*")
+
 ;; tab isolation w/ consult
 (with-eval-after-load 'consult
   ;; hide full buffer list (still available with "b" prefix)
