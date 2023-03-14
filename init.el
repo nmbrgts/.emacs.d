@@ -214,8 +214,8 @@
      '("z" . meow-pop-selection)
      '("'" . repeat)
      '("<escape>" . ignore)))
+  (require 'meow)
   (meow-setup)
-  ;; (meow-global-mode 1)
   (define-key global-map (kbd "C-c t k") #'meow-global-mode))
 
 ;; improved search and completion functionality
