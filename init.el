@@ -381,16 +381,10 @@
   ;; (tabspaces-session t)
   ;; (tabspaces-session-auto-restore t)
   :config
+  (project-known-project-roots)
   (define-key tab-prefix-map (kbd "s") tabspaces-command-map)
   (define-key project-prefix-map (kbd "p") #'tabspaces-open-or-create-project-and-workspace)
   (define-key project-prefix-map (kbd "P") #'project-switch-project))
-
-(defun my/init-project-list (&rest _)
-  (project-known-project-roots))
-
-(advice-add #'tabspaces-open-or-create-project-and-workspace
-            :before
-            'my/init-project-list)
 
 ;; rename current tab when switching projects within tabspace
 (defun my/switch-tab-name-with-project (&rest _)
