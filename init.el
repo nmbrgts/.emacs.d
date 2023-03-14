@@ -358,7 +358,7 @@
 
 (tab-bar-mode 1)
 
-(tab-rename "welcome" 0)
+(tab-rename "default" 0)
 
 ;; move tab-bar-map
 (define-key global-map (kbd "M-t") tab-prefix-map)
