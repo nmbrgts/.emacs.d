@@ -430,6 +430,14 @@
 ;; highlight line everywhere
 (global-hl-line-mode 1)
 
+;; ... except for in vterm and eshell
+(defun my/disable-global-hl-line-mode ()
+  (setq-local global-hl-line-mode nil))
+
+(dolist (hook '(vterm-mode-hook
+                eshell-mode-hook))
+  (add-hook hook #'my/disable-hl-line-mode))
+
 ;; display line numbers for code buffers
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
