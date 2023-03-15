@@ -70,6 +70,33 @@
 ;; update buffers when files change
 (global-auto-revert-mode 1)
 
+;; buffer keymap
+(let ((map (make-sparse-keymap)))
+  (define-key map (kbd "k") #'kill-buffer)
+  (define-key map (kbd "b") #'consult-buffer)
+  (define-key map (kbd "B") #'ibuffer)
+  (define-key map (kbd "n") #'next-buffer)
+  (define-key map (kbd "p") #'previous-buffer)
+  (define-key global-map (kbd "C-c b") `("buffer" . ,map)))
+
+;; window undo/redo
+(winner-mode 1)
+
+;; window map
+(let ((map (make-sparse-keymap)))
+  (define-key map (kbd "k") #'delete-window)
+  (define-key map (kbd "K") #'delete-other-windows)
+  (define-key map (kbd "s") #'split-window-right)
+  (define-key map (kbd "S") #'split-window-below)
+  (define-key map (kbd "n") #'windmove-down)
+  (define-key map (kbd "p") #'windmove-up)
+  (define-key map (kbd "f") #'windmove-right)
+  (define-key map (kbd "b") #'windmove-left)
+  (define-key map (kbd "B") #'balance-windows)
+  (define-key map (kbd "u") #'winner-undo)
+  (define-key map (kbd "r") #'winner-redo)
+  (define-key global-map (kbd "C-c w") `("window" . ,map)))
+
 ;; adjust transient buffer behaviors to personal preference
 (defun my/display-buffer-in-side-window-and-select (buffer alist)
   (let ((window (display-buffer-in-side-window buffer alist)))
@@ -350,6 +377,8 @@
 
 ;; run font tweaks after theme change
 (add-hook 'after-enable-theme-hook #'my/apply-preferred-fonts)
+
+;;; tabs and tabspaces
 
 ;; add minimal tab bar
 (setq tab-bar-close-button-show nil
