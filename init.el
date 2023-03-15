@@ -28,10 +28,6 @@
   (package-install 'use-package)
   (require 'use-package))
 
-;; keep yes/no prompts brief
-;; TODO: this doesn't work?
-;; (defalias 'yes-or-no-p 'y-or-no-p)
-
 ;; pls no more ring
 (setq ring-bell-function 'ignore)
 
