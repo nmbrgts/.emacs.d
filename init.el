@@ -54,6 +54,13 @@
 ;; pls delete highlighted regions on input
 (delete-selection-mode 1)
 
+;; pls no more nuisance prompts
+(setq use-short-answers t
+      confirm-nonexistent-file-or-buffer nil
+      revert-without-query '(".*")
+      kill-buffer-query-functions (remq 'process-kill-buffer-query-function
+                                        kill-buffer-query-functions))
+
 ;; keep transient files tidy
 (setq my/transient-files-backup-dir (expand-file-name "tmp/backups/" user-emacs-directory)
       my/transient-files-auto-save-dir (expand-file-name "tmp/auto-saves/" user-emacs-directory)
