@@ -77,6 +77,7 @@
   (define-key map (kbd "B") #'ibuffer)
   (define-key map (kbd "n") #'next-buffer)
   (define-key map (kbd "p") #'previous-buffer)
+  (define-key map (kbd "r") #'revert-buffer)
   (define-key global-map (kbd "C-c b") `("buffer" . ,map)))
 
 ;; window undo/redo
