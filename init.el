@@ -55,16 +55,16 @@
 (delete-selection-mode 1)
 
 ;; keep transient files tidy
-(setq tn/transient-files-backup-dir (expand-file-name "tmp/backups/" user-emacs-directory)
-      tn/transient-files-auto-save-dir (expand-file-name "tmp/auto-saves/" user-emacs-directory)
-      tn/transient-files-auto-save-prefix (expand-file-name "sessions" tn/transient-files-auto-save-dir))
+(setq my/transient-files-backup-dir (expand-file-name "tmp/backups/" user-emacs-directory)
+      my/transient-files-auto-save-dir (expand-file-name "tmp/auto-saves/" user-emacs-directory)
+      my/transient-files-auto-save-prefix (expand-file-name "sessions" my/transient-files-auto-save-dir))
 
-(make-directory tn/transient-files-auto-save-dir t)
-(make-directory tn/transient-files-backup-dir t)
+(make-directory my/transient-files-auto-save-dir t)
+(make-directory my/transient-files-backup-dir t)
 
-(setq backup-directory-alist `(("." . ,tn/transient-files-backup-dir))
-      auto-save-file-name-transforms `((".*" ,tn/transient-files-auto-save-dir t))
-      auto-save-list-file-prefix tn/transient-files-auto-save-prefix
+(setq backup-directory-alist `(("." . ,my/transient-files-backup-dir))
+      auto-save-file-name-transforms `((".*" ,my/transient-files-auto-save-dir t))
+      auto-save-list-file-prefix my/transient-files-auto-save-prefix
       create-lockfiles nil)
 
 ;; update buffers when files change
@@ -329,13 +329,13 @@
 ;;; visual tweaks
 
 ;; preferred fonts
-(setq tn/default-fixed-pitch-font "Iosevka Fixed"
-      tn/default-variable-pitch-font "Iosevka Aile")
+(setq my/default-fixed-pitch-font "Iosevka Fixed"
+      my/default-variable-pitch-font "Iosevka Aile")
 
 (defun my/apply-preferred-fonts ()
-  (set-face-attribute 'default nil :font tn/default-fixed-pitch-font :weight 'light :height 250)
-  (set-face-attribute 'fixed-pitch nil :font tn/default-fixed-pitch-font :weight 'light :height 250)
-  (set-face-attribute 'variable-pitch nil :font tn/default-variable-pitch-font :weight 'light :height 250)
+  (set-face-attribute 'default nil :font my/default-fixed-pitch-font :weight 'light :height 250)
+  (set-face-attribute 'fixed-pitch nil :font my/default-fixed-pitch-font :weight 'light :height 250)
+  (set-face-attribute 'variable-pitch nil :font my/default-variable-pitch-font :weight 'light :height 250)
   (set-face-attribute 'bold nil :weight 'normal))
 
 ;; create after theme hook
