@@ -134,8 +134,6 @@
          (slot . 1)
          (window-width . 0.5))))
 
-(define-key global-map (kbd "C-c t p") #'window-toggle-side-windows)
-
 ;; get helpful prompts for keys
 (use-package which-key
   :ensure t
@@ -248,7 +246,7 @@
      '("<escape>" . ignore)))
   (require 'meow)
   (meow-setup)
-  (define-key global-map (kbd "C-c t k") #'meow-global-mode))
+  (define-key global-map (kbd "C-c T k") #'meow-global-mode))
 
 ;; improved search and completion functionality
 ;; vertical suggestions for many minibuffer operations
@@ -288,6 +286,7 @@
          ("C-x 5 b" . consult-buffer-other-frame)
          ("C-x r b" . consult-bookmark)
          ("C-x p b" . consult-project-buffer)
+         ("C-c p b" . consult-project-buffer)
          ;; Custom M-# bindings for fast register access
          ("M-#" . consult-register-load)
          ("M-'" . consult-register-store)
@@ -451,6 +450,31 @@
     "Set workspace buffer list for consult-buffer.")
   (add-to-list 'consult-buffer-sources 'consult--source-workspace))
 
+;; tab keymap
+(with-eval-after-load 'tabspaces
+  (let ((tab-map (make-sparse-keymap))
+        (tabspace-map (make-sparse-keymap)))
+    (define-key global-map (kbd "C-c t") `("tabs/spaces" . ,tab-map))
+    (define-key tab-map (kbd "n") #'tab-next)
+    (define-key tab-map (kbd "p") #'tab-previous)
+    (define-key tab-map (kbd "t") #'tab-switch)
+    (define-key tab-map (kbd "k") #'tab-close)
+    (define-key tab-map (kbd "K") #'tab-close-other)
+    (define-key tab-map (kbd "s") `("tabspaces" . ,tabspace-map))
+    (define-key tabspace-map (kbd "c") #'tabspaces-remove-current-buffer)
+    (define-key tabspace-map (kbd "C") #'tabspaces-clear-buffers)
+    (define-key tabspace-map (kbd "K") #'tabspaces-kill-buffers-close-workspace)
+    (define-key tabspace-map (kbd "s") #'tabspaces-switch-or-create-workspace)
+    (define-key tabspace-map (kbd "S") #'tab-detach)))
+
+;; move project keymap
+(with-eval-after-load 'project
+  (define-key global-map (kbd "C-c p") `("project" . ,project-prefix-map)))
+
+;; project keymap
+(with-eval-after-load 'project
+  (let ()))
+
 ;; remove tool bar and scroll bar
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
@@ -481,7 +505,7 @@
 
   (load-theme 'modus-operandi t)
 
-  (define-key global-map (kbd "C-c t t") #'modus-themes-toggle))
+  (define-key global-map (kbd "C-c T t") #'modus-themes-toggle))
 
 ;; pretty mode line
 (use-package mood-line
@@ -519,6 +543,15 @@
 
 ;;; git tooling
 
+;; keymap
+(setq my/git-prefix-map (make-sparse-keymap))
+
+;; mnemonic binding
+(define-key global-map (kbd "C-c g") `("git" . ,my/git-prefix-map))
+
+;; meow friendly binding
+(define-key global-map (kbd "C-c G") `("git" . ,my/git-prefix-map))
+
 ;; magical git porcelean
 (use-package magit
   :ensure t
@@ -529,9 +562,9 @@
 
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t)
 
-  (define-key global-map (kbd "C-c g b") #'magit-blame-addition)
-  (define-key global-map (kbd "C-c g g") #'magit-status)
-  (define-key global-map (kbd "C-c g f") #'magit-file-dispatch))
+  (define-key my/git-prefix-map (kbd "b") #'magit-blame-addition)
+  (define-key my/git-prefix-map (kbd "g") #'magit-status)
+  (define-key my/git-prefix-map (kbd "f") #'magit-file-dispatch))
 
 ;; forge integration
 (use-package forge
@@ -545,8 +578,8 @@
   (global-diff-hl-mode)
   :config
   (define-key diff-hl-command-map (kbd "s") #'diff-hl-show-hunk-stage-hunk)
-  (define-key global-map (kbd "C-c g H") #'diff-hl-show-hunk-next)
-  (define-key global-map (kbd "C-c g h") #'diff-hl-show-hunk-previous))
+  (define-key my/git-prefix-map (kbd "H") #'diff-hl-show-hunk-next)
+  (define-key my/git-prefix-map (kbd "h") #'diff-hl-show-hunk-previous))
 
 (use-package diff-hl-inline-popup
   :ensure f
@@ -557,13 +590,13 @@
 (use-package git-timemachine
   :ensure t
   :config
-  (define-key global-map (kbd "C-c g t") #'git-timemachine))
+  (define-key my/git-prefix-map (kbd "t") #'git-timemachine))
 
 ;; jump to buffer or region in forge
 (use-package browse-at-remote
   :ensure t
   :config
-  (define-key global-map (kbd "C-c g r") #'browse-at-remote))
+  (define-key my/git-prefix-map (kbd "r") #'browse-at-remote))
 
 ;; handle conflics with a quick menu
 (use-package smerge-mode
@@ -603,7 +636,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     ("k" smerge-kill-current)
     ("q" nil "cancel" :color blue))
 
-  (define-key global-map (kbd "C-c g s") '("smerge hydra" . hydra-smerge/body)))
+  (define-key my/git-prefix-map (kbd "s") '("smerge hydra" . hydra-smerge/body)))
 
 ;;; tree-sitter tweaks
 
