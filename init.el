@@ -800,6 +800,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; javascript
 
+;; use treesit tsx mode if possible
+(when my/treesit-enabled
+  (add-to-list 'major-mode-remap-alist '(js-mode . tsx-ts-mode)))
+
+;; remove horrible mode keymap
+(eval-after-load 'js
+  (define-key js-mode-map (kbd "M-.") nil))
+
 ;;; org
 
 ;; load external custom file
