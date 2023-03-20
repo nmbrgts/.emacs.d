@@ -826,7 +826,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (add-hook 'my/vue-mode-hook #'eglot-ensure)
 
 ;; register language server for vue
-(add-to-list 'eglot-server-programs '(my/vue-mode . ("vls" "--stdio")))
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs '(my/vue-mode . ("vls" "--stdio"))))
 
 ;;; org
 
