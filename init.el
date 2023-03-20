@@ -813,6 +813,21 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                 js-mode-hook))
   (add-hook hook #'eglot-ensure))
 
+;; vue
+
+;; use web-mode for vue since vue-mode is a little jank
+(use-package web-mode
+  :ensure t
+  :config
+  (define-derived-mode my/vue-mode web-mode "Vue.js")
+  (add-to-list 'auto-mode-alist '("\\.vue\\'" . my/vue-mode)))
+
+;; run eglot automatically
+(add-hook 'my/vue-mode-hook #'eglot-ensure)
+
+;; register language server for vue
+(add-to-list 'eglot-server-programs '(my/vue-mode . ("vls" "--stdio")))
+
 ;;; org
 
 ;; load external custom file
