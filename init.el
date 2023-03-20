@@ -472,9 +472,30 @@
 (with-eval-after-load 'project
   (define-key global-map (kbd "C-c p") `("project" . ,project-prefix-map)))
 
-;; project keymap
+;; use project find file if in project
+(defun my/dwim-find-file ()
+  (interactive)
+  (if (project-current)
+      (project-find-file)
+    (call-interactively #'find-file)))
+
+;; use project dired if in project
+(defun my/dwim-dired ()
+  (interactive)
+  (if (project-current)
+      (project-dired)
+    (call-interactively #'dired)))
+
+;; file keymap
 (with-eval-after-load 'project
-  (let ()))
+  (let ((map (make-sparse-keymap)))
+    (define-key global-map (kbd "C-c f") `("file" . ,map))
+    (define-key map (kbd "f") #'my/dwim-find-file)
+    (define-key map (kbd "F") #'find-file)
+    (define-key map (kbd "d") #'my/dwim-dired)
+    (define-key map (kbd "D") #'dired)
+    (define-key map (kbd "j") #'dired-jump)
+    (define-key map (kbd "s") #'save-buffer)))
 
 ;; remove tool bar and scroll bar
 (tool-bar-mode -1)
