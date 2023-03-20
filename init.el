@@ -813,6 +813,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                 js-mode-hook))
   (add-hook hook #'eglot-ensure))
 
+;; format with prettier
+(use-package prettier-js
+  :ensure t
+  :after js
+  :commands (prettier-js)
+  :init
+  (define-key js-mode-map (kbd "C-c c f ") #'prettier-js)
+  (define-key js-ts-mode-map (kbd "C-c c f") #'prettier-js))
+
 ;; vue
 
 ;; use web-mode for vue since vue-mode is a little jank
