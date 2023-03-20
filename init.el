@@ -796,7 +796,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                         (awk-mode . "awk")
                         (other . "k&r")))
 
-
 ;; elixir
 
 ;; javascript
@@ -806,8 +805,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (add-to-list 'major-mode-remap-alist '(js-mode . tsx-ts-mode)))
 
 ;; remove horrible mode keymap
-(eval-after-load 'js
-  (define-key js-mode-map (kbd "M-.") nil))
+(with-eval-after-load 'js
+  (define-key js-mode-map (kbd "M-.") #'xref-find-definitions))
+
+;; enable eglot by default
+(dolist (hook '(txs-ts-mode-hook
+                js-mode-hook))
+  (add-hook hook #'eglot-ensure))
 
 ;;; org
 
