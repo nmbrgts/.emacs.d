@@ -802,14 +802,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; use treesit tsx mode if possible
 (when my/treesit-enabled
-  (add-to-list 'major-mode-remap-alist '(js-mode . tsx-ts-mode)))
+  (add-to-list 'major-mode-remap-alist '(js-mode . js-ts-mode)))
 
 ;; remove horrible mode keymap
 (with-eval-after-load 'js
   (define-key js-mode-map (kbd "M-.") #'xref-find-definitions))
 
 ;; enable eglot by default
-(dolist (hook '(txs-ts-mode-hook
+(dolist (hook '(js-ts-mode-hook
                 js-mode-hook))
   (add-hook hook #'eglot-ensure))
 
