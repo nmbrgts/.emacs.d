@@ -655,6 +655,10 @@ targets."
 	magit-display-buffer-function 'magit-display-buffer-fullcolumn-most-v1
 	magit-pre-display-buffer-hook 'magit-save-window-configuration)
 
+  ;; hardcode system git for performance on mac
+  (when (eq system-type 'darwin)
+    (setq magit-git-executable "/usr/bin/git"))
+
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t)
 
   (define-key my/git-prefix-map (kbd "b") #'magit-blame-addition)
