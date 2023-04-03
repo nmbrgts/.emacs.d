@@ -441,7 +441,9 @@ targets."
   (set-face-attribute 'default nil :font my/default-fixed-pitch-font :weight 'light :height 250)
   (set-face-attribute 'fixed-pitch nil :font my/default-fixed-pitch-font :weight 'light :height 250)
   (set-face-attribute 'variable-pitch nil :font my/default-variable-pitch-font :weight 'light :height 250)
-  (set-face-attribute 'bold nil :weight 'normal))
+  (set-face-attribute 'bold nil :weight 'normal)
+  (with-eval-after-load 'lsp-mode
+    (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)))
 
 ;; create after theme hook
 (defvar after-enable-theme-hook nil
@@ -753,31 +755,64 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (setq my/code-keymap (make-sparse-keymap))
 (define-key prog-mode-map (kbd "C-c c") `("code" . ,my/code-keymap))
 
-;; setup eglot
-(use-package eglot
-  :ensure t  ;; ensure required until 29
-  :after project
-  :custom
-  (eglot-autoshutdown
-   t
-   "Automatically shutdown when there are no buffers to manage")
-  (eglot-extend-to-xref
-   t
-   "Apply eglot on out-of-project xref jumps")
+;; setup lsp mode
+(use-package lsp-mode
+  :ensure t
+  :hook (lsp-mode . #'lsp-enable-which-key-integration)
   :init
-  (setq my/lsp-keymap (make-sparse-keymap))
+  (setq lsp-keymap-prefix "C-c l"
+        lsp-headerline-breadcrumb-enable nil
+        lsp-imenu-index-function #'lsp-imenu-create-categorized-index))
 
-  ;; common use lsp operations
-  (define-key my/code-keymap (kbd "l") `("lsp" . ,my/lsp-keymap))
-  (define-key my/lsp-keymap (kbd "c") '("lsp-connect" . eglot-reconnect))
-  (define-key my/lsp-keymap (kbd "s") '("lsp-shutdown" . eglot-shutdown))
+;; setup pyright
+(use-package lsp-pyright
+  :ensure t
+  :init
+  (setq lsp-pyright-disable-organize-imports t
+        lsp-pyright-auto-import-completions t
+        lsp-pyright-use-library-code-for-types t
+        lsp-pyright-diagnostic-mode "onlyOpenFiles")
+  :hook ((python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp)))
+         (python-ts-mode . (lambda ()
+                             (require 'lsp-pyright)
+                             (lsp)))))
 
-  ;; lsp powered code actions
-  (define-key my/code-keymap (kbd "r") '("rename-symbol" . eglot-rename))
-  (define-key my/code-keymap (kbd "e") '("error-list" . flymake-show-buffer-diagnostics))
-  (define-key my/code-keymap (kbd "d") '("jump-to-definition" . xref-find-definitions))
-  (define-key my/code-keymap (kbd "n") '("navigate" . imenu))
-  (define-key my/code-keymap (kbd "g") '("jump-to-references" . xref-find-references)))
+;; setup dap
+(setq tn/dap-mode-map (make-sparse-keymap))
+
+(use-package dap-mode
+  :ensure t
+  :init
+  (setq dap-auto-configure-features '(sessions locals))
+  :config
+  (require 'dap-python)
+
+  (setq dap-python-debugger 'debugpy)
+
+  (dap-register-debug-template
+   "Python :: Attach to Dockerized Django"
+   (list :name "Python :: Attach to Dockerized Django"
+         :type "python"
+         :request "attach"
+         :connect '(:port 5679 :host "localhost")
+         :django t
+         :pathMappings '((("localRoot" . "${workspaceFolder}")
+                          ("remoteRoot" . "/app/")))))
+
+  :bind (:map tn/dap-mode-map
+              ("n" . #'dap-next)
+              ("i" . #'dap-step-in)
+              ("o" . #'dap-step-out)
+              ("c" . #'dap-continue)
+              ("h" . #'dap-hydra)
+              ("r" . #'dap-debug-restart)
+              ("d" . #'dap-debug)
+              ("b" . #'dap-breakpoint-toggle)
+              ("s" . #'dap-disconnect)))
+
+(define-key global-map (kbd "C-c d") (cons "debug" tn/dap-mode-map))
 
 ;;; language support
 
@@ -836,21 +871,21 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; python
 
+;; consult imenu integration
+(with-eval-after-load 'consult-imenu
+  (add-to-list 'consult-imenu-config
+               '(python-ts-mode
+                 :toplevel "Varaibles"
+                 :types
+                 ((?f "Functions")
+                  (?m "Methods")
+                  (?c "Classes")
+                  (?v "Variables")
+                  (?C "Constants")))))
+
 ;; use tree-sitter mode by default
 (when my/treesit-enabled
   (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
-
-;; start eglot automatically
-(when my/treesit-enabled
-  (add-hook 'python-ts-mode-hook #'eglot-ensure))
-
-(add-hook 'python-mode-hook #'eglot-ensure)
-
-;; make eglot unquestioningly use pyright
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '((python-ts-mode python-mode)
-                 . ("pyright-langserver" "--stdio"))))
 
 ;; formatting
 (use-package python-black
@@ -886,9 +921,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (when my/treesit-enabled
   (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode)))
 
-;; enable eglot automatically
+;; enable lsp automatically
 (when my/treesit-enabled
-  (add-hook 'c-ts-mode-hook #'eglot-ensure))
+  (add-hook 'c-ts-mode-hook #'lsp))
 
 ;; use k&r style
 (setq c-default-style '((java-mode . "java")
@@ -907,10 +942,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (with-eval-after-load 'js
   (define-key js-mode-map (kbd "M-.") #'xref-find-definitions))
 
-;; enable eglot by default
+;; enable lsp by default
 (dolist (hook '(js-ts-mode-hook
                 js-mode-hook))
-  (add-hook hook #'eglot-ensure))
+  (add-hook hook #'lsp))
 
 ;; format with prettier
 (use-package prettier-js
@@ -930,12 +965,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (define-derived-mode my/vue-mode web-mode "Vue.js")
   (add-to-list 'auto-mode-alist '("\\.vue\\'" . my/vue-mode)))
 
-;; run eglot automatically
-(add-hook 'my/vue-mode-hook #'eglot-ensure)
-
-;; register language server for vue
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs '(my/vue-mode . ("vls" "--stdio"))))
+;; run lsp automatically
+(add-hook 'my/vue-mode-hook #'lsp)
 
 ;;; org
 
