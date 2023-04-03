@@ -609,7 +609,22 @@ targets."
 (use-package mood-line
   :ensure t
   :config
-  (setq mood-line-glyph-alist  mood-line-glyphs-fira-code)
+  (setq mood-line-glyph-alist '((:checker-info . ?↳)
+                                (:checker-issues . ?→)
+                                (:checker-good . ?✓)
+                                (:checker-checking . ?◯)
+                                (:checker-errored . ?x)
+                                (:checker-interrupted . ?=)
+                                (:vc-added . ?+)
+                                (:vc-needs-merge . ?⟷)
+                                (:vc-needs-update . ?↓)
+                                (:vc-conflict . ?x)
+                                (:vc-good . ?✓)
+                                (:buffer-narrowed . ?◢)
+                                (:buffer-modified . ?●)
+                                (:buffer-read-only . ?■)
+                                (:count-separator . ?×)))
+
   (mood-line-mode))
 
 ;;; terminal
