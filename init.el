@@ -887,16 +887,50 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; python
 
 ;; consult imenu integration
+(setq my/lsp-mode-imenu-types
+      '((?f "Functions")
+        (?F "Fields")
+        (?m "Methods")
+        (?M "Modules")
+        (?c "Classes")
+        (?C "Constants")
+        (?v "Variables")
+        (?e "Enums")
+        (?E "Enum Members")
+        (?i "Interfaces")
+        (?s "Strings")
+        (?S "Structs")
+        (?n "Numbers")
+        (?N "Namespaces")
+        (?p "Properties")
+        (?P "Packages")
+        (?b "Booleans")
+        (?a "Arrays")
+        (?o "Objects")
+        (?O "Operators")
+        (?k "Keys")
+        (?K "Constructors")
+        (?_ "Nulls")
+        (?t "Type Parameters")
+        (?! "Events")
+        (?d "Files")))
+
 (with-eval-after-load 'consult-imenu
-  (add-to-list 'consult-imenu-config
-               '(python-ts-mode
-                 :toplevel "Varaibles"
-                 :types
-                 ((?f "Functions")
-                  (?m "Methods")
-                  (?c "Classes")
-                  (?v "Variables")
-                  (?C "Constants")))))
+  (dolist (mode '(python-mode
+                  python-ts-mode))
+    (add-to-list 'consult-imenu-config
+                 `(,mode
+                   :toplevel "Varaibles"
+                   :types ,my/lsp-mode-imenu-types))))
+
+(with-eval-after-load 'consult-imenu
+  (dolist (mode '(js-mode
+                  js-ts-mode
+                  typescript-ts-mode))
+    (add-to-list 'consult-imenu-config
+                 `(,mode
+                   :toplevel "Functions"
+                   :types ,my/lsp-mode-imenu-types))))
 
 ;; use tree-sitter mode by default
 (when my/treesit-enabled
