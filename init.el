@@ -764,6 +764,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (setq my/treesit-enabled  (and (fboundp 'treesit-available-p)
                                (treesit-available-p)))
 
+;;; dokcker tooling
+
+;; edit docker
+(when my/treesit-enabled
+  (add-to-list 'auto-mode-alist '("\\.Dockerfile\\'" . dockerfile-ts-mode)))
+
+;; run docker
+(use-package docker
+  :ensure t
+  :bind ("C-c D" . docker))
+
 ;;; language server
 
 ;; shared keymap setup
