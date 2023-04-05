@@ -806,7 +806,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                              (lsp)))))
 
 ;; setup dap
-(setq tn/dap-mode-map (make-sparse-keymap))
+(setq my/dap-mode-map (make-sparse-keymap))
 
 (use-package dap-mode
   :ensure t
@@ -827,7 +827,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          :pathMappings '((("localRoot" . "${workspaceFolder}")
                           ("remoteRoot" . "/app/")))))
 
-  :bind (:map tn/dap-mode-map
+  :bind (:map my/dap-mode-map
               ("n" . #'dap-next)
               ("i" . #'dap-step-in)
               ("o" . #'dap-step-out)
@@ -838,7 +838,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               ("b" . #'dap-breakpoint-toggle)
               ("s" . #'dap-disconnect)))
 
-(define-key global-map (kbd "C-c d") (cons "debug" tn/dap-mode-map))
+(define-key global-map (kbd "C-c d") (cons "debug" my/dap-mode-map))
 
 ;;; language support
 
