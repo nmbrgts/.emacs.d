@@ -567,11 +567,14 @@ targets."
     (define-key global-map (kbd "C-c f") `("file" . ,map))
     (define-key map (kbd "f") #'my/dwim-find-file)
     (define-key map (kbd "F") #'find-file)
+    (define-key map (kbd "p") #'project-find-file)
+    (define-key map (kbd "P") #'project-or-external-find-file)
     (define-key map (kbd "d") #'my/dwim-dired)
     (define-key map (kbd "D") #'dired)
     (define-key map (kbd "j") #'dired-jump)
     (define-key map (kbd "s") #'save-buffer)
-    (define-key map (kbd "r") #'rename-visited-file)))
+    (define-key map (kbd "r") #'rename-visited-file)
+    (define-key map (kbd "R") #'file-notify-rm-all-watches)))
 
 ;; remove tool bar and scroll bar
 (tool-bar-mode -1)
