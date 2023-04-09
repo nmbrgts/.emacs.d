@@ -992,5 +992,65 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; org
 
+;; org-capture project notes
+
+(defun my/get-project-notes-or-default-filepath ()
+  (or (and (project-current)
+           (expand-file-name
+            "notes.org"
+            (project-root (project-current))))
+      (progn
+        (message "No project found. Using default notes file.")
+        org-default-notes-file)))
+
+(defun my/initialize-org-file-with-headline (filepath headline)
+  (progn
+    ;; initialize empty file if none exists
+    (when (not (file-exists-p filepath))
+      (message "File doesn't exist... Initializing...")
+      (with-temp-buffer (write-file filepath)))
+    ;; add headline
+    (with-temp-buffer
+      (insert-file-contents filepath)
+      (let* ((headline-fmt (concat "* " headline))
+             (headline-exists (save-excursion
+                                (goto-char (point-min))
+                                (search-forward headline-fmt nil t))))
+        (when (not headline-exists)
+          (message "No existing headline... Adding to file...")
+          (save-excursion
+            (goto-char (point-max))
+            (insert "\n" headline-fmt))
+          (write-file filepath))))
+    filepath))
+
+(defun my/project-or-default-file+headline (headline)
+  `(file+headline
+    ,(my/initialize-org-file-with-headline
+      (my/get-project-notes-or-default-filepath)
+      headline)
+    ,headline))
+
+(defun my/org-capture-project ()
+  (interactive)
+  (let* ((org-capture-templates
+          (cl-concatenate
+           'list
+           `(("t" "TODO (proj.)" entry
+              ,(my/project-or-default-file+headline "Tasks")
+              "* TODO %?\nContext:%a")
+             ("n" "Note (proj.)" entry
+              ,(my/project-or-default-file+headline "Notes")
+              "* %?\nContext:%a"))
+           org-capture-templates)))
+    (org-capture)))
+
+;; org-capture
+
+(use-package org-capture
+  :config
+  (setq org-default-notes-file "~/org/notes.org"
+        org-capture-templates '()))
+
 ;; load external custom file
 (load custom-file)
