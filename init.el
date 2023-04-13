@@ -36,7 +36,7 @@
 (setq ring-bell-function 'ignore)
 
 ;; pls no more C-M-i
-(setq tabs-always-indent 'complete)
+(setq tabs-always-indent nil)
 
 ;; pls no more tabs
 (setq-default indent-tabs-mode nil)
