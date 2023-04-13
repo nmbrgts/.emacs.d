@@ -948,13 +948,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode)))
 
 ;; enable lsp automatically
-(when my/treesit-enabled
-  (add-hook 'c-ts-mode-hook #'lsp))
+(add-hook (if my/treesit-enabled
+              'c-ts-mode
+            'c-mode)
+          #'lsp)
 
 ;; use k&r style
-(setq c-default-style '((java-mode . "java")
-                        (awk-mode . "awk")
-                        (other . "k&r")))
+(setq c-default-style "linux"
+      c-basic-offset 4)
 
 ;; elixir
 
@@ -969,9 +970,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (define-key js-mode-map (kbd "M-.") #'xref-find-definitions))
 
 ;; enable lsp by default
-(dolist (hook '(js-ts-mode-hook
-                js-mode-hook))
-  (add-hook hook #'lsp))
+(add-hook (if my/treesit-enabled
+              'js-ts-mode-hook
+            'js-mode-hook)
+          #'lsp)
+
 
 ;; format with prettier
 (use-package prettier-js
@@ -979,8 +982,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after js
   :commands (prettier-js)
   :init
-  (define-key js-mode-map (kbd "C-c c f ") #'prettier-js)
-  (define-key js-ts-mode-map (kbd "C-c c f") #'prettier-js))
+  (define-key (if my/treesit-enabed js-ts-mode-map js-mode-map)
+              (kbd "C-c c f ")
+              #'prettier-js))
 
 ;; vue
 
