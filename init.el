@@ -1055,8 +1055,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
            org-capture-templates)))
     (org-capture)))
 
-;; org-capture
-
+;; capture notes on the fly
 (use-package org-capture
   :config
   (setq org-default-notes-file "~/org/notes.org"
@@ -1064,11 +1063,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (define-key global-map (kbd "M-c") #'my/org-capture-project))
 
 ;; rebind capitalize because it's still useful
-
 (define-key global-map (kbd "M-C") #'capitalize-dwim)
 
-;; presentations with org
-
+;; do so-so presentations with org
 (use-package org-present
   :ensure t
   :hook ((org-present-mode . (lambda ()
