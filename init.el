@@ -996,6 +996,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; org
 
+;; org config
+(use-package org
+  :config
+  (setq org-startup-with-inline-images nil
+        org-return-follows-link t))
+
 ;; org-capture project notes
 
 (defun my/get-project-notes-or-default-filepath ()
@@ -1054,7 +1060,27 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package org-capture
   :config
   (setq org-default-notes-file "~/org/notes.org"
-        org-capture-templates '()))
+        org-capture-templates '())
+  (define-key global-map (kbd "M-c") #'my/org-capture-project))
+
+;; rebind capitalize because it's still useful
+
+(define-key global-map (kbd "M-C") #'capitalize-dwim)
+
+;; presentations with org
+
+(use-package org-present
+  :ensure t
+  :hook ((org-present-mode . (lambda ()
+                               (org-present-big)
+                               (org-display-inline-images)
+                               (org-present-hide-cursor)
+                               (org-present-read-only)))
+         (org-present-mode-quit . (lambda ()
+                                    (org-present-small)
+                                    (org-remove-inline-images)
+                                    (org-present-show-cursor)
+                                    (org-present-read-write)))))
 
 ;; load external custom file
 (load custom-file)
