@@ -51,6 +51,9 @@
 ;; pls no more dangling ws
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
+;; pls just one more
+(repeat-mode 1)
+
 ;; pls delete highlighted regions on input
 (delete-selection-mode 1)
 
