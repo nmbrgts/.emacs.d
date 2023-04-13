@@ -449,7 +449,7 @@
              tabspaces-open-or-create-project-and-workspace)
   :custom
   (tabspaces-use-filtered-buffers-as-default t)
-  (tabspaces-default-tab "Default")
+  (tabspaces-default-tab "default")
   (tabspaces-remove-to-default t)
   (tabspaces-include-buffers '("*scratch*"))
   ;; sessions
@@ -457,9 +457,7 @@
   ;; (tabspaces-session-auto-restore t)
   :config
   (project-known-project-roots)
-  (define-key tab-prefix-map (kbd "s") tabspaces-command-map)
-  (define-key project-prefix-map (kbd "p") #'tabspaces-open-or-create-project-and-workspace)
-  (define-key project-prefix-map (kbd "P") #'project-switch-project))
+  (define-key tab-prefix-map (kbd "s") tabspaces-command-map))
 
 ;; rename current tab when switching projects within tabspace
 (defun my/switch-tab-name-with-project (&rest _)
@@ -593,7 +591,6 @@
                                 (:buffer-modified . ?●)
                                 (:buffer-read-only . ?■)
                                 (:count-separator . ?×)))
-
   (mood-line-mode))
 
 ;;; terminal
