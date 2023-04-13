@@ -1,5 +1,9 @@
 ;;; general usability
 
+;; general performance
+(setq gc-cons-threshold (* 100 1024 1024)
+      read-process-output-max (* 5 1024 1024))
+
 ;; set up external custom file
 (setq custom-file (locate-user-emacs-file "custom.el"))
 
