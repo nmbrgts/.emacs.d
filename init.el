@@ -459,6 +459,11 @@
   (project-known-project-roots)
   (define-key tab-prefix-map (kbd "s") tabspaces-command-map))
 
+;; pre-29 emacs
+(when (not (fboundp 'project-name))
+  (defun project-name (proj)
+    (cl-second (reverse (split-string (cdr proj) "/")))))
+
 ;; rename current tab when switching projects within tabspace
 (defun my/switch-tab-name-with-project (&rest _)
   (let ((pname (project-name (project-current))))
