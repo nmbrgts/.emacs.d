@@ -553,7 +553,7 @@
 
 (dolist (hook '(vterm-mode-hook
                 eshell-mode-hook))
-  (add-hook hook #'my/disable-hl-line-mode))
+  (add-hook hook #'my/disable-global-hl-line-mode))
 
 ;; display line numbers for code buffers
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
