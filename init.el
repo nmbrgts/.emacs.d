@@ -756,21 +756,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         lsp-headerline-breadcrumb-enable nil
         lsp-imenu-index-function #'lsp-imenu-create-categorized-index))
 
-;; setup pyright
-(use-package lsp-pyright
-  :ensure t
-  :init
-  (setq lsp-pyright-disable-organize-imports t
-        lsp-pyright-auto-import-completions t
-        lsp-pyright-use-library-code-for-types t
-        lsp-pyright-diagnostic-mode "onlyOpenFiles")
-  :hook ((python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp)))
-         (python-ts-mode . (lambda ()
-                             (require 'lsp-pyright)
-                             (lsp)))))
-
 ;; setup dap
 (setq my/dap-mode-map (make-sparse-keymap))
 
@@ -912,6 +897,22 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; use tree-sitter mode by default
 (when my/treesit-enabled
   (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
+
+;; setup pyright
+(use-package lsp-pyright
+  :ensure t
+  :init
+  (setq lsp-pyright-disable-organize-imports t
+        lsp-pyright-auto-import-completions t
+        lsp-pyright-use-library-code-for-types t
+        lsp-pyright-diagnostic-mode "onlyOpenFiles")
+
+  (add-hook (if my/treesit-enabled
+                'python-ts-mode-hook
+              'python-mode-hook)
+            (lambda ()
+              (require 'lsp-pyright)
+              (lsp))))
 
 ;; formatting
 (use-package python-black
