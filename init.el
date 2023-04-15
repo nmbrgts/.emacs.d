@@ -877,22 +877,23 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         (?! "Events")
         (?d "Files")))
 
+;; lsp based imenu for python
 (with-eval-after-load 'consult-imenu
-  (dolist (mode '(python-mode
-                  python-ts-mode))
-    (add-to-list 'consult-imenu-config
-                 `(,mode
-                   :toplevel "Varaibles"
-                   :types ,my/lsp-mode-imenu-types))))
+  (add-to-list 'consult-imenu-config
+               `(,(if my/treesit-enabled
+                      'python-base-mode
+                    'python-mode)
+                 :toplevel "Varaibles"
+                 :types ,my/lsp-mode-imenu-types)))
 
+;; lsp based imenu for js
 (with-eval-after-load 'consult-imenu
-  (dolist (mode '(js-mode
-                  js-ts-mode
-                  typescript-ts-mode))
-    (add-to-list 'consult-imenu-config
-                 `(,mode
-                   :toplevel "Functions"
-                   :types ,my/lsp-mode-imenu-types))))
+  (add-to-list 'consult-imenu-config
+               `(,(if my/treesit-enabled
+                      'js-base-mode
+                    'js-mode)
+                 :toplevel "Functions"
+                 :types ,my/lsp-mode-imenu-types)))
 
 ;; use tree-sitter mode by default
 (when my/treesit-enabled
@@ -983,7 +984,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after js
   :commands (prettier-js)
   :init
-  (define-key (if my/treesit-enabed js-ts-mode-map js-mode-map)
+  (define-key (if my/treesit-enabled js-base-mode-map js-mode-map)
               (kbd "C-c c f ")
               #'prettier-js))
 
@@ -1008,7 +1009,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         org-return-follows-link t))
 
 ;; org-capture project notes
-
 (defun my/get-project-notes-or-default-filepath ()
   (or (and (project-current)
            (expand-file-name
