@@ -564,6 +564,9 @@
 ;; display line numbers for code buffers
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
+;; display only left fringe
+(fringe-mode '(8 . 0))
+
 ;; color theme
 (use-package modus-themes
   :ensure t
