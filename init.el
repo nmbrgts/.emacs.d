@@ -1062,10 +1062,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
            'list
            `(("t" "TODO (proj.)" entry
               ,(my/project-or-default-file+headline "Tasks")
-              "* TODO %?\nContext:%a")
+              "* TODO %?\nContext:%a\n")
              ("n" "Note (proj.)" entry
               ,(my/project-or-default-file+headline "Notes")
-              "* %?\nContext:%a"))
+              "* %?\nContext:%a\n"))
            org-capture-templates)))
     (org-capture)))
 
