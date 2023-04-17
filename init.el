@@ -152,12 +152,13 @@
 ;; put minibuffer near top
 (use-package mini-frame
   :ensure t
-  :custom
-  (mini-frame-show-parameters
-   '((top . 0.2)
-     (width . 0.7)
-     (left . 0.5)))
   :init
+  (setq mini-frame-detach-on-hide nil
+        mini-frame-show-parameters
+        '((top . 0.15)
+          (width . 0.7)
+          (left . 0.5)
+          (no-accept-focus . t)))
   (mini-frame-mode))
 
 ;; define modal-like menus in a declarational style
