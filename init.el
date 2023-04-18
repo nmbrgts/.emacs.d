@@ -659,6 +659,9 @@
   (define-key my/git-prefix-map (kbd "f") #'magit-file-dispatch))
 
 ;; forge integration
+(use-package sqlite3
+  :ensure t)
+
 (use-package forge
   :ensure t
   :after magit)
