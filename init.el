@@ -759,7 +759,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; setup lsp mode
 (use-package lsp-mode
   :ensure t
-  :hook (lsp-mode . #'lsp-enable-which-key-integration)
   :init
   (setq lsp-keymap-prefix "C-c l"
         lsp-headerline-breadcrumb-enable nil
