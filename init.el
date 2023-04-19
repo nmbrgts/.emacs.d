@@ -748,8 +748,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; dokcker tooling
 
 ;; edit docker
-(when my/treesit-enabled
-  (add-to-list 'auto-mode-alist '("\\.Dockerfile\\'" . dockerfile-ts-mode)))
+(if my/treesit-enabled
+    (add-to-list 'auto-mode-alist '("\\.Dockerfile\\'" . dockerfile-ts-mode))
+  (use-package dockerfile-mode
+    :ensure t))
+
 
 ;; run docker
 (use-package docker
