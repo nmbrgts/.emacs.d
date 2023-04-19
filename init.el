@@ -54,6 +54,9 @@
 ;; pls just one more
 (repeat-mode 1)
 
+;; pls another one, but marks this time
+(setq set-mark-command-repeat-pop t)
+
 ;; pls delete highlighted regions on input
 (delete-selection-mode 1)
 
