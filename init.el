@@ -580,7 +580,7 @@
         '((border-mode-line-active bg-mode-line-active)
           (border-mode-line-inactive bg-mode-line-inactive)))
 
-  (load-theme 'modus-operandi t)
+  (load-theme 'modus-vivendi t)
 
   (define-key global-map (kbd "C-c T t") #'modus-themes-toggle))
 
