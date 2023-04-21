@@ -152,18 +152,6 @@
   :init
   (which-key-mode))
 
-;; put minibuffer near top
-(use-package mini-frame
-  :ensure t
-  :init
-  (setq mini-frame-detach-on-hide nil
-        mini-frame-show-parameters
-        '((top . 0.15)
-          (width . 0.7)
-          (left . 0.5)
-          (no-accept-focus . t)))
-  (mini-frame-mode))
-
 ;; define modal-like menus in a declarational style
 (use-package hydra
   :ensure t)
@@ -266,7 +254,13 @@
 (use-package vertico
   :ensure t
   :init
+  (setq vertico-buffer-display-action
+        '(display-buffer-in-side-window
+          (window-height . 0.33)
+          (side . bottom)
+          (window-parameters . ((mode-line-format . (""))))))
   (vertico-mode)
+  (vertico-buffer-mode)
   (setq vertico-cycle t))
 
 ;; additional data with suggestions
