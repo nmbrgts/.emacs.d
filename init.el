@@ -833,6 +833,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; insert closing delimiters
 (electric-pair-mode 1)
 
+;; define keybinding missing in 28?
+(define-key global-map (kbd "C-M-<backspace>") #'backward-kill-sexp)
+
 ;; completions nice-to-haves
 (setq tab-always-indent 'complete
       completion-auto-help 'always
