@@ -610,21 +610,7 @@
 (use-package mood-line
   :ensure t
   :config
-  (setq mood-line-glyph-alist '((:checker-info . ?↳)
-                                (:checker-issues . ?✕)
-                                (:checker-good . ?◯)
-                                (:checker-checking . ?⨂)
-                                (:checker-errored . ?⁈)
-                                (:checker-interrupted . ?~)
-                                (:vc-added . ?🞧)
-                                (:vc-needs-merge . ?⨂)
-                                (:vc-needs-update . ?🢇)
-                                (:vc-conflict . ?✕)
-                                (:vc-good . ?◯)
-                                (:buffer-narrowed . ?◢)
-                                (:buffer-modified . ?●)
-                                (:buffer-read-only . ?■)
-                                (:count-separator . ?×)))
+  (setq mood-line-glyph-alist mood-line-glyphs-ascii)
   (mood-line-mode))
 
 ;;; terminal
