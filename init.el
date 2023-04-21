@@ -139,7 +139,8 @@
          (my/display-buffer-in-side-window-and-select)
          (side . right)
          (slot . 1)
-         (window-width . 0.25))
+         (window-width . 75)
+         (window-parameters . ((mode-line-format . nil))))
         ("^\\*\\( docker container log\\)"
          (my/display-buffer-in-side-window-and-select)
          (side . right)
