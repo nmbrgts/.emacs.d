@@ -404,16 +404,19 @@
 ;;; visual tweaks
 
 ;; preferred fonts
-(setq my/default-fixed-pitch-font "Iosevka Fixed"
+(setq my/default-fixed-pitch-font "JetBrains Mono"
       my/default-variable-pitch-font "Iosevka Aile")
 
 (defun my/apply-preferred-fonts ()
-  (set-face-attribute 'default nil :font my/default-fixed-pitch-font :weight 'light :height 250)
-  (set-face-attribute 'fixed-pitch nil :font my/default-fixed-pitch-font :weight 'light :height 250)
+  (set-face-attribute 'default nil :font my/default-fixed-pitch-font :weight 'light :height 280)
+  (set-face-attribute 'fixed-pitch nil :font my/default-fixed-pitch-font :weight 'light :height 280)
   (set-face-attribute 'variable-pitch nil :font my/default-variable-pitch-font :weight 'light :height 250)
   (set-face-attribute 'bold nil :weight 'normal)
   (with-eval-after-load 'lsp-mode
-    (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)))
+    (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)
+    (set-face-attribute 'lsp-face-highlight-textual nil :weight 'normal))
+  (with-eval-after-load 'doom-themes
+    (set-face-attribute 'tab-bar-tab nil :background (doom-color 'bg-alt))))
 
 ;; create after theme hook
 (defvar after-enable-theme-hook nil
@@ -571,18 +574,43 @@
 (fringe-mode '(8 . 0))
 
 ;; color theme
-(use-package modus-themes
+(use-package doom-themes
   :ensure t
   :config
-  (setq modus-themes-italic-constructs nil
-        modus-themes-bold-constructs nil
-        modus-themes-common-palette-overrides
-        '((border-mode-line-active bg-mode-line-active)
-          (border-mode-line-inactive bg-mode-line-inactive)))
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold nil
+        doom-themes-enable-italic nil) ; if nil, italics is universally disabled
+  (load-theme 'doom-one t)
 
-  (load-theme 'modus-vivendi t)
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  ;; (doom-themes-neotree-config)
+  ;; or for treemacs users
+  ;; (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  ;; (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
 
-  (define-key global-map (kbd "C-c T t") #'modus-themes-toggle))
+;; darken popup windows
+(use-package solaire-mode
+  :ensure t
+  :init
+  (solaire-global-mode +1))
+
+;; toggle between dark and light theme
+(with-eval-after-load 'doom-themes
+  (setq my/active-theme 'doom-one)
+
+  (defun my/theme-toggle ()
+    (interactive)
+    (setq my/active-theme
+          (if (eq my/active-theme 'doom-one)
+              'doom-one-light
+            'doom-one))
+    (load-theme my/active-theme t))
+
+  (define-key global-map (kbd "C-c T t") #'my/theme-toggle))
 
 ;; pretty mode line
 (use-package mood-line
