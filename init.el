@@ -750,7 +750,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (setq my/treesit-enabled  (and (fboundp 'treesit-available-p)
                                (treesit-available-p)))
 
-;;; dokcker tooling
+;;; docker tooling
 
 ;; edit docker
 (if my/treesit-enabled
