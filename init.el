@@ -604,11 +604,19 @@
   (define-key global-map (kbd "C-c T t") #'my/theme-toggle))
 
 ;; pretty mode line
-(use-package mood-line
+(use-package doom-modeline
   :ensure t
-  :config
-  (setq mood-line-glyph-alist mood-line-glyphs-ascii)
-  (mood-line-mode))
+  :init
+  (setq doom-modeline-icon nil
+        doom-modeline-vcs-max-length 36
+        doom-modeline-support-imenu nil
+        doom-modeline-height 0
+        doom-modeline-bar-width 0
+        doom-modeline-project-detection nil
+        doom-modeline-battery nil
+        doom-modeline-time nil
+        doom-modeline-display-misc-in-all-mode-lines nil)
+  :hook (after-init . doom-modeline-mode))
 
 ;;; terminal
 
