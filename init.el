@@ -698,6 +698,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l"
+        lsp-enable-file-watchers nil
         lsp-headerline-breadcrumb-enable nil
         lsp-imenu-index-function #'lsp-imenu-create-categorized-index))
 
