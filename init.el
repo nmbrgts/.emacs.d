@@ -975,7 +975,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package org
   :config
   (setq org-startup-with-inline-images nil
-        org-return-follows-link t))
+        org-return-follows-link t)
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((shell . t)
+     (awk . t)
+     (sed . t)
+     (python . t)
+     (sql . t)
+     (js . t)
+     (emacs-lisp . t))))
 
 ;; org-capture project notes
 (defun my/get-project-notes-or-default-filepath ()
