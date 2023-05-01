@@ -573,6 +573,9 @@
 ;; meow friendly binding
 (define-key global-map (kbd "C-c G") `("git" . ,my/git-prefix-map))
 
+;; keep modeline up to date
+(setq auto-revert-check-vc-info t)
+
 ;; magical git porcelean
 (use-package magit
   :ensure t
