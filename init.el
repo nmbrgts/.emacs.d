@@ -153,6 +153,18 @@
   :init
   (which-key-mode))
 
+;; improved help
+(use-package helpful
+  :ensure t
+  :config
+  (global-set-key (kbd "C-h f") #'helpful-callable)
+  (global-set-key (kbd "C-h v") #'helpful-variable)
+  (global-set-key (kbd "C-h k") #'helpful-key)
+  (global-set-key (kbd "C-h x") #'helpful-command)
+  (global-set-key (kbd "C-c C-d") #'helpful-at-point))
+
+;; get examples in help
+
 ;; define modal-like menus in a declarational style
 (use-package hydra
   :ensure t)
