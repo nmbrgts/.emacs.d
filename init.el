@@ -315,12 +315,14 @@
 
 ;; preferred fonts
 (setq my/default-fixed-pitch-font "JetBrains Mono"
-      my/default-variable-pitch-font "Iosevka Aile")
+      my/default-variable-pitch-font "Iosevka Aile"
+      my/default-fixed-pitch-height 270
+      my/default-variable-pitch-height 270)
 
 (defun my/apply-preferred-fonts ()
-  (set-face-attribute 'default nil :font my/default-fixed-pitch-font :weight 'light :height 280)
-  (set-face-attribute 'fixed-pitch nil :font my/default-fixed-pitch-font :weight 'light :height 280)
-  (set-face-attribute 'variable-pitch nil :font my/default-variable-pitch-font :weight 'light :height 250)
+  (set-face-attribute 'default nil :font my/default-fixed-pitch-font :weight 'light :height my/default-fixed-pitch-height)
+  (set-face-attribute 'fixed-pitch nil :font my/default-fixed-pitch-font :weight 'light :height my/default-fixed-pitch-height)
+  (set-face-attribute 'variable-pitch nil :font my/default-variable-pitch-font :weight 'light :height my/default-variable-pitch-height)
   (set-face-attribute 'bold nil :weight 'normal)
   (with-eval-after-load 'lsp-mode
     (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)
