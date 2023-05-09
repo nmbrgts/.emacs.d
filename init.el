@@ -800,6 +800,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
       completion-auto-wrap t
       completion-auto-select 'second-tab)
 
+;; improved context-based completions
+(global-set-key [remap dabbrev-expand] #'hippie-expand)
+
 ;; completions at cursor because I'm not emacs enough...
 (use-package corfu
   :ensure t
