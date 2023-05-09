@@ -936,6 +936,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (setq c-default-style "linux"
       c-basic-offset 4)
 
+;; common-lisp
+(use-package sly
+  :ensure t
+  :init
+  (setq inferior-lisp-program "sbcl"))
+
 ;; elixir
 
 ;; javascript
