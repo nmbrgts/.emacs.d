@@ -570,9 +570,10 @@
   (add-to-list 'project-switch-commands     '(project-vterm "Vterm") t)
   (add-to-list 'project-kill-buffer-conditions  '(major-mode . vterm-mode))
   :config
-  (setq vterm-copy-exclude-prompt t)
-  (setq vterm-max-scrollback 100000)
-  (setq vterm-tramp-shells '(("ssh" "/bin/bash")
+  (setq vterm-copy-exclude-prompt t
+        vterm-disable-bold t
+        vterm-max-scrollback 100000
+        vterm-tramp-shells '(("ssh" "/bin/bash")
                              ("podman" "/bin/bash"))))
 
 ;;; git tooling
