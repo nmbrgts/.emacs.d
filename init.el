@@ -767,7 +767,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; general
 
 ;; spellcheck strings and comments
-(add-hook 'prog-mode #'flyspell-prog-mode)
+(add-hook 'prog-mode-hook #'flyspell-prog-mode)
+(add-hook 'text-mode-hook #'flyspell-mode)
 
 ;; improved structural navigation and editing
 (use-package puni
