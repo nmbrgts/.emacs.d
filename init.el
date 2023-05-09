@@ -706,6 +706,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :bind ("C-c D" . docker))
 
+;;; config languages
+
+;; yaml
+(use-package yaml-mode
+  :ensure t)
+
 ;;; language server
 
 ;; shared keymap setup
