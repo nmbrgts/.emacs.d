@@ -67,6 +67,9 @@
       kill-buffer-query-functions (remq 'process-kill-buffer-query-function
                                         kill-buffer-query-functions))
 
+;; cycle spaces
+(global-set-key [remap just-one-space] #'cycle-spacing)
+
 ;; keep transient files tidy
 (setq my/transient-files-backup-dir (expand-file-name "tmp/backups/" user-emacs-directory)
       my/transient-files-auto-save-dir (expand-file-name "tmp/auto-saves/" user-emacs-directory)
