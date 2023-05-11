@@ -563,7 +563,6 @@
   :init
   (solaire-global-mode +1))
 
-
 ;; pretty mode line
 (use-package doom-modeline
   :ensure t
