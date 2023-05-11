@@ -1038,7 +1038,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
      (python . t)
      (sql . t)
      (js . t)
-     (emacs-lisp . t))))
+     (emacs-lisp . t)))
+
+  (setq org-babel-default-header-args:sh
+        '((:session . "sh")
+          (:results . "verbatim"))))
 
 ;; org-capture project notes
 (defun my/get-project-notes-or-default-filepath ()
