@@ -614,9 +614,6 @@
 ;; mnemonic binding
 (define-key global-map (kbd "C-c g") `("git" . ,my/git-prefix-map))
 
-;; meow friendly binding
-(define-key global-map (kbd "C-c G") `("git" . ,my/git-prefix-map))
-
 ;; keep modeline up to date
 (setq auto-revert-check-vc-info t)
 
