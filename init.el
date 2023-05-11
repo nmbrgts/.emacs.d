@@ -1026,6 +1026,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq org-startup-with-inline-images nil
         org-return-follows-link t)
 
+  (add-to-list 'org-modules 'org-tempo)
+
+  (add-hook 'org-mode-hook (lambda ()
+    (setq-local electric-pair-inhibit-predicate
+    `(lambda (c)
+        (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((shell . t)
