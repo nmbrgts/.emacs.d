@@ -335,15 +335,19 @@
       my/default-variable-pitch-height 270)
 
 (defun my/apply-preferred-fonts ()
-  (set-face-attribute 'default nil :font my/default-fixed-pitch-font :weight 'light :height my/default-fixed-pitch-height)
-  (set-face-attribute 'fixed-pitch nil :font my/default-fixed-pitch-font :weight 'light :height my/default-fixed-pitch-height)
-  (set-face-attribute 'variable-pitch nil :font my/default-variable-pitch-font :weight 'light :height my/default-variable-pitch-height)
-  (set-face-attribute 'bold nil :weight 'normal)
-  (with-eval-after-load 'lsp-mode
-    (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)
-    (set-face-attribute 'lsp-face-highlight-textual nil :weight 'normal))
-  (with-eval-after-load 'doom-themes
-    (set-face-attribute 'tab-bar-tab nil :background (doom-color 'bg-alt))))
+  (set-face-attribute 'default nil
+                      :font my/default-fixed-pitch-font
+                      :weight 'light
+                      :height my/default-fixed-pitch-height)
+  (set-face-attribute 'fixed-pitch nil
+                      :font my/default-fixed-pitch-font
+                      :weight 'light
+                      :height my/default-fixed-pitch-height)
+  (set-face-attribute 'variable-pitch nil
+                      :font my/default-variable-pitch-font
+                      :weight 'light
+                      :height my/default-variable-pitch-height)
+  (set-face-attribute 'bold nil :weight 'normal))
 
 ;; create after theme hook
 (defvar after-enable-theme-hook nil
@@ -357,6 +361,29 @@
 
 ;; run font tweaks after theme change
 (add-hook 'after-enable-theme-hook #'my/apply-preferred-fonts)
+
+;; run lsp-mode visual tweaks after theme change
+(defun my/tweak-lsp-mode-faces ()
+  (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)
+  (set-face-attribute 'lsp-face-highlight-textual nil :weight 'normal))
+
+(with-eval-after-load 'lsp-mode
+  (add-hook 'after-enable-theme-hook #'my/tweak-lsp-mode-faces))
+
+;; run tab-bar tweaks after theme change
+(defun my/tweak-tab-bar-faces ()
+  (set-face-attribute 'tab-bar-tab nil
+                      :background (doom-color 'modeline-bg-alt)
+                      :weight 'normal)
+  (set-face-attribute 'tab-bar-tab-inactive nil
+                      :foreground (doom-color 'modeline-fg-alt)
+                      :background (doom-color 'modeline-bg-alt)
+                      :weight 'normal)
+  (set-face-attribute 'tab-bar nil
+                      :background (doom-color 'modeline-bg-alt)))
+
+(with-eval-after-load 'doom-themes
+  (add-hook 'after-enable-theme-hook #'my/tweak-tab-bar-faces))
 
 ;;; tabs and tabspaces
 
@@ -504,7 +531,21 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold nil
         doom-themes-enable-italic nil) ; if nil, italics is universally disabled
-  (load-theme 'doom-one t)
+
+  (setq my/active-theme 'doom-one-light
+        my/alternative-theme 'doom-one)
+
+  (defun my/theme-toggle ()
+    (interactive)
+    (let ((active my/active-theme)
+          (alternative my/alternative-theme))
+      (setq my/active-theme alternative
+            my/alternative-theme active))
+    (load-theme my/active-theme t))
+
+  (define-key global-map (kbd "C-c T t") #'my/theme-toggle)
+
+  (load-theme my/active-theme t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -522,19 +563,6 @@
   :init
   (solaire-global-mode +1))
 
-;; toggle between dark and light theme
-(with-eval-after-load 'doom-themes
-  (setq my/active-theme 'doom-one)
-
-  (defun my/theme-toggle ()
-    (interactive)
-    (setq my/active-theme
-          (if (eq my/active-theme 'doom-one)
-              'doom-one-light
-            'doom-one))
-    (load-theme my/active-theme t))
-
-  (define-key global-map (kbd "C-c T t") #'my/theme-toggle))
 
 ;; pretty mode line
 (use-package doom-modeline
