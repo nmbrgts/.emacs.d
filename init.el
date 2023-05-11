@@ -626,8 +626,9 @@
   :ensure t
   :config
   (setq magit-bury-buffer-function 'magit-restore-window-configuration
-	magit-display-buffer-function 'magit-display-buffer-fullcolumn-most-v1
-	magit-pre-display-buffer-hook 'magit-save-window-configuration)
+	magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
+	magit-pre-display-buffer-hook 'magit-save-window-configuration
+        magit-save-repository-buffers 'dontask)
 
   ;; hardcode system git for performance on mac
   (when (eq system-type 'darwin)
