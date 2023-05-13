@@ -120,7 +120,7 @@
   (define-key map (kbd "B") #'balance-windows)
   (define-key map (kbd "u") #'winner-undo)
   (define-key map (kbd "r") #'winner-redo)
-  (define-key map (kbd "p") #'window-toggle-side-windows)
+  (define-key map (kbd "t") #'window-toggle-side-windows)
   (define-key global-map (kbd "C-c w") `("window" . ,map)))
 
 ;; adjust transient buffer behaviors to personal preference
