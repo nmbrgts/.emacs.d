@@ -552,6 +552,10 @@ targets."
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 
+;; remove menu bar unless mac ns
+(unless (memq window-system '(mac ns))
+  (menu-bar-mode -1))
+
 ;; highlight line everywhere
 (global-hl-line-mode 1)
 
