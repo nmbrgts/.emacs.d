@@ -1141,18 +1141,32 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
       headline)
     ,headline))
 
+
+(setq my/project-capture-prefix "p"
+      my/project-capture-list
+      `(("t" "TODO" entry
+         ,(my/project-or-default-file+headline "Tasks")
+         "* TODO %?\nContext:%a\n")
+        ("n" "Note" entry
+         ,(my/project-or-default-file+headline "Notes")
+         "* %?\nContext:%a\n")))
+
+(mapcar (lambda (xs) (cons (concat "p" (car xs)) (cdr xs))) my/project-capture-list)
+
 (defun my/org-capture-project ()
   (interactive)
   (let* ((org-capture-templates
           (cl-concatenate
            'list
-           `(("t" "TODO (proj.)" entry
-              ,(my/project-or-default-file+headline "Tasks")
-              "* TODO %?\nContext:%a\n")
-             ("n" "Note (proj.)" entry
-              ,(my/project-or-default-file+headline "Notes")
-              "* %?\nContext:%a\n"))
-           org-capture-templates)))
+           org-capture-templates
+           (when (project-current)
+             `((,my/project-capture-prefix "project")
+               ,(mapcar
+                 (lambda (xs)
+                   (cons (concat my/project-capture-prefix
+                                 (car xs))
+                         (cdr xs)))
+                 my/project-capture-list))))))
     (org-capture)))
 
 ;; capture notes on the fly
