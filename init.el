@@ -947,7 +947,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                `(,(if my/treesit-enabled
                       'python-base-mode
                     'python-mode)
-                 :toplevel "Varaibles"
                  :types ,my/lsp-mode-imenu-types)))
 
 ;; lsp based imenu for js
@@ -956,7 +955,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                `(,(if my/treesit-enabled
                       'js-base-mode
                     'js-mode)
-                 :toplevel "Functions"
                  :types ,my/lsp-mode-imenu-types)))
 
 ;; use tree-sitter mode by default
