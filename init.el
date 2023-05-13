@@ -843,6 +843,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; general
 
+;; display current defun in modeline
+(add-hook 'prog-mode-hook #'which-func-mode)
+
 ;; spellcheck strings and comments
 (add-hook 'prog-mode-hook #'flyspell-prog-mode)
 (add-hook 'text-mode-hook #'flyspell-mode)
