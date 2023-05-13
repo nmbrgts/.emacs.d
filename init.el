@@ -871,6 +871,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; insert closing delimiters
 (electric-pair-mode 1)
 
+;; always add newline at the end of the file
+(setq require-final-newline t)
+
 ;; define keybinding missing in 28?
 (define-key global-map (kbd "C-M-<backspace>") #'backward-kill-sexp)
 
