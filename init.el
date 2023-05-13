@@ -416,15 +416,16 @@ targets."
 
 ;; run tab-bar tweaks after theme change
 (defun my/tweak-tab-bar-faces ()
+  (set-face-attribute 'tab-bar nil
+                      :background (doom-color 'modeline-bg-alt)
+                      :foreground (doom-color 'modeline-bg-alt))
   (set-face-attribute 'tab-bar-tab nil
                       :background (doom-color 'modeline-bg-alt)
                       :weight 'normal)
   (set-face-attribute 'tab-bar-tab-inactive nil
                       :foreground (doom-color 'modeline-fg-alt)
                       :background (doom-color 'modeline-bg-alt)
-                      :weight 'normal)
-  (set-face-attribute 'tab-bar nil
-                      :background (doom-color 'modeline-bg-alt)))
+                      :weight 'normal))
 
 (with-eval-after-load 'doom-themes
   (add-hook 'after-enable-theme-hook #'my/tweak-tab-bar-faces))
