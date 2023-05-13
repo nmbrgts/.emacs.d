@@ -1149,8 +1149,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          ,(my/project-or-default-file+headline "Notes")
          "* %?\nContext:%a\n")))
 
-(mapcar (lambda (xs) (cons (concat "p" (car xs)) (cdr xs))) my/project-capture-list)
-
 (defun my/org-capture-project ()
   (interactive)
   (let* ((org-capture-templates
