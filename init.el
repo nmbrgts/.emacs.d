@@ -86,6 +86,12 @@
 ;; update buffers when files change
 (global-auto-revert-mode 1)
 
+;; make buffers unique based on directory
+(use-package uniquify
+  :demand t
+  :config
+  (setq uniquify-buffer-name-style 'post-forward-angle-brackets))
+
 ;; buffer keymap
 (let ((map (make-sparse-keymap)))
   (define-key map (kbd "k") #'kill-buffer)
