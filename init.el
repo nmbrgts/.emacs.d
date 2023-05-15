@@ -1176,6 +1176,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; rebind capitalize because it's still useful
 (define-key global-map (kbd "M-C") #'capitalize-dwim)
 
+;; do http requests with org
+(use-package verb
+  :ensure t
+  :after org
+  :init
+  (define-key org-mode-map (kbd "C-c C-r") `("verb" . verb-command-map)))
+
+;; import from postman
+(use-package impostman
+  :ensure t)
+
 ;; do so-so presentations with org
 (use-package org-present
   :ensure t
