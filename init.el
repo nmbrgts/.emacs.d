@@ -1156,13 +1156,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
            'list
            org-capture-templates
            (when (project-current)
-             `((,my/project-capture-prefix "project")
-               ,(mapcar
-                 (lambda (xs)
-                   (cons (concat my/project-capture-prefix
-                                 (car xs))
-                         (cdr xs)))
-                 my/project-capture-list))))))
+             (cons
+              `(,my/project-capture-prefix "project")
+              (mapcar
+               (lambda (xs)
+                 (cons (concat my/project-capture-prefix
+                               (car xs))
+                       (cdr xs)))
+               my/project-capture-list))))))
     (org-capture)))
 
 ;; capture notes on the fly
