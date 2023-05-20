@@ -871,10 +871,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; spellcheck strings and comments
 (use-package flyspell
   :hook ((prog-mode . flyspell-prog-mode)
-         (text-mode . flyspell-text-mode))
-  :init
+         (text-mode . flyspell-mode))
+  :config
   (setq flyspell-mode-map (make-sparse-keymap)
-        flyspell-mouse-map nil))
+        flyspell-mouse-map (make-sparse-keymap)))
 
 ;; improved structural navigation and editing
 (use-package puni
