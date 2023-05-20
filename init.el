@@ -458,6 +458,13 @@ targets."
 ;; bind tab in a similar way to buffers
 (define-key global-map (kbd "C-x t") #'tab-bar-switch-to-tab)
 
+;; fix bug with tab-new and side windows
+(define-advice
+    tab-bar-new-tab
+    (:before (&rest args) my/side-window-new-tab-fix)
+  (when (window-parameter (selected-window) 'window-side)
+    (select-window (window-main-window))))
+
 ;; isolate tabs
 (use-package tabspaces
   :ensure t
