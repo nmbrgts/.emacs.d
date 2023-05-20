@@ -200,6 +200,16 @@
   (vertico-buffer-mode)
   (setq vertico-cycle t))
 
+;; improved file navigation
+(use-package vertico-directory
+  :ensure nil
+  :after vertico
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+
 ;; additional data with suggestions
 (use-package marginalia
   :ensure t
