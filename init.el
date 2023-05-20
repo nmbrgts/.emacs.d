@@ -562,6 +562,10 @@ targets."
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 
+;; add line and colum number display to modeline
+(column-number-mode 1)
+(line-number-mode 1)
+
 ;; remove menu bar unless mac ns
 (unless (memq window-system '(mac ns))
   (menu-bar-mode -1))
