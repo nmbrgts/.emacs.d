@@ -861,8 +861,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (add-hook 'prog-mode-hook #'which-func-mode)
 
 ;; spellcheck strings and comments
-(add-hook 'prog-mode-hook #'flyspell-prog-mode)
-(add-hook 'text-mode-hook #'flyspell-mode)
+(use-package flyspell
+  :hook ((prog-mode . flyspell-prog-mode)
+         (text-mode . flyspell-text-mode))
+  :init
+  (setq flyspell-mode-map (make-sparse-keymap)
+        flyspell-mouse-map nil))
 
 ;; improved structural navigation and editing
 (use-package puni
