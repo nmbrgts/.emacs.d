@@ -872,7 +872,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package flyspell
   :hook ((prog-mode . flyspell-prog-mode)
          (text-mode . flyspell-mode))
-  :config
+  :init
   (setq flyspell-mode-map (make-sparse-keymap)
         flyspell-mouse-map (make-sparse-keymap)))
 
