@@ -1079,8 +1079,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :commands (prettier-js)
   :init
   (define-key (if my/treesit-enabled js-base-mode-map js-mode-map)
-              (kbd "C-c c f ")
-              #'prettier-js))
+    (kbd "C-c c f ")
+    #'prettier-js))
 
 ;; vue
 
