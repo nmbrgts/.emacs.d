@@ -1094,10 +1094,16 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; run lsp automatically
 (add-hook 'my/vue-mode-hook #'lsp)
 
+;;; writing
+
+(use-package olivetti
+  :hook (text-mode . olivetti-mode))
+
 ;;; org
 
 ;; org config
 (use-package org
+  :hook (org-mode . org-indent-mode)
   :config
   (setq org-startup-with-inline-images nil
         org-return-follows-link t)
