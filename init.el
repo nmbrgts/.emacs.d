@@ -611,6 +611,7 @@ targets."
           (alternative my/alternative-theme))
       (setq my/active-theme alternative
             my/alternative-theme active))
+    (mapcar 'disable-theme custom-enabled-themes)
     (load-theme my/active-theme t))
 
   (define-key global-map (kbd "C-c T t") #'my/theme-toggle)
