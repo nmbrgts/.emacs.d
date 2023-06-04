@@ -483,17 +483,21 @@ targets."
   (project-known-project-roots)
   (define-key tab-prefix-map (kbd "s") tabspaces-command-map))
 
-;; pre-29 emacs
+
 (when (not (fboundp 'project-name))
   (defun project-name (proj)
     (cl-second (reverse (split-string (cdr proj) "/")))))
 
 ;; rename current tab when switching projects within tabspace
-(defun my/switch-tab-name-with-project (&rest _)
-  (let ((pname (project-name (project-current))))
-    (tab-bar-rename-tab pname)))
+(defun my/switch-tab-name-with-project (&optional pdir)
+  (when pdir
+    (let ((pname (cl-second (reverse (split-string pdir "/")))))
+      (tab-bar-rename-tab pname))
+    pdir))
 
-(advice-add #'project-switch-project :after 'my/switch-tab-name-with-project)
+(advice-add #'project-prompt-project-dir
+            :filter-return
+            'my/switch-tab-name-with-project)
 
 ;; tabs open to scratch buffer
 ;; TODO: it would be neat to set this dynamically
