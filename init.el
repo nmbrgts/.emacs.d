@@ -606,8 +606,8 @@ targets."
   (setq doom-themes-enable-bold nil
         doom-themes-enable-italic nil) ; if nil, italics is universally disabled
 
-  (setq my/active-theme 'doom-one-light
-        my/alternative-theme 'doom-one)
+  (setq my/active-theme 'doom-nord-aurora
+        my/alternative-theme 'doom-nord-light)
 
   (defun my/theme-toggle ()
     (interactive)
