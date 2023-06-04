@@ -606,17 +606,37 @@ targets."
   (setq doom-themes-enable-bold nil
         doom-themes-enable-italic nil) ; if nil, italics is universally disabled
 
-  (setq my/active-theme 'doom-nord-aurora
-        my/alternative-theme 'doom-nord-light)
+  (setq my/light-theme 'doom-nord-light
+        my/dark-theme 'doom-nord-aurora
+        my/active-theme my/dark-theme)
 
-  (defun my/theme-toggle ()
+  ;; toggle theme
+  (defun my/theme-toggle (&optional light-or-dark)
     (interactive)
-    (let ((active my/active-theme)
-          (alternative my/alternative-theme))
-      (setq my/active-theme alternative
-            my/alternative-theme active))
+    (setq my/active-theme
+          (or (and (eq light-or-dark :light) my/light-theme)
+              (and (eq light-or-dark :dark) my/dark-theme)
+              (and (eq my/active-theme my/dark-theme) my/light-theme)
+              (and (eq my/active-theme my/light-theme) my/dark-theme)
+              my/dark-theme))
     (mapcar 'disable-theme custom-enabled-themes)
     (load-theme my/active-theme t))
+
+  ;; switch themes with system
+  (when (eq system-type 'darwin)
+    (defun my/match-theme-to-system ()
+      (message "HI")
+      (let ((appearance (plist-get (mac-application-state)
+                                   :appearance)))
+        (my/theme-toggle
+         (if (string-equal
+              appearance
+              "NSAppearanceNameDarkAqua")
+             :dark
+           :light))))
+
+    (add-hook 'mac-effective-appearance-change-hook
+              #'my/match-theme-to-system))
 
   (define-key global-map (kbd "C-c T t") #'my/theme-toggle)
 
