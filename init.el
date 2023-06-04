@@ -1114,7 +1114,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; writing
 
 (use-package olivetti
-  :hook (text-mode . olivetti-mode))
+  :ensure t
+  :hook ((org-mode . olivetti-mode)
+         (markdown-mode . olivetti-mode)))
+
+;;; markdown
+
+;; markdown mode
+(use-package markdown-mode
+  :ensure t)
 
 ;;; org
 
