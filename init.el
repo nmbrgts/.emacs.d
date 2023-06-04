@@ -751,12 +751,8 @@ targets."
   :ensure f
   :after hydra
   :config
-  (defhydra hydra-smerge (:color pink
-                                 :hint nil
-                                 :pre (smerge-mode 1)
-                                 ;; Disable `smerge-mode' when quitting hydra if
-                                 ;; no merge conflicts remain.
-                                 :post (smerge-auto-leave))
+  (defhydra my/smerge-hydra
+    (:color pink :hint nil :post (smerge-auto-leave))
     "
 ^Move^       ^Keep^               ^Diff^                 ^Other^
 ^^-----------^^-------------------^^---------------------^^-------
@@ -782,9 +778,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     ("C" smerge-combine-with-next)
     ("r" smerge-resolve)
     ("k" smerge-kill-current)
+    ("ZZ" (lambda ()
+            (interactive)
+            (save-buffer)
+            (bury-buffer))
+     "Save and bury buffer" :color blue)
     ("q" nil "cancel" :color blue))
-
-  (define-key my/git-prefix-map (kbd "s") '("smerge hydra" . hydra-smerge/body)))
+  :hook (magit-diff-visit-file . (lambda ()
+                                   (when smerge-mode
+                                     (my/smerge-hydra/body)))))
 
 ;;; tree-sitter tweaks
 
