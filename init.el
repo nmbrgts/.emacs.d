@@ -1197,18 +1197,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     ,headline))
 
 
-(setq my/project-capture-prefix "p"
-      my/project-capture-list
-      `(("t" "TODO" entry
-         ,(my/project-or-default-file+headline "Tasks")
-         "* TODO %?\nContext:%a\n")
-        ("n" "Note" entry
-         ,(my/project-or-default-file+headline "Notes")
-         "* %?\nContext:%a\n")))
+(setq my/project-capture-prefix "p")
 
 (defun my/org-capture-project ()
   (interactive)
-  (let* ((org-capture-templates
+  (let* ((my/project-capture-list
+          `(("t" "TODO" entry
+             ,(my/project-or-default-file+headline "Tasks")
+             "* TODO %?\nContext:%a\n")
+            ("n" "Note" entry
+             ,(my/project-or-default-file+headline "Notes")
+             "* %?\nContext:%a\n")))
+         (org-capture-templates
           (cl-concatenate
            'list
            org-capture-templates
