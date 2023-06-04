@@ -1130,7 +1130,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package org
   :hook (org-mode . org-indent-mode)
   :config
-  (setq org-startup-with-inline-images nil
+  (setq org-default-notes-file "~/org/notes.org"
+        org-startup-with-inline-images nil
         org-return-follows-link t)
 
   (add-to-list 'org-modules 'org-tempo)
@@ -1226,8 +1227,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; capture notes on the fly
 (use-package org-capture
   :config
-  (setq org-default-notes-file "~/org/notes.org"
-        org-capture-templates '())
+  (setq org-capture-templates '())
   (define-key global-map (kbd "M-c") #'my/org-capture-project))
 
 ;; rebind capitalize because it's still useful
