@@ -809,12 +809,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :bind ("C-c D" . docker))
 
-;;; config languages
-
-;; yaml
-(use-package yaml-mode
-  :ensure t)
-
 ;;; language server
 
 ;; shared keymap setup
@@ -864,6 +858,24 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               ("s" . #'dap-disconnect)))
 
 (define-key global-map (kbd "C-c d") (cons "debug" my/dap-mode-map))
+
+;;; data formats
+
+;; csv
+(use-package csv-mode
+  :ensure t)
+
+;; yaml
+(use-package yaml-mode
+  :ensure t)
+
+;; toml
+(use-package toml-mode
+  :ensure t)
+
+;; ini
+(use-package ini-mode
+  :ensure t)
 
 ;;; language support
 
