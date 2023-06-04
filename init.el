@@ -148,13 +148,13 @@
          (my/display-buffer-in-side-window-and-select)
          (side . right)
          (slot . 1)
-         (window-width . 75)
+         (window-width . 0.30)
          (window-parameters . ((mode-line-format . nil))))
-        ("^\\*\\( docker container log\\)"
+        ("^\\*\\( docker\\)"
          (my/display-buffer-in-side-window-and-select)
          (side . right)
          (slot . 1)
-         (window-width . 0.5))))
+         (window-width . 0.30))))
 
 ;; get helpful prompts for keys
 (use-package which-key
