@@ -603,7 +603,7 @@ targets."
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold nil
-        doom-themes-enable-italic nil) ; if nil, italics is universally disabled
+        doom-themes-enable-italic nil)
 
   (setq my/light-theme 'doom-nord-light
         my/dark-theme 'doom-nord-aurora
