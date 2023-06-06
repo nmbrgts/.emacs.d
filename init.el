@@ -192,8 +192,8 @@
   :init
   (setq vertico-buffer-display-action
         '(display-buffer-in-side-window
-          (window-height . 0.33)
-          (side . bottom)
+          (window-height . 0.20)
+          (side . top)
           (window-parameters . ((mode-line-format . (""))))))
   (vertico-mode)
   (vertico-buffer-mode)
