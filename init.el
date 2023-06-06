@@ -148,8 +148,7 @@
          (my/display-buffer-in-side-window-and-select)
          (side . right)
          (slot . 1)
-         (window-width . 0.30)
-         (window-parameters . ((mode-line-format . nil))))
+         (window-width . 0.30))
         ("^\\*\\( docker\\)"
          (my/display-buffer-in-side-window-and-select)
          (side . right)
