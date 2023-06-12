@@ -194,7 +194,8 @@
         '(display-buffer-in-side-window
           (window-height . 0.20)
           (side . top)
-          (window-parameters . ((mode-line-format . (""))))))
+          ;; (window-parameters . ((mode-line-format . (""))))
+          ))
   (vertico-mode)
   (vertico-buffer-mode)
   (setq vertico-cycle t))
