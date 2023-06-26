@@ -490,10 +490,8 @@ targets."
 
 ;; move tab-bar-map
 (define-key global-map (kbd "M-t") tab-prefix-map)
+(define-key global-map (kbd "C-c t") tab-prefix-map)
 (define-key global-map (kbd "s-t") tab-prefix-map)
-
-;; bind tab in a similar way to buffers
-(define-key global-map (kbd "C-x t") #'tab-bar-switch-to-tab)
 
 ;; fix bug with tab-new and side windows
 (define-advice
