@@ -1006,6 +1006,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; elisp
 
+;;; (guile) scheme
+(use-package geiser-mit
+  :ensure t)
+
+(use-package geiser-guile
+  :after geiser-mit
+  :ensure t)
+
 ;;; python
 
 ;; consult imenu integration
