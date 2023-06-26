@@ -376,6 +376,35 @@ targets."
 
 (advice-add #'embark-completing-read-prompter
             :around #'embark-hide-which-key-indicator)
+
+;; directory viewer
+(use-package dired
+  :ensure f
+  :after files
+  :hook ((dired-mode . dired-hide-details-mode)
+         (dired-mode . (lambda () (dired-omit-mode)))
+         ;; (dired-mode . (lambda () (direc-sort-toggle)))
+         )
+  :init
+  (setq insert-directory-program
+        (if (and (eq system-type 'darwin)
+                 (executable-find "gls"))
+            "gls"
+          insert-directory-program)
+        dired-listing-switches "-al --dired --group-directories-first -h -G"
+        dired-omit-files "\\`[.]?#\\|\\.java\\|snap\\|System\\|\\.ssh\\|\\.gitconfig\\|\\.wget\\|\\.aspell\\|\\.cache\\|\\.lesshst\\|\\.gftp\\|\\.pki\\|\\.gnome\\|VirtualBox\\|master\\.tar\\.gz\\|\\.wine\\|plan9port\\|\\.idm\\|\\.font\\|\\.iso\\|\\.cargo\\|lib\\|amd64\\|\\.gnupg\\|\\.python\\|\\.var\\|\\.local\\|\\`[.][.]?\\'"))
+
+(use-package all-the-icons
+  :ensure t
+  :config
+  (setq all-the-icons-scale-factor 0.8))
+
+(use-package all-the-icons-dired
+  :ensure t
+  :hook ((dired-mode . all-the-icons-dired-mode))
+  :config
+  (setq all-the-icons-dired-monochrome f))
+
 ;;; mac usability tweaks
 
 ;; load system path on startup
