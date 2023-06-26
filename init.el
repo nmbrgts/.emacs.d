@@ -422,8 +422,8 @@ targets."
 ;; preferred fonts
 (setq my/default-fixed-pitch-font "JetBrains Mono"
       my/default-variable-pitch-font "Iosevka Aile"
-      my/default-fixed-pitch-height 270
-      my/default-variable-pitch-height 270)
+      my/default-fixed-pitch-height 280
+      my/default-variable-pitch-height 280)
 
 (defun my/apply-preferred-fonts ()
   (set-face-attribute 'default nil
