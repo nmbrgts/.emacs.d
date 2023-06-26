@@ -47,7 +47,8 @@
 ;; pls no more ugly wrap
 (use-package adaptive-wrap
   :ensure t
-  :hook (visual-line-mode . adaptive-wrap-prefix-mode)
+  :hook ((visual-line-mode . adaptive-wrap-prefix-mode)
+         (org-mode . (lambda () (setq-local adaptive-wrap-extra-indent 4))))
   :init
   (global-visual-line-mode 1))
 
