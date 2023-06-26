@@ -523,16 +523,12 @@ targets."
   (defun project-name (proj)
     (cl-second (reverse (split-string (cdr proj) "/")))))
 
-;; rename current tab when switching projects within tabspace
-(defun my/switch-tab-name-with-project (&optional pdir)
-  (when pdir
-    (let ((pname (cl-second (reverse (split-string pdir "/")))))
-      (tab-bar-rename-tab pname))
-    pdir))
+;; rename current tab to project nameq
+(defun my/project-tab-name ()
+  (interactive)
+  (tab-bar-rename-tab (project-name (project-current))))
 
-(advice-add #'project-prompt-project-dir
-            :filter-return
-            'my/switch-tab-name-with-project)
+(define-key project-prefix-map (kbd "TAB") #'my/project-tab-name)
 
 ;; tabs open to scratch buffer
 ;; TODO: it would be neat to set this dynamically
