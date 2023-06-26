@@ -90,6 +90,10 @@
 ;; update buffers when files change
 (global-auto-revert-mode 1)
 
+;; forward compatibility
+(use-package compat
+  :ensure t)
+
 ;; make buffers unique based on directory
 (use-package uniquify
   :demand t
