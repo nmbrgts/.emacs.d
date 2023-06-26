@@ -1,5 +1,8 @@
 ;;; general usability
 
+;; no splash
+(setq inhibit-splash-screen t)
+
 ;; general performance
 (setq gc-cons-threshold (* 100 1024 1024)
       read-process-output-max (* 5 1024 1024))
