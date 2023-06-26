@@ -930,7 +930,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package ini-mode
   :ensure t)
 
-;;; language support
+;;; programming language support
 
 ;;; general
 
