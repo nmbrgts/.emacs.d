@@ -100,17 +100,25 @@
   :config
   (setq uniquify-buffer-name-style 'post-forward-angle-brackets))
 
-;; buffer keymap
-(let ((map (make-sparse-keymap)))
-  (define-key map (kbd "k") #'kill-buffer)
-  (define-key map (kbd "b") #'consult-buffer)
-  (define-key map (kbd "B") #'tabspaces-switch-buffer-and-tab)
-  (define-key map (kbd "i") #'ibuffer)
-  (define-key map (kbd "n") #'next-buffer)
-  (define-key map (kbd "p") #'previous-buffer)
-  (define-key map (kbd "r") #'revert-buffer)
-  (define-key map (kbd "s") #'scratch-buffer)
-  (define-key global-map (kbd "C-c b") `("buffer" . ,map)))
+;; call scratch buffer
+(with-eval-after-load 'compat
+  (defun my/display-scratch ()
+    (interactive)
+    (display-buffer (get-scratch-buffer-create)))
+
+  ;; buffer keymap
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "k") #'kill-buffer)
+    (define-key map (kbd "b") #'consult-buffer)
+    (define-key map (kbd "B") #'tabspaces-switch-buffer-and-tab)
+    (define-key map (kbd "i") #'ibuffer)
+    (define-key map (kbd "n") #'next-buffer)
+    (define-key map (kbd "p") #'previous-buffer)
+    (define-key map (kbd "r") #'revert-buffer)
+    (define-key map (kbd "s") (if (fboundp #'scratch-buffer)
+                                  #'scratch-buffer
+                                #'my/display-scratch))
+    (define-key global-map (kbd "C-c b") `("buffer" . ,map))))
 
 ;; window undo/redo
 (winner-mode 1)
@@ -146,6 +154,13 @@
          (window-height . 0.20))
         ;; top bar informational
         ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
+         (my/display-buffer-in-side-window-and-select)
+         (select. t)
+         (side . top)
+         (slot . 1)
+         (window-height . 0.20))
+        ;;
+        ("^\\*\\(scratch\\)"
          (my/display-buffer-in-side-window-and-select)
          (select. t)
          (side . top)
