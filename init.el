@@ -477,6 +477,15 @@ targets."
 (with-eval-after-load 'doom-themes
   (add-hook 'after-enable-theme-hook #'my/tweak-tab-bar-faces))
 
+;; run fringe tweaks after theme change
+(defun my/tweak-fringe-faces ()
+  (set-face-attribute 'fringe nil
+                      :background (doom-color 'bg)
+                      :foreground (doom-color 'bg)))
+
+(with-eval-after-load 'doom-themes
+  (add-hook 'after-enable-theme-hook #'my/tweak-fringe-faces))
+
 ;;; tabs and tabspaces
 
 ;; add minimal tab bar
