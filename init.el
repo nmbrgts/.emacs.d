@@ -665,7 +665,6 @@ targets."
   ;; switch themes with system
   (when (eq system-type 'darwin)
     (defun my/match-theme-to-system ()
-      (message "HI")
       (let ((appearance (plist-get (mac-application-state)
                                    :appearance)))
         (my/theme-toggle
