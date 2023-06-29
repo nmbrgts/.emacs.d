@@ -642,6 +642,9 @@ targets."
 ;; display line numbers for code buffers
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
+;; display line numbers for config buffers
+(add-hook 'conf-mode-hook #'display-line-numbers-mode)
+
 ;; display only left fringe
 (fringe-mode '(8 . 0))
 
