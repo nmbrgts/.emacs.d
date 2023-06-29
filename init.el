@@ -698,12 +698,6 @@ targets."
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
-;; darken popup windows
-(use-package solaire-mode
-  :ensure t
-  :init
-  (solaire-global-mode +1))
-
 ;; pretty mode line
 (use-package doom-modeline
   :ensure t
