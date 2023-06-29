@@ -200,14 +200,6 @@
 (use-package hydra
   :ensure t)
 
-;; modal
-(use-package god-mode
-  :ensure t
-  :config
-  (define-key god-local-mode-map (kbd "z") #'repeat)
-  :init
-  (define-key global-map (kbd "<escape>") #'god-mode-all))
-
 ;; improved search and completion functionality
 ;; vertical suggestions for many minibuffer operations
 (use-package vertico
