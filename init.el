@@ -418,7 +418,7 @@ targets."
   :ensure t
   :hook ((dired-mode . all-the-icons-dired-mode))
   :config
-  (setq all-the-icons-dired-monochrome f))
+  (setq all-the-icons-dired-monochrome nil))
 
 ;;; mac usability tweaks
 
