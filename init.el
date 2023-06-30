@@ -1359,5 +1359,21 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                                     (org-present-show-cursor)
                                     (org-present-read-write)))))
 
+;;; email
+
+(use-package sendmail
+  :ensure f
+  :init
+  (setq send-mail-function 'sendmail-send-it
+        sendmail-program "/opt/local/bin/msmtp"
+        mail-specify-envelope-from t
+        message-sendmail-envelope-from 'header
+        mail-envelope-from 'header))
+
+(use-package notmuch
+  :ensure t
+  :bind (("C-c m c" . #'notmuch-mua-mail)
+         ("C-c m i" . #'notmuch)))
+
 ;; load external custom file
 (load custom-file)
