@@ -1216,8 +1216,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package olivetti
   :ensure t
-  :hook ((org-mode . olivetti-mode)
-         (markdown-mode . olivetti-mode)))
+  :hook (((org-mode
+           markdown-mode
+           message-mode)
+          . olivetti-mode)))
 
 ;;; markdown
 
