@@ -1300,7 +1300,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
       headline)
     ,headline))
 
-
 (setq my/project-capture-prefix "p")
 
 (defun my/org-capture-project ()
