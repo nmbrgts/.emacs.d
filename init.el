@@ -1056,6 +1056,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after geiser-mit
   :ensure t)
 
+(if (eq system-type 'darwin)
+    (add-to-list 'Info-directory-list
+                 "/opt/local/share/info/"))
+
 ;;; python
 
 ;; consult imenu integration
