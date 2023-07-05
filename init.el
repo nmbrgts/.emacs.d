@@ -932,7 +932,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; yaml
 (use-package yaml-mode
-  :ensure t)
+  :ensure t
+  ;; yaml doesn't inherit from conf mode
+  :hook (yaml-mode . display-line-numbers-mode))
 
 ;; toml
 (use-package toml-mode
