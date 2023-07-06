@@ -642,9 +642,6 @@ targets."
 ;; display line numbers for code buffers
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
-;; display line numbers for config buffers
-(add-hook 'conf-mode-hook #'display-line-numbers-mode)
-
 ;; display only left fringe
 (fringe-mode '(8 . 0))
 
@@ -925,6 +922,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (define-key global-map (kbd "C-c d") (cons "debug" my/dap-mode-map))
 
 ;;; data formats
+
+;; conf
+(use-package conf-mode
+  :ensure t
+  :mode ("\\..*ignore\\'" "\\.fish\\'")
+  :hook (conf-mode . display-line-numbers-mode))
 
 ;; csv
 (use-package csv-mode
