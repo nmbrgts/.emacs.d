@@ -496,7 +496,6 @@ targets."
 ;; create after theme hook
 (use-package custom
   :config
-
   (defvar after-enable-theme-hook nil
     "Normal hook run after enabling a theme.")
 
@@ -506,9 +505,9 @@ targets."
 
   (advice-add 'enable-theme :after #'run-after-enable-theme-hook))
 
-;; preferred fonts
+;; visual tweaks to apply after theme
 (use-package faces
-  :after custom
+  :after (custom fringe tab-bar lsp-mode doom-themes)
   :config
   (setq my/default-fixed-pitch-font "JetBrains Mono"
 	my/default-variable-pitch-font "Iosevka Aile"
@@ -530,21 +529,13 @@ targets."
 			:weight 'light
 			:height my/default-variable-pitch-height)
     (set-face-attribute 'bold nil :weight 'normal))
-  :hook (after-enable-theme . my/apply-preferred-fonts))
 
-;; run lsp-mode visual tweaks after theme change
-(use-package faces
-  :after (custom lsp-mode)
-  :config
   (defun my/tweak-lsp-mode-faces ()
-    (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)
-    (set-face-attribute 'lsp-face-highlight-textual nil :weight 'normal))
-  :hook (after-enable-theme . my/tweak-lsp-mode-faces))
+    (set-face-attribute 'lsp-face-highlight-write nil
+			:weight 'normal)
+    (set-face-attribute 'lsp-face-highlight-textual nil
+			:weight 'normal))
 
-;; run tab-bar tweaks after theme change
-(use-package faces
-  :after (custom tab-bar doom-themes)
-  :config
   (defun my/tweak-tab-bar-faces ()
     (set-face-attribute 'tab-bar nil
 			:background (doom-color 'modeline-bg-alt)
@@ -556,22 +547,20 @@ targets."
 			:foreground (doom-color 'modeline-fg-alt)
 			:background (doom-color 'modeline-bg-alt)
 			:weight 'normal))
-  :hook (after-enable-theme . my/tweak-tab-bar-faces))
 
-;; run fringe tweaks after theme change
-(use-package faces
-  ;; :after (custom fringe doom-themes)
-  :config
   (defun my/tweak-fringe-faces ()
     (set-face-attribute 'fringe nil
 			:background (doom-color 'bg)
 			:foreground (doom-color 'bg)))
-  :hook (after-enable-theme . my/tweak-fringe-faces))
+
+  :hook ((after-enable-theme-hook . my/apply-preferred-fonts)
+	 (after-enable-theme-hook . my/tweak-lsp-mode-faces)
+	 (after-enable-theme-hook . my/tweak-tab-bar-faces)
+	 (after-enable-theme-hook . my/tweak-fringe-faces)))
 
 (use-package doom-themes
   :ensure t
   :config
-  ;; Global settings (defaults)
   (setq doom-themes-enable-bold nil
         doom-themes-enable-italic nil)
 
