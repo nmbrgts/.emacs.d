@@ -870,37 +870,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
              (when smerge-mode
                (my/smerge-hydra/body)))))
 
-;; TODO: remove tree-sitter for now?
-;;; tree-sitter tweaks
-
-;; add mac-ports installed tree-sitter grammars
-(setq treesit-extra-load-path '("/opt/local/lib"))
-
-;; create a flag for checking for treesit
-(setq my/treesit-enabled  (and (fboundp 'treesit-available-p)
-                               (treesit-available-p)))
-
 ;;; docker tooling
 
-;; edit docker
-(if my/treesit-enabled
-    (add-to-list 'auto-mode-alist '("\\.Dockerfile\\'" . dockerfile-ts-mode))
-  (use-package dockerfile-mode
-    :ensure t))
+(use-package dockerfile-mode
+  :ensure t)
 
-
-;; run docker
 (use-package docker
   :ensure t
   :bind ("C-c D" . docker))
 
 ;;; language server
 
-;; shared keymap setup
-(setq my/code-keymap (make-sparse-keymap))
-(define-key prog-mode-map (kbd "C-c c") `("code" . ,my/code-keymap))
-
-;; setup lsp mode
 (use-package lsp-mode
   :ensure t
   :init
@@ -908,9 +888,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         lsp-enable-file-watchers nil
         lsp-headerline-breadcrumb-enable nil
         lsp-imenu-index-function #'lsp-imenu-create-categorized-index))
-
-;; setup dap
-
 
 (use-package dap-mode
   :ensure t
@@ -1132,22 +1109,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; lsp based imenu for python
 (with-eval-after-load 'consult-imenu
   (add-to-list 'consult-imenu-config
-               `(,(if my/treesit-enabled
-                      'python-base-mode
-                    'python-mode)
+               `(python-mode
                  :types ,my/lsp-mode-imenu-types)))
 
 ;; lsp based imenu for js
 (with-eval-after-load 'consult-imenu
   (add-to-list 'consult-imenu-config
-               `(,(if my/treesit-enabled
-                      'js-base-mode
-                    'js-mode)
+               `(js-mode
                  :types ,my/lsp-mode-imenu-types)))
-
-;; use tree-sitter mode by default
-(when my/treesit-enabled
-  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
 
 ;; setup pyright
 (use-package lsp-pyright
@@ -1158,9 +1127,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         lsp-pyright-use-library-code-for-types t
         lsp-pyright-diagnostic-mode "onlyOpenFiles")
 
-  (add-hook (if my/treesit-enabled
-                'python-ts-mode-hook
-              'python-mode-hook)
+  (add-hook 'python-mode-hook
             (lambda ()
               (require 'lsp-pyright)
               (lsp))))
@@ -1195,15 +1162,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; c
 
-;; use tree-sitter mode by default
-(when my/treesit-enabled
-  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode)))
-
 ;; enable lsp automatically
-(add-hook (if my/treesit-enabled
-              'c-ts-mode
-            'c-mode)
-          #'lsp)
+(add-hook 'c-mode-hook #'lsp)
 
 ;; use k&r style
 (setq c-default-style "linux"
@@ -1219,20 +1179,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; javascript
 
-;; use treesit tsx mode if possible
-(when my/treesit-enabled
-  (add-to-list 'major-mode-remap-alist '(js-mode . js-ts-mode)))
-
 ;; remove horrible mode keymap
 (with-eval-after-load 'js
   (define-key js-mode-map (kbd "M-.") #'xref-find-definitions))
 
 ;; enable lsp by default
-(add-hook (if my/treesit-enabled
-              'js-ts-mode-hook
-            'js-mode-hook)
-          #'lsp)
-
+(add-hook 'js-mode-hook #'lsp)
 
 ;; format with prettier
 (use-package prettier-js
@@ -1240,9 +1192,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after js
   :commands (prettier-js)
   :init
-  (define-key (if my/treesit-enabled js-base-mode-map js-mode-map)
-    (kbd "C-c c f ")
-    #'prettier-js))
+  (define-key js-base-mode-map (kbd "C-c c f ") #'prettier-js))
 
 ;; vue
 
