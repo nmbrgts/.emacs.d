@@ -215,7 +215,9 @@
 
   (setq window-sides-slots '(0 1 1 1)
 	display-buffer-alist
-	;; TODO: pp-eval/expand geiser
+	;; TODO: add rules for pp-eval/expand and geiser
+	;; TODO: create a system for generalizing the display rules I want,
+	;;       so display definitions don't need to be centralized here.
 	'(;; top bar interactive
           ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|Python\\)\\*$"
            (my/display-buffer-in-side-window-and-select)
