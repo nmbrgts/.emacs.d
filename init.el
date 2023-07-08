@@ -516,6 +516,7 @@ targets."
 	my/default-variable-pitch-height 270)
 
   (defun my/apply-preferred-fonts ()
+    (interactive)
     (set-face-attribute 'default nil
 			:font my/default-fixed-pitch-font
 			:weight 'light
