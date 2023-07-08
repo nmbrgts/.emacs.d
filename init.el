@@ -512,8 +512,8 @@ targets."
   :config
   (setq my/default-fixed-pitch-font "JetBrains Mono"
 	my/default-variable-pitch-font "Iosevka Aile"
-	my/default-fixed-pitch-height 130
-	my/default-variable-pitch-height 130)
+	my/default-fixed-pitch-height 270
+	my/default-variable-pitch-height 270)
 
   (defun my/apply-preferred-fonts ()
     (set-face-attribute 'default nil
