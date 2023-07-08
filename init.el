@@ -1,4 +1,4 @@
-;;; general usability
+;;; early config
 
 ;; no splash
 (setq inhibit-splash-screen t)
@@ -17,7 +17,7 @@
 ;; lexical binding
 (setq lexical-binding t)
 
-;; set up package archives
+;; package archives
 (require 'package)
 
 (dolist (archive '(("nongnu" . "https://elpa.nongnu.org/nongnu/")
@@ -30,21 +30,49 @@
 (unless package-archive-contents
   (package-refresh-contents))
 
-;; for pre 29 emacs
+;; use package imenu integration
+(setq use-package-enable-imenu-support t)
+
+;; ensure use-package is available (pre-29)
 (unless (package-installed-p 'use-package)
   (package-install 'use-package)
   (require 'use-package))
 
-;; pls no more ring
-(setq ring-bell-function 'ignore)
+;; misc. early settings
+(use-package emacs
+  :init
+  (setq lexical-binding t
+        inhibit-splash-screen t
+        gc-cons-threshold (* 100 1024 1024)
+        read-process-output-max (* 5 1024 1024)))
 
-;; pls no more C-M-i
-(setq tabs-always-indent nil)
+;; set up external custom file
+(use-package cus-edit
+  :init
+  (setq custom-file (locate-user-emacs-file "custom.el")))
 
-;; pls no more tabs
-(setq-default indent-tabs-mode nil)
+;; macos native compilation fix
+(use-package comp
+  :if (eq system-type 'darwin)
+  :custom
+  (native-comp-driver-options '("-Wl,-w")))
 
-;; pls no more ugly wrap
+;; misc. preference tweaks
+(use-package emacs
+  :ensure f
+  :init
+  (setq
+   ;; do not ring bell by default
+   ring-bell-function 'ignore
+   ;; set tab behavior (C-M-i 'till I die)
+   tabs-always-indent nil
+   indent-tabs-mode nil
+   ;; reduce nuisance prompts
+   use-short-answers t
+   kill-buffer-query-functions (remq 'process-kill-buffer-query-function
+                                     kill-buffer-query-functions)))
+
+;; trying to make wrapping less ugly
 (use-package adaptive-wrap
   :ensure t
   :hook ((visual-line-mode . adaptive-wrap-prefix-mode)
@@ -52,47 +80,78 @@
   :init
   (global-visual-line-mode 1))
 
-;; pls no more dangling ws
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+;; helper function for setting paths in emacs dir
+(defun my/initialize-emacs-dir-path (sub-path)
+    (let ((path (expand-file-name sub-path user-emacs-directory)))
+      (make-directory path t)
+      path))
 
-;; pls just one more
-(repeat-mode 1)
+(use-package files
+  :ensure f
+  :hook ((before-save-hook . delete-trailing-whitespace))
+  :init
+  (setq
+   require-final-newline t
+   ;; reduce nuisance prompts
+   confirm-nonexistent-file-or-buffer nil
+   ;; automatically refresh any file visiting buffers
+   revert-without-query '(".*")
+   ;; keep transient files tidy (part 1)
+   my/transient-files-backup-dir (my/initialize-emacs-dir-path "tmp/backups/")
+   my/transient-files-auto-save-dir (my/initialize-emacs-dir-path "tmp/auto-saves/")
+   backup-directory-alist `(("." . ,my/transient-files-backup-dir))
+   auto-save-file-name-transforms `((".*" ,my/transient-files-auto-save-dir t)))
+  :bind (("C-r" . #'revert-buffer)
+	 ("C-x C-r" . #'set-visited-file)))
 
-;; pls another one, but marks this time
-(setq set-mark-command-repeat-pop t)
+(use-package emacs
+  :ensure f
+  :init
+  (setq
+   ;; keep transient files tidy (part 2)
+   my/transient-files-auto-save-prefix (my/initialize-emacs-dir-path "tmp/auto-saves/sessions")
+   auto-save-list-file-prefix my/transient-files-auto-save-prefix
+   create-lockfiles nil))
 
-;; pls delete highlighted regions on input
-(delete-selection-mode 1)
+;; contextually repeat commands with a single key press
+(use-package repeat-mode
+  :ensure f
+  :init
+  (repeat-mode 1))
 
-;; pls no more nuisance prompts
-(setq use-short-answers t
-      confirm-nonexistent-file-or-buffer nil
-      revert-without-query '(".*")
-      kill-buffer-query-functions (remq 'process-kill-buffer-query-function
-                                        kill-buffer-query-functions))
+(use-package simple
+  :ensure f
+  :init
+  ;; repeat-like behavior when popping mark
+  (setq set-mark-command-repeat-pop t)
+  (column-number-mode 1)
+  (line-number-mode 1)
+  :config
+  ;; better default behavior for M-SPC
+  (global-set-key [remap just-one-space] #'cycle-spacing))
 
-;; cycle spaces
-(global-set-key [remap just-one-space] #'cycle-spacing)
-
-;; keep transient files tidy
-(setq my/transient-files-backup-dir (expand-file-name "tmp/backups/" user-emacs-directory)
-      my/transient-files-auto-save-dir (expand-file-name "tmp/auto-saves/" user-emacs-directory)
-      my/transient-files-auto-save-prefix (expand-file-name "sessions" my/transient-files-auto-save-dir))
-
-(make-directory my/transient-files-auto-save-dir t)
-(make-directory my/transient-files-backup-dir t)
-
-(setq backup-directory-alist `(("." . ,my/transient-files-backup-dir))
-      auto-save-file-name-transforms `((".*" ,my/transient-files-auto-save-dir t))
-      auto-save-list-file-prefix my/transient-files-auto-save-prefix
-      create-lockfiles nil)
+;; delete selected region on insert
+(use-package delsel
+  :ensure f
+  :init
+  (delete-selection-mode 1))
 
 ;; update buffers when files change
-(global-auto-revert-mode 1)
+(use-package autorevert
+  :ensure f
+  :init
+  ;; keep modeline up to date
+  (setq auto-revert-check-vc-info t)
+  (global-auto-revert-mode 1))
 
 ;; forward compatibility
 (use-package compat
-  :ensure t)
+  :ensure t
+  :config
+  (when (not (fboundp #'scratch-buffer))
+    (defun scratch-buffer ()
+      (interactive)
+      (display-buffer (get-scratch-buffer-create)))))
 
 ;; make buffers unique based on directory
 (use-package uniquify
@@ -100,83 +159,94 @@
   :config
   (setq uniquify-buffer-name-style 'post-forward-angle-brackets))
 
-;; call scratch buffer
-(with-eval-after-load 'compat
-  (defun my/display-scratch ()
-    (interactive)
-    (display-buffer (get-scratch-buffer-create)))
+(use-package ibuffer
+  :ensure f
+  :bind ("C-x C-b" . #'ibuffer))
 
-  ;; buffer keymap
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "k") #'kill-buffer)
-    (define-key map (kbd "b") #'consult-buffer)
-    (define-key map (kbd "B") #'tabspaces-switch-buffer-and-tab)
-    (define-key map (kbd "i") #'ibuffer)
-    (define-key map (kbd "n") #'next-buffer)
-    (define-key map (kbd "p") #'previous-buffer)
-    (define-key map (kbd "r") #'revert-buffer)
-    (define-key map (kbd "s") (if (fboundp #'scratch-buffer)
-                                  #'scratch-buffer
-                                #'my/display-scratch))
-    (define-key global-map (kbd "C-c b") `("buffer" . ,map))))
+;; helpful window operations
+(use-package window
+  :ensure f
+  :init
+  (setq my/window-map (make-sparse-keymap))
+  (bind-key "C-c w" my/window-map)
+  :bind (("C-c s" . #'scratch-buffer)
+	 :map my/window-map
+         ("t" . #'window-toggle-side-windows)
+         ("o" . #'other-window)
+         ("b" . #'balance-windows)
+	 :repeat-map my/window-repeat-map
+	 ("<right>" . #'next-buffer)
+	 ("<left>" . #'previous-buffer)))
 
-;; window undo/redo
-(winner-mode 1)
+(use-package windmove
+  :ensure f
+  :after window
+  :init
+  :bind (:map my/window-map
+         ("<down>" . #'windmove-down)
+         ("<up>" . #'windmove-up)
+         ("<left>" . #'windmove-left)
+         ("<right>" . #'windmove-right)
+         :repeat-map my/windmove-repeat-map
+         ("<down>" . #'windmove-down)
+         ("<up>" . #'windmove-up)
+         ("<left>" . #'windmove-left)
+         ("<right>" . #'windmove-right)))
 
-;; window map
-(let ((map (make-sparse-keymap)))
-  (define-key map (kbd "k") #'delete-window)
-  (define-key map (kbd "K") #'delete-other-windows)
-  (define-key map (kbd "s") #'split-window-right)
-  (define-key map (kbd "S") #'split-window-below)
-  (define-key map (kbd "n") #'windmove-down)
-  (define-key map (kbd "p") #'windmove-up)
-  (define-key map (kbd "f") #'windmove-right)
-  (define-key map (kbd "b") #'windmove-left)
-  (define-key map (kbd "B") #'balance-windows)
-  (define-key map (kbd "u") #'winner-undo)
-  (define-key map (kbd "r") #'winner-redo)
-  (define-key map (kbd "t") #'window-toggle-side-windows)
-  (define-key global-map (kbd "C-c w") `("window" . ,map)))
+(use-package winner
+  :ensure f
+  :after window
+  :init (winner-mode 1)
+  :bind (:map my/window-map
+         ("u" . #'winner-undo)
+         ("r" . #'winner-redo)
+         :repeat-map my/winner-repeat-map
+         ("u" . #'winner-undo)
+         ("r" . #'winner-redo)))
 
-;; adjust transient buffer behaviors to personal preference
-(defun my/display-buffer-in-side-window-and-select (buffer alist)
-  (let ((window (display-buffer-in-side-window buffer alist)))
-    (select-window window)))
+;; window display behavior
+(use-package window
+  :ensure f
+  :config
+  ;; adjust transient buffer behaviors to personal preference
+  (defun my/display-buffer-in-side-window-and-select (buffer alist)
+    (let ((window (display-buffer-in-side-window buffer alist)))
+      (select-window window)))
 
-(setq window-sides-slots '(0 1 1 1)
-      display-buffer-alist
-      '(;; top bar interactive
-        ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|Python\\)\\*$"
-         (my/display-buffer-in-side-window-and-select)
-         (side . top)
-         (slot . 1)
-         (window-height . 0.20))
-        ;; top bar informational
-        ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
-         (my/display-buffer-in-side-window-and-select)
-         (select. t)
-         (side . top)
-         (slot . 1)
-         (window-height . 0.20))
-        ;;
-        ("^\\*\\(scratch\\)"
-         (my/display-buffer-in-side-window-and-select)
-         (select. t)
-         (side . top)
-         (slot . 1)
-         (window-height . 0.20))
-        ;; side bar information
-        ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\)"
-         (my/display-buffer-in-side-window-and-select)
-         (side . right)
-         (slot . 1)
-         (window-width . 0.30))
-        ("^\\*\\( docker\\)"
-         (my/display-buffer-in-side-window-and-select)
-         (side . right)
-         (slot . 1)
-         (window-width . 0.30))))
+  (setq window-sides-slots '(0 1 1 1)
+	display-buffer-alist
+	;; TODO: pp-eval/expand geiser
+	'(;; top bar interactive
+          ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|Python\\)\\*$"
+           (my/display-buffer-in-side-window-and-select)
+           (side . top)
+           (slot . 1)
+           (window-height . 0.20))
+          ;; top bar informational
+          ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
+           (my/display-buffer-in-side-window-and-select)
+           (select. t)
+           (side . top)
+           (slot . 1)
+           (window-height . 0.20))
+          ;;
+          ("^\\*\\(scratch\\)"
+           (my/display-buffer-in-side-window-and-select)
+           (select. t)
+           (side . top)
+           (slot . 1)
+           (window-height . 0.20))
+          ;; side bar information
+          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\)"
+           (my/display-buffer-in-side-window-and-select)
+           (side . right)
+           (slot . 1)
+           (window-width . 0.30))
+          ("^\\*\\( docker\\)"
+           (my/display-buffer-in-side-window-and-select)
+           (side . right)
+           (slot . 1)
+           (window-width . 0.30)))))
 
 ;; get helpful prompts for keys
 (use-package which-key
@@ -187,12 +257,11 @@
 ;; improved help
 (use-package helpful
   :ensure t
-  :config
-  (global-set-key (kbd "C-h f") #'helpful-callable)
-  (global-set-key (kbd "C-h v") #'helpful-variable)
-  (global-set-key (kbd "C-h k") #'helpful-key)
-  (global-set-key (kbd "C-h x") #'helpful-command)
-  (global-set-key (kbd "C-c C-d") #'helpful-at-point))
+  :bind (([remap describe-function] . #'helpful-callable)
+	 ([remap describe-variable] . #'helpful-variable)
+	 ([remap describe-command] . #'helpful-command)
+	 ([remap describe-key] . #'helpful-key)
+	 ("C-c C-d" . #'helpful-at-point)))
 
 ;; get examples in help
 
@@ -209,28 +278,24 @@
         '(display-buffer-in-side-window
           (window-height . 0.20)
           (side . top)
-          ;; (window-parameters . ((mode-line-format . (""))))
-          ))
+          (window-parameters . ((mode-line-format . ("  ↑ make selection above ↑")))))
+	 vertico-cycle t)
   (vertico-mode)
-  (vertico-buffer-mode)
-  (setq vertico-cycle t))
+  (vertico-buffer-mode))
 
 ;; improved file navigation
 (use-package vertico-directory
   :ensure nil
   :after vertico
   :bind (:map vertico-map
-              ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
+         ("RET" . vertico-directory-enter)
+         ("DEL" . vertico-directory-delete-char)
+         ("M-DEL" . vertico-directory-delete-word))
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 ;; additional data with suggestions
 (use-package marginalia
   :ensure t
-  :bind (("M-A" . marginalia-cycle)
-         :map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
   :init
   (marginalia-mode))
 
@@ -293,6 +358,7 @@
          ("M-r" . consult-history))                ;; orig. previous-matching-history-element
 
   :init
+  ;; TODO: this should be conditional on OS
   ;; gnu locate is glocate using macports
   (setq consult-locate-args "glocate --ignore-case")
 
@@ -333,6 +399,7 @@
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
   :config
+  ;; TODO: maybe remove this??
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
@@ -386,12 +453,9 @@ targets."
 
 ;; directory viewer
 (use-package dired
-  :ensure f
   :after files
   :hook ((dired-mode . dired-hide-details-mode)
-         (dired-mode . (lambda () (dired-omit-mode)))
-         ;; (dired-mode . (lambda () (direc-sort-toggle)))
-         )
+         (dired-mode . (lambda () (dired-omit-mode))))
   :init
   (setq insert-directory-program
         (if (and (eq system-type 'darwin)
@@ -408,6 +472,7 @@ targets."
 
 (use-package all-the-icons-dired
   :ensure t
+  :after (all-the-icons dired)
   :hook ((dired-mode . all-the-icons-dired-mode))
   :config
   (setq all-the-icons-dired-monochrome nil))
@@ -421,231 +486,87 @@ targets."
   (exec-path-from-shell-initialize))
 
 ;; comand -> meta and option -> super
-(setq mac-command-modifier 'meta
-      mac-option-modifier 'super)
+(use-package emacs
+  :init
+  (setq mac-command-modifier 'meta
+	mac-option-modifier 'super))
 
 ;;; visual tweaks
 
-;; preferred fonts
-(setq my/default-fixed-pitch-font "JetBrains Mono"
-      my/default-variable-pitch-font "Iosevka Aile"
-      my/default-fixed-pitch-height 270
-      my/default-variable-pitch-height 270)
-
-(defun my/apply-preferred-fonts ()
-  (set-face-attribute 'default nil
-                      :font my/default-fixed-pitch-font
-                      :weight 'light
-                      :height my/default-fixed-pitch-height)
-  (set-face-attribute 'fixed-pitch nil
-                      :font my/default-fixed-pitch-font
-                      :weight 'light
-                      :height my/default-fixed-pitch-height)
-  (set-face-attribute 'variable-pitch nil
-                      :font my/default-variable-pitch-font
-                      :weight 'light
-                      :height my/default-variable-pitch-height)
-  (set-face-attribute 'bold nil :weight 'normal))
-
 ;; create after theme hook
-(defvar after-enable-theme-hook nil
-  "Normal hook run after enabling a theme.")
+(use-package custom
+  :config
 
-(defun run-after-enable-theme-hook (&rest _args)
-  "Run `after-enable-theme-hook'."
-  (run-hooks 'after-enable-theme-hook))
+  (defvar after-enable-theme-hook nil
+    "Normal hook run after enabling a theme.")
 
-(advice-add 'enable-theme :after #'run-after-enable-theme-hook)
+  (defun run-after-enable-theme-hook (&rest _args)
+    "Run `after-enable-theme-hook'."
+    (run-hooks 'after-enable-theme-hook))
 
-;; run font tweaks after theme change
-(add-hook 'after-enable-theme-hook #'my/apply-preferred-fonts)
+  (advice-add 'enable-theme :after #'run-after-enable-theme-hook))
+
+;; preferred fonts
+(use-package faces
+  :after custom
+  :config
+  (setq my/default-fixed-pitch-font "JetBrains Mono"
+	my/default-variable-pitch-font "Iosevka Aile"
+	my/default-fixed-pitch-height 130
+	my/default-variable-pitch-height 130)
+
+  (defun my/apply-preferred-fonts ()
+    (set-face-attribute 'default nil
+			:font my/default-fixed-pitch-font
+			:weight 'light
+			:height my/default-fixed-pitch-height)
+    (set-face-attribute 'fixed-pitch nil
+			:font my/default-fixed-pitch-font
+			:weight 'light
+			:height my/default-fixed-pitch-height)
+    (set-face-attribute 'variable-pitch nil
+			:font my/default-variable-pitch-font
+			:weight 'light
+			:height my/default-variable-pitch-height)
+    (set-face-attribute 'bold nil :weight 'normal))
+  :hook (after-enable-theme . my/apply-preferred-fonts))
 
 ;; run lsp-mode visual tweaks after theme change
-(defun my/tweak-lsp-mode-faces ()
-  (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)
-  (set-face-attribute 'lsp-face-highlight-textual nil :weight 'normal))
-
-(with-eval-after-load 'lsp-mode
-  (add-hook 'after-enable-theme-hook #'my/tweak-lsp-mode-faces))
+(use-package faces
+  :after (custom lsp-mode)
+  :config
+  (defun my/tweak-lsp-mode-faces ()
+    (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)
+    (set-face-attribute 'lsp-face-highlight-textual nil :weight 'normal))
+  :hook (after-enable-theme . my/tweak-lsp-mode-faces))
 
 ;; run tab-bar tweaks after theme change
-(defun my/tweak-tab-bar-faces ()
-  (set-face-attribute 'tab-bar nil
-                      :background (doom-color 'modeline-bg-alt)
-                      :foreground (doom-color 'modeline-bg-alt))
-  (set-face-attribute 'tab-bar-tab nil
-                      :background (doom-color 'modeline-bg-alt)
-                      :weight 'normal)
-  (set-face-attribute 'tab-bar-tab-inactive nil
-                      :foreground (doom-color 'modeline-fg-alt)
-                      :background (doom-color 'modeline-bg-alt)
-                      :weight 'normal))
-
-(with-eval-after-load 'doom-themes
-  (add-hook 'after-enable-theme-hook #'my/tweak-tab-bar-faces))
+(use-package faces
+  :after (custom tab-bar doom-themes)
+  :config
+  (defun my/tweak-tab-bar-faces ()
+    (set-face-attribute 'tab-bar nil
+			:background (doom-color 'modeline-bg-alt)
+			:foreground (doom-color 'modeline-bg-alt))
+    (set-face-attribute 'tab-bar-tab nil
+			:background (doom-color 'modeline-bg-alt)
+			:weight 'normal)
+    (set-face-attribute 'tab-bar-tab-inactive nil
+			:foreground (doom-color 'modeline-fg-alt)
+			:background (doom-color 'modeline-bg-alt)
+			:weight 'normal))
+  :hook (after-enable-theme . my/tweak-tab-bar-faces))
 
 ;; run fringe tweaks after theme change
-(defun my/tweak-fringe-faces ()
-  (set-face-attribute 'fringe nil
-                      :background (doom-color 'bg)
-                      :foreground (doom-color 'bg)))
-
-(with-eval-after-load 'doom-themes
-  (add-hook 'after-enable-theme-hook #'my/tweak-fringe-faces))
-
-;;; tabs and tabspaces
-
-;; add minimal tab bar
-(setq tab-bar-close-button-show nil
-      tab-bar-new-button-show nil
-      tab-bar-tab-hints nil)
-
-(tab-bar-mode 1)
-
-(tab-rename "default" 0)
-
-;; move tab-bar-map
-(define-key global-map (kbd "M-t") tab-prefix-map)
-(define-key global-map (kbd "C-c t") tab-prefix-map)
-(define-key global-map (kbd "s-t") tab-prefix-map)
-
-;; fix bug with tab-new and side windows
-(define-advice
-    tab-bar-new-tab
-    (:before (&rest args) my/side-window-new-tab-fix)
-  (when (window-parameter (selected-window) 'window-side)
-    (select-window (window-main-window))))
-
-;; isolate tabs
-(use-package tabspaces
-  :ensure t
-  :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup.
-  :commands (tabspaces-switch-or-create-workspace
-             tabspaces-open-or-create-project-and-workspace)
-  :custom
-  (tabspaces-use-filtered-buffers-as-default t)
-  (tabspaces-default-tab "default")
-  (tabspaces-remove-to-default t)
-  (tabspaces-include-buffers '("*scratch*" "*Messages*"))
-  ;; sessions
-  ;; (tabspaces-session t)
-  ;; (tabspaces-session-auto-restore t)
+(use-package faces
+  ;; :after (custom fringe doom-themes)
   :config
-  (project-known-project-roots)
-  (define-key tab-prefix-map (kbd "s") tabspaces-command-map))
+  (defun my/tweak-fringe-faces ()
+    (set-face-attribute 'fringe nil
+			:background (doom-color 'bg)
+			:foreground (doom-color 'bg)))
+  :hook (after-enable-theme . my/tweak-fringe-faces))
 
-
-(when (not (fboundp 'project-name))
-  (defun project-name (proj)
-    (cl-second (reverse (split-string (cdr proj) "/")))))
-
-;; rename current tab to project nameq
-(defun my/project-tab-name ()
-  (interactive)
-  (tab-bar-rename-tab (project-name (project-current))))
-
-(define-key project-prefix-map (kbd "TAB") #'my/project-tab-name)
-
-;; tabs open to scratch buffer
-;; TODO: it would be neat to set this dynamically
-(setq tab-bar-new-tab-choice "*scratch*")
-
-;; tab isolation w/ consult
-(with-eval-after-load 'consult
-  ;; hide full buffer list (still available with "b" prefix)
-  (consult-customize consult--source-buffer :hidden t :default nil)
-  ;; set consult-workspace buffer list
-  (defvar consult--source-workspace
-    (list :name     "Workspace Buffers"
-          :narrow   ?w
-          :history  'buffer-name-history
-          :category 'buffer
-          :state    #'consult--buffer-state
-          :default  t
-          :items    (lambda () (consult--buffer-query
-                                :predicate #'tabspaces--local-buffer-p
-                                :sort 'visibility
-                                :as #'buffer-name)))
-
-    "Set workspace buffer list for consult-buffer.")
-  (add-to-list 'consult-buffer-sources 'consult--source-workspace))
-
-;; tab keymap
-(with-eval-after-load 'tabspaces
-  (let ((tab-map (make-sparse-keymap))
-        (tabspace-map (make-sparse-keymap)))
-    (define-key global-map (kbd "C-c t") `("tabs/spaces" . ,tab-map))
-    (define-key tab-map (kbd "n") #'tab-next)
-    (define-key tab-map (kbd "p") #'tab-previous)
-    (define-key tab-map (kbd "t") #'tab-switch)
-    (define-key tab-map (kbd "k") #'tab-close)
-    (define-key tab-map (kbd "K") #'tab-close-other)
-    (define-key tab-map (kbd "s") `("tabspaces" . ,tabspace-map))
-    (define-key tabspace-map (kbd "c") #'tabspaces-remove-current-buffer)
-    (define-key tabspace-map (kbd "C") #'tabspaces-clear-buffers)
-    (define-key tabspace-map (kbd "K") #'tabspaces-kill-buffers-close-workspace)
-    (define-key tabspace-map (kbd "s") #'tabspaces-switch-or-create-workspace)
-    (define-key tabspace-map (kbd "S") #'tab-detach)))
-
-;; move project keymap
-(with-eval-after-load 'project
-  (define-key global-map (kbd "C-c p") `("project" . ,project-prefix-map)))
-
-;; use project find file if in project
-(defun my/dwim-find-file ()
-  (interactive)
-  (if (project-current)
-      (project-find-file)
-    (call-interactively #'find-file)))
-
-;; use project dired if in project
-(defun my/dwim-dired ()
-  (interactive)
-  (if (project-current)
-      (project-dired)
-    (call-interactively #'dired)))
-
-;; file keymap
-(with-eval-after-load 'project
-  (let ((map (make-sparse-keymap)))
-    (define-key global-map (kbd "C-c f") `("file" . ,map))
-    (define-key map (kbd "f") #'find-file)
-    (define-key map (kbd "d") #'dired)
-    (define-key map (kbd "D") #'dired-jump)
-    (define-key map (kbd "s") #'save-buffer)
-    (define-key map (kbd "r") #'rename-visited-file)
-    (define-key map (kbd "R") #'file-notify-rm-all-watches)))
-
-;; remove tool bar and scroll bar
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-
-;; add line and colum number display to modeline
-(column-number-mode 1)
-(line-number-mode 1)
-
-;; remove menu bar unless mac ns
-(unless (memq window-system '(mac ns))
-  (menu-bar-mode -1))
-
-;; highlight line everywhere
-(global-hl-line-mode 1)
-
-;; ... except for in vterm and eshell
-(defun my/disable-global-hl-line-mode ()
-  (setq-local global-hl-line-mode nil))
-
-(dolist (hook '(vterm-mode-hook
-                eshell-mode-hook))
-  (add-hook hook #'my/disable-global-hl-line-mode))
-
-;; display line numbers for code buffers
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
-
-;; display only left fringe
-(fringe-mode '(8 . 0))
-
-;; color theme
 (use-package doom-themes
   :ensure t
   :config
@@ -687,18 +608,11 @@ targets."
   (define-key global-map (kbd "C-c T t") #'my/theme-toggle)
 
   (load-theme my/active-theme t)
-
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  ;; (doom-themes-neotree-config)
-  ;; or for treemacs users
-  ;; (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  ;; (doom-themes-treemacs-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
-;; pretty mode line
 (use-package doom-modeline
   :ensure t
   :init
@@ -713,6 +627,111 @@ targets."
         doom-modeline-display-misc-in-all-mode-lines nil)
   :hook (after-init . doom-modeline-mode))
 
+;;; tabs and tabspaces
+
+;; add minimal tab bar
+(use-package tab-bar
+  :init
+  (setq tab-bar-close-button-show nil
+	tab-bar-new-button-show nil
+	tab-bar-tab-hints nil
+	tab-bar-new-tab-choice "*scratch*")
+  (tab-bar-mode 1)
+  (tab-rename "default" 0)
+  ;; fix bug with tab-new and side windows
+  (define-advice
+      tab-bar-new-tab
+      (:before (&rest args) my/side-window-new-tab-fix)
+    (when (window-parameter (selected-window) 'window-side)
+      (select-window (window-main-window)))))
+
+;; isolate tabs
+(use-package tabspaces
+  :ensure t
+  :after tab-bar
+  :hook (after-init . tabspaces-mode)
+  :commands (tabspaces-switch-or-create-workspace
+             tabspaces-open-or-create-project-and-workspace)
+  :custom
+  (tabspaces-use-filtered-buffers-as-default t)
+  (tabspaces-default-tab "default")
+  (tabspaces-remove-to-default t)
+  (tabspaces-include-buffers '("*scratch*" "*Messages*"))
+  ;; sessions
+  ;; (tabspaces-session t)
+  ;; (tabspaces-session-auto-restore t)
+  :config
+  (project-known-project-roots)
+  ;; embed tabspaces within tab keymap
+  (bind-key "s" tabspaces-command-map tab-prefix-map))
+
+(use-package project
+  :after tab-bar
+  :config
+  (when (not (fboundp 'project-name))
+    (defun project-name (proj)
+      (cl-second (reverse (split-string (cdr proj) "/")))))
+
+  (defun my/project-tab-name ()
+    (interactive)
+    (tab-bar-rename-tab (project-name (project-current))))
+  :bind (:map project-prefix-map
+	 ("TAB" . #'my/project-tab-name))
+  :bind-keymap ("C-c p" . project-prefix-map))
+
+;; TODO: should this go under consult and then consult given :after tabspaces?
+;; tab isolation w/ consult
+(with-eval-after-load 'consult
+  ;; hide full buffer list (still available with "b" prefix)
+  (consult-customize consult--source-buffer :hidden t :default nil)
+  ;; set consult-workspace buffer list
+  (defvar consult--source-workspace
+    (list :name     "Workspace Buffers"
+          :narrow   ?w
+          :history  'buffer-name-history
+          :category 'buffer
+          :state    #'consult--buffer-state
+          :default  t
+          :items    (lambda () (consult--buffer-query
+                                :predicate #'tabspaces--local-buffer-p
+                                :sort 'visibility
+                                :as #'buffer-name)))
+
+    "Set workspace buffer list for consult-buffer.")
+  (add-to-list 'consult-buffer-sources 'consult--source-workspace))
+
+;; TODO: move to early init?
+(use-package tool-bar
+  :init
+  (tool-bar-mode -1))
+
+(use-package scroll-bar
+  :init
+  (scroll-bar-mode -1))
+
+(use-package menu-bar
+  :init
+  (unless (memq window-system '(mac ns))
+    (menu-bar-mode -1)))
+
+;; highlight line everywhere
+(use-package hl-line
+  :after (vterm eshell)
+  :init
+  (global-hl-line-mode 1)
+  :hook ((vterm-mode eshell-mode)
+	 . (lambda ()
+	     (setq-local global-hl-line-mode nil))))
+
+;; display line numbers for code buffers
+(use-package display-line-numbers
+  :hook (prog-mode . display-line-numbers-mode))
+
+;; display only left fringe
+(use-package fringe
+  :init
+  (fringe-mode '(8 . 0)))
+
 ;;; terminal
 
 ;; vterm
@@ -720,7 +739,7 @@ targets."
   :ensure t
   :after project
   :bind (:map project-prefix-map
-              ("t" . project-vterm))
+         ("t" . project-vterm))
   :preface
   (defun project-vterm ()
     (interactive)
@@ -743,18 +762,12 @@ targets."
 
 ;;; git tooling
 
-;; keymap
-(setq my/git-prefix-map (make-sparse-keymap))
-
-;; mnemonic binding
-(define-key global-map (kbd "C-c g") `("git" . ,my/git-prefix-map))
-
-;; keep modeline up to date
-(setq auto-revert-check-vc-info t)
-
 ;; magical git porcelean
 (use-package magit
   :ensure t
+  :init
+  (setq my/git-prefix-map (make-sparse-keymap))
+  (bind-key "C-c g" my/git-prefix-map)
   :config
   (setq magit-bury-buffer-function 'magit-restore-window-configuration
 	magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
@@ -765,11 +778,11 @@ targets."
   (when (eq system-type 'darwin)
     (setq magit-git-executable "/usr/bin/git"))
 
-  (add-hook 'after-save-hook 'magit-after-save-refresh-status t)
-
-  (define-key my/git-prefix-map (kbd "b") #'magit-blame-addition)
-  (define-key my/git-prefix-map (kbd "g") #'magit-status)
-  (define-key my/git-prefix-map (kbd "f") #'magit-file-dispatch))
+  :hook (after-save . magit-after-save-refresh-status)
+  :bind (:map my/git-prefix-map
+	 ("b" . #'magit-blame-addition)
+	 ("g" . #'magit-status)
+	 ("f" .  #'magit-file-dispatch)))
 
 ;; forge integration
 (use-package sqlite3
@@ -777,39 +790,47 @@ targets."
 
 (use-package forge
   :ensure t
-  :after magit)
+  :after (magit sqlite3))
 
 ;; see changes in fringe
 (use-package diff-hl
   :ensure t
+  :after magit
   :init
   (global-diff-hl-mode)
-  :config
-  (define-key diff-hl-command-map (kbd "s") #'diff-hl-show-hunk-stage-hunk)
-  (define-key my/git-prefix-map (kbd "H") #'diff-hl-show-hunk-next)
-  (define-key my/git-prefix-map (kbd "h") #'diff-hl-show-hunk-previous))
+  :bind (:map diff-hl-command-map
+         ("s" . #'diff-hl-show-hunk-stage-hunk)
+	 :map my/git-prefix-map
+	 ("H" . #'diff-hl-show-hunk-next)
+	 ("h" . #'diff-hl-show-hunk-previous)))
 
+;; TODO: make ignored a grey block?
+(use-package diff-hl-dired
+  :after (dired diff-hl)
+  :hook (dired-mode . diff-hl-dired-mode))
+
+;; TODO: drop popup for repeat map?
 (use-package diff-hl-inline-popup
-  :ensure f
-  :config
-  (define-key diff-hl-inline-popup-transient-mode-map (kbd "s") #'diff-hl-show-hunk-stage-hunk))
+  :bind (:map diff-hl-inline-popup-transient-mode-map
+         ("s" . #'diff-hl-show-hunk-stage-hunk)))
 
 ;; travel through time
 (use-package git-timemachine
   :ensure t
-  :config
-  (define-key my/git-prefix-map (kbd "t") #'git-timemachine))
+  :after magit
+  :bind (:map my/git-prefix-map
+	 ("t" . #'git-timemachine)))
 
 ;; jump to buffer or region in forge
 (use-package browse-at-remote
   :ensure t
-  :config
-  (define-key my/git-prefix-map (kbd "r") #'browse-at-remote))
+  :after magit
+  :bind (:map my/git-prefix-map
+	 ("r" . #'browse-at-remote)))
 
 ;; handle conflics with a quick menu
 (use-package smerge-mode
-  :ensure f
-  :after hydra
+  :after (hydra magit)
   :config
   (defhydra my/smerge-hydra
     (:color pink :hint nil :post (smerge-auto-leave))
@@ -844,10 +865,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
             (bury-buffer))
      "Save and bury buffer" :color blue)
     ("q" nil "cancel" :color blue))
-  :hook (magit-diff-visit-file . (lambda ()
-                                   (when smerge-mode
-                                     (my/smerge-hydra/body)))))
+  :hook (magit-diff-visit-file
+	 . (lambda ()
+             (when smerge-mode
+               (my/smerge-hydra/body)))))
 
+;; TODO: remove tree-sitter for now?
 ;;; tree-sitter tweaks
 
 ;; add mac-ports installed tree-sitter grammars
@@ -887,17 +910,31 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         lsp-imenu-index-function #'lsp-imenu-create-categorized-index))
 
 ;; setup dap
-(setq my/dap-mode-map (make-sparse-keymap))
+
 
 (use-package dap-mode
   :ensure t
+  :after hydra
   :init
-  (setq dap-auto-configure-features '(sessions locals))
+  (setq my/dap-mode-map (make-sparse-keymap)
+	dap-auto-configure-features '(sessions locals))
+  (bind-key "C-c d" my/dap-mode-map)
+  :bind (:map my/dap-mode-map
+         ("n" . #'dap-next)
+         ("i" . #'dap-step-in)
+         ("o" . #'dap-step-out)
+         ("c" . #'dap-continue)
+         ("h" . #'dap-hydra)
+         ("r" . #'dap-debug-restart)
+         ("d" . #'dap-debug)
+         ("b" . #'dap-breakpoint-toggle)
+         ("s" . #'dap-disconnect)))
+
+(use-package dap-python
+  :ensure nil
+  :after dap-mode
   :config
-  (require 'dap-python)
-
   (setq dap-python-debugger 'debugpy)
-
   (dap-register-debug-template
    "Python :: Attach to Dockerized Django"
    (list :name "Python :: Attach to Dockerized Django"
@@ -906,26 +943,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          :connect '(:port 5679 :host "localhost")
          :django t
          :pathMappings '((("localRoot" . "${workspaceFolder}")
-                          ("remoteRoot" . "/app/")))))
-
-  :bind (:map my/dap-mode-map
-              ("n" . #'dap-next)
-              ("i" . #'dap-step-in)
-              ("o" . #'dap-step-out)
-              ("c" . #'dap-continue)
-              ("h" . #'dap-hydra)
-              ("r" . #'dap-debug-restart)
-              ("d" . #'dap-debug)
-              ("b" . #'dap-breakpoint-toggle)
-              ("s" . #'dap-disconnect)))
-
-(define-key global-map (kbd "C-c d") (cons "debug" my/dap-mode-map))
+                          ("remoteRoot" . "/app/"))))))
 
 ;;; data formats
 
 ;; conf
 (use-package conf-mode
-  :ensure t
+  :after (display-line-numbers)
   :mode ("\\..*ignore\\'" "\\.fish\\'")
   :hook (conf-mode . display-line-numbers-mode))
 
@@ -936,6 +960,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; yaml
 (use-package yaml-mode
   :ensure t
+  :after (display-line-numbers)
   ;; yaml doesn't inherit from conf mode
   :hook (yaml-mode . display-line-numbers-mode))
 
@@ -979,44 +1004,54 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (set var (cons 'my/caution-tape-bitmap
                    (cdr (symbol-value var))))))
 
+;; run .env/rc automagically
+(use-package envrc
+  :ensure t
+  :init
+  ;; I'm not ready to turn it on yet
+  ;; (envrc-global-mode)
+  )
+
 ;; display current defun in modeline
 (use-package which-func
+  :after (prog-mode)
   :hook (prog-mode . which-function-mode))
 
 ;; spellcheck strings and comments
 (use-package flyspell
-  :hook ((prog-mode . flyspell-prog-mode)
-         ((markdown-mode org-mode git-commit-mode) . flyspell-mode))
+  :after (prog-mode markdown-mode org git-commit)
   :init
   (setq flyspell-mode-map (make-sparse-keymap)
-        flyspell-mouse-map (make-sparse-keymap)))
+        flyspell-mouse-map (make-sparse-keymap))
+  :hook ((prog-mode . flyspell-prog-mode)
+         ((markdown-mode org-mode git-commit-mode) . flyspell-mode)))
 
 ;; improved structural navigation and editing
 (use-package puni
   :ensure t
   :bind (:map prog-mode-map
-              ("C-M-f" . puni-forward-sexp-or-up-list)
-              ("C-M-b" . puni-backward-sexp-or-up-list)
-              ;; slurping & barfing
-              ("C-}" . puni-barf-forward)
-              ("C-)" . puni-slurp-forward)
-              ("C-(" . puni-slurp-backward)
-              ("C-{" . puni-barf-backward)
-              ;; depth changing
-              ("M-r" . puni-raise)
-              ("M-=" . puni-splice)
-              ("M-_" . puni-split)
-              ("M-<up>" . puni-splice-killing-backward)
-              ("M-<down>" . puni-splice-killing-forward)))
+         ("C-M-f" . puni-forward-sexp-or-up-list)
+         ("C-M-b" . puni-backward-sexp-or-up-list)
+         ;; slurping & barfing
+         ("C-}" . puni-barf-forward)
+         ("C-)" . puni-slurp-forward)
+         ("C-(" . puni-slurp-backward)
+         ("C-{" . puni-barf-backward)
+         ;; depth changing
+         ("C-M-r" . puni-raise)
+         ("M-=" . puni-splice)
+         ("M-_" . puni-split)
+         ("M-<up>" . puni-splice-killing-backward)
+         ("M-<down>" . puni-splice-killing-forward)))
 
 ;; insert closing delimiters
-(electric-pair-mode 1)
-
-;; always add newline at the end of the file
-(setq require-final-newline t)
+(use-package elec-pair
+  :init
+  (electric-pair-mode 1))
 
 ;; define keybinding missing in 28?
-(define-key global-map (kbd "C-M-<backspace>") #'backward-kill-sexp)
+(use-package emacs
+  :bind ("C-M-<backspace>" . #'backward-kill-sexp))
 
 ;; completions nice-to-haves
 (setq tab-always-indent 'complete
@@ -1224,7 +1259,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; writing
 
 (use-package emacs
-  :ensure f
   :init
   (setq sentence-end-double-space nil))
 
@@ -1377,7 +1411,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; email
 
 (use-package sendmail
-  :ensure f
   :init
   (setq send-mail-function 'sendmail-send-it
         sendmail-program "/opt/local/bin/msmtp"
@@ -1389,6 +1422,27 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :bind (("C-c m c" . #'notmuch-mua-mail)
          ("C-c m i" . #'notmuch)))
+
+;; scratch
+(with-eval-after-load 'which-func
+  (defun my/kill-new-function-at-point ()
+    (interactive)
+    (kill-new (which-function))))
+
+(define-advice
+    org-change-tag-in-region
+    (:around (&rest args) my/dont-move-point)
+  (interactive)
+  (save-excursion
+    (call-interactively (car args) (cdr args))))
+
+
+(use-package ns-auto-titlebar
+  :init
+  (when (eq system-type 'darwin)
+    (ns-auto-titlebar-mode 1)))
+
+;; text scale adjust is useful
 
 ;; load external custom file
 (load custom-file)
