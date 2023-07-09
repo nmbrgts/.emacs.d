@@ -566,6 +566,7 @@ targets."
   (setq doom-themes-enable-bold nil
         doom-themes-enable-italic nil)
 
+  ;; my theme selections for toggling
   (setq my/light-theme 'doom-nord-light
         my/dark-theme 'doom-nord-aurora
         my/active-theme my/dark-theme)
@@ -596,14 +597,13 @@ targets."
 
     (add-hook 'mac-effective-appearance-change-hook
               #'my/match-theme-to-system))
-
-  (define-key global-map (kbd "C-c T t") #'my/theme-toggle)
-
+  
   (load-theme my/active-theme t)
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
   ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
+  (doom-themes-org-config)
+  :bind ("C-t t" . #'my/theme-toggle))
 
 (use-package doom-modeline
   :ensure t
