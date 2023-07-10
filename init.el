@@ -481,7 +481,17 @@ targets."
   :init
   (exec-path-from-shell-initialize))
 
-;;; visual tweaks
+;;; themes
+
+(use-package doom-themes
+  :ensure t
+  :config
+  (setq doom-themes-enable-bold nil
+        doom-themes-enable-italic nil)
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
 
 ;; create after theme hook
 (use-package custom
@@ -496,8 +506,8 @@ targets."
   (advice-add 'enable-theme :after #'run-after-enable-theme-hook))
 
 ;; visual tweaks to apply after theme
+;; fonts
 (use-package faces
-  :after (custom fringe tab-bar lsp-mode doom-themes)
   :config
   (setq my/default-fixed-pitch-font "JetBrains Mono"
 	my/default-variable-pitch-font "Iosevka Aile"
@@ -519,13 +529,23 @@ targets."
 			:weight 'light
 			:height my/default-variable-pitch-height)
     (set-face-attribute 'bold nil :weight 'normal))
+  :hook (after-enable-theme . my/apply-preferred-fonts))
 
+;; lsp faces
+(use-package faces
+  :after lsp-mode
+  :config
   (defun my/tweak-lsp-mode-faces ()
     (set-face-attribute 'lsp-face-highlight-write nil
 			:weight 'normal)
     (set-face-attribute 'lsp-face-highlight-textual nil
 			:weight 'normal))
+  :hook ((after-enable-theme lsp-mode) . my/tweak-lsp-mode-faces))
 
+;; doom color tweaks
+(use-package faces
+  :after doom-themes
+  :config
   (defun my/tweak-tab-bar-faces ()
     (set-face-attribute 'tab-bar nil
 			:background (doom-color 'modeline-bg-alt)
@@ -542,23 +562,16 @@ targets."
     (set-face-attribute 'fringe nil
 			:background (doom-color 'bg)
 			:foreground (doom-color 'bg)))
+  :hook ((after-enable-theme . my/tweak-tab-bar-faces)
+	 (after-enable-theme . my/tweak-tab-bar-faces)))
 
-  :hook ((after-enable-theme . my/apply-preferred-fonts)
-	 (after-enable-theme . my/tweak-lsp-mode-faces)
-	 (after-enable-theme . my/tweak-tab-bar-faces)
-	 (after-enable-theme . my/tweak-fringe-faces)))
-
-(use-package doom-themes
-  :ensure t
+(use-package emacs
+  :after doom-themes
   :config
-  (setq doom-themes-enable-bold nil
-        doom-themes-enable-italic nil)
-
   ;; my theme selections for toggling
   (setq my/light-theme 'doom-nord-light
         my/dark-theme 'doom-nord-aurora
         my/active-theme my/dark-theme)
-
   ;; toggle theme
   (defun my/theme-toggle (&optional light-or-dark)
     (interactive)
@@ -587,10 +600,6 @@ targets."
               #'my/match-theme-to-system))
 
   (load-theme my/active-theme t)
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config)
   :bind ("C-c t t" . #'my/theme-toggle))
 
 (use-package doom-modeline
@@ -657,7 +666,7 @@ targets."
     (tab-bar-rename-tab (project-name (project-current))))
   :bind (:map project-prefix-map
 	 ("TAB" . #'my/project-tab-name))
-  :bind-keymap ("C-c p" . p-prefix-map))
+  :bind-keymap ("C-c p" . project-prefix-map))
 
 ;; TODO: should this go under consult and then consult given :after tabspaces?
 ;; tab isolation w/ consult
