@@ -83,7 +83,7 @@
 
 (use-package files
   :ensure f
-  :hook ((before-save-hook . delete-trailing-whitespace))
+  :hook (before-save . delete-trailing-whitespace)
   :init
   (setq
    require-final-newline t
