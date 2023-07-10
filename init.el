@@ -1108,7 +1108,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; setup pyright
 (use-package lsp-pyright
   :ensure t
-  :after python-mode
   :init
   (setq lsp-pyright-disable-organize-imports t
         lsp-pyright-auto-import-completions t
@@ -1122,22 +1121,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; formatting
 (use-package python-black
   :ensure t
-  :after python-mode
   :bind (:map python-mode-map
          ("C-c f r" . #'python-black-region)
          ("C-c f b" . #'python-black-buffer)))
 
 (use-package python-isort
   :ensure t
-  :demand t
-  :after python-mode
   :bind (:map python-mode-map
          ("C-c f o" . #'python-isort-buffer)))
 
 ;; virtual environments
 (use-package pyvenv
   :ensure t
-  :after python-mode
   :init
   (setq my/python-venv-map (make-sparse-keymap))
   (bind-key "C-c v" my/python-venv-map python-mode-map)
