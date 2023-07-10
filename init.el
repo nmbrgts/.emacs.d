@@ -1114,28 +1114,28 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; formatting
 (use-package python-black
   :ensure t
-  :demand t
-  :after python-ts-mode
-  :config
-  (define-key python-ts-mode-map (kbd "C-c c f") '("format-buffer" . python-black-buffer))
-  (define-key python-ts-mode-map (kbd "C-c c F") '("format-region" . python-black-region)))
+  :after python-mode
+  :bind (:map python-mode-map
+         ("C-c f r" . #'python-black-region)
+         ("C-c f b" . #'python-black-buffer)))
 
 (use-package python-isort
   :ensure t
   :demand t
-  :after python-ts-mode
-  :config
-  (define-key python-ts-mode-map (kbd "C-c c o") '("organize-imports" . python-isort-buffer)))
+  :after python-mode
+  :bind (:map python-mode-map
+         ("C-c f o" . #'python-isort-buffer)))
 
 ;; virtual environments
 (use-package pyvenv
   :ensure t
-  :after python-ts-mode
+  :after python-mode
   :init
   (setq my/python-venv-map (make-sparse-keymap))
-  (define-key python-ts-mode-map (kbd "C-c c v") `("virtualenv" . ,my/python-venv-map))
-  (define-key my/python-venv-map (kbd "a") '("activate" . pyvenv-activate))
-  (define-key my/python-venv-map (kbd "d") '("de-activate" . pyvenv-deactivate)))
+  (bind-key "C-c v" my/python-venv-map python-mode-map)
+  :bind (:map my/python-venv-map
+         ("a" . 'pyenv-active)
+         ("b" . 'pyenv-deactivate)))
 
 ;; test running
 
