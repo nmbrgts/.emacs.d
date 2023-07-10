@@ -1007,10 +1007,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (electric-pair-mode 1))
 
-;; define keybinding missing in 28?
-(use-package emacs
-  :bind ("C-M-<backspace>" . #'backward-kill-sexp))
-
 ;; completions nice-to-haves
 (setq tab-always-indent 'complete
       completion-auto-help 'always
