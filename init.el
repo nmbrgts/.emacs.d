@@ -651,8 +651,7 @@ targets."
   ;; (tabspaces-session-auto-restore t)
   :config
   (project-known-project-roots)
-  ;; embed tabspaces within tab keymap
-  (bind-key "s" tabspaces-command-map tab-prefix-map))
+  :bind-keymap ("C-c TAB" . tabspaces-command-map))
 
 (use-package project
   :after tab-bar
