@@ -1352,13 +1352,5 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (save-excursion
     (call-interactively (car args) (cdr args))))
 
-
-(use-package ns-auto-titlebar
-  :init
-  (when (eq system-type 'darwin)
-    (ns-auto-titlebar-mode 1)))
-
-;; text scale adjust is useful
-
 ;; load external custom file
 (load custom-file)
