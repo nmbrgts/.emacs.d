@@ -1181,10 +1181,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; writing
 
-(use-package emacs
-  :init
-  (setq sentence-end-double-space nil))
-
 (use-package olivetti
   :ensure t
   :hook (((org-mode
