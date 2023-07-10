@@ -1176,10 +1176,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :config
   (define-derived-mode my/vue-mode web-mode "Vue.js")
-  (add-to-list 'auto-mode-alist '("\\.vue\\'" . my/vue-mode)))
-
-;; run lsp automatically
-(add-hook 'my/vue-mode-hook #'lsp)
+  (add-to-list 'auto-mode-alist '("\\.vue\\'" . my/vue-mode))
+  :hook (my/vue-mode . lsp))
 
 ;;; writing
 
