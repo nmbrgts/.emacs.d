@@ -1157,21 +1157,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; elixir
 
 ;; javascript
+(use-package js
+  :hook (js-mode . lsp)
+  :bind (:map js-mode-map
+         ("M-." . nil)))
 
-;; remove horrible mode keymap
-(with-eval-after-load 'js
-  (define-key js-mode-map (kbd "M-.") #'xref-find-definitions))
-
-;; enable lsp by default
-(add-hook 'js-mode-hook #'lsp)
-
-;; format with prettier
 (use-package prettier-js
   :ensure t
   :after js
   :commands (prettier-js)
-  :init
-  (define-key js-base-mode-map (kbd "C-c c f ") #'prettier-js))
+  :bind (:map js-mode-map
+         ("C-c f b" . #'prettier-js)))
 
 ;; vue
 
