@@ -44,7 +44,17 @@
   (setq lexical-binding t
         inhibit-splash-screen t
         gc-cons-threshold (* 100 1024 1024)
-        read-process-output-max (* 5 1024 1024)))
+        read-process-output-max (* 5 1024 1024)
+        ring-bell-function 'ignore
+        tabs-always-indent nil
+        indent-tabs-mode nil
+        use-short-answers t
+        kill-buffer-query-functions (remq 'process-kill-buffer-query-function
+                                          kill-buffer-query-functions)
+        mac-command-modifier 'meta
+	mac-option-modifier 'super
+        sentence-end-double-space nil)
+  :bind ("C-M-<backspace>" . #'backward-kill-sexp))
 
 ;; set up external custom file
 (use-package cus-edit
@@ -56,21 +66,6 @@
   :if (eq system-type 'darwin)
   :custom
   (native-comp-driver-options '("-Wl,-w")))
-
-;; misc. preference tweaks
-(use-package emacs
-  :ensure f
-  :init
-  (setq
-   ;; do not ring bell by default
-   ring-bell-function 'ignore
-   ;; set tab behavior (C-M-i 'till I die)
-   tabs-always-indent nil
-   indent-tabs-mode nil
-   ;; reduce nuisance prompts
-   use-short-answers t
-   kill-buffer-query-functions (remq 'process-kill-buffer-query-function
-                                     kill-buffer-query-functions)))
 
 ;; trying to make wrapping less ugly
 (use-package adaptive-wrap
@@ -486,12 +481,6 @@ targets."
   :ensure t
   :init
   (exec-path-from-shell-initialize))
-
-;; comand -> meta and option -> super
-(use-package emacs
-  :init
-  (setq mac-command-modifier 'meta
-	mac-option-modifier 'super))
 
 ;;; visual tweaks
 
