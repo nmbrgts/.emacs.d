@@ -586,7 +586,7 @@ targets."
 
     (add-hook 'mac-effective-appearance-change-hook
               #'my/match-theme-to-system))
-  
+
   (load-theme my/active-theme t)
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
