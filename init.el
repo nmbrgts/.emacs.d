@@ -1100,16 +1100,16 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; setup pyright
 (use-package lsp-pyright
   :ensure t
+  :after python-mode
   :init
   (setq lsp-pyright-disable-organize-imports t
         lsp-pyright-auto-import-completions t
         lsp-pyright-use-library-code-for-types t
         lsp-pyright-diagnostic-mode "onlyOpenFiles")
-
-  (add-hook 'python-mode-hook
-            (lambda ()
-              (require 'lsp-pyright)
-              (lsp))))
+  :hook (python-mode
+	 . (lambda ()
+	     (require 'lsp-pyright)
+	     (lsp))))
 
 ;; formatting
 (use-package python-black
@@ -1198,22 +1198,20 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; org config
 (use-package org
-  :hook (org-mode . org-indent-mode)
+  :hook ((org-mode . org-indent-mode)
+	 (org-mode
+	  . (lambda ()
+	      (setq-local electric-pair-inhibit-predicate
+                 `(lambda (c)
+                    (if (char-equal c ?<)
+                        t
+                      (,electric-pair-inhibit-predicate c))))))))
   :config
   (setq org-default-notes-file "~/org/notes.org"
         org-startup-with-inline-images nil
         org-return-follows-link t)
 
   (add-to-list 'org-modules 'org-tempo)
-
-  (add-hook
-   'org-mode-hook
-   (lambda ()
-     (setq-local electric-pair-inhibit-predicate
-                 `(lambda (c)
-                    (if (char-equal c ?<)
-                        t
-                      (,electric-pair-inhibit-predicate c))))))
 
   (org-babel-do-load-languages
    'org-babel-load-languages
