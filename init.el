@@ -109,7 +109,7 @@
    create-lockfiles nil))
 
 ;; contextually repeat commands with a single key press
-(use-package repeat-mode
+(use-package repeat
   :ensure f
   :init
   (repeat-mode 1))
@@ -316,8 +316,6 @@
          ("C-x 4 b" . consult-buffer-other-window)
          ("C-x 5 b" . consult-buffer-other-frame)
          ("C-x r b" . consult-bookmark)
-         ("C-x p b" . consult-project-buffer)
-         ("C-c p b" . consult-project-buffer)
          ;; Custom M-# bindings for fast register access
          ("M-#" . consult-register-load)
          ("M-'" . consult-register-store)
@@ -352,8 +350,9 @@
          ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
          :map minibuffer-local-map
          ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
-
+         ("M-r" . consult-history)                 ;; orig. previous-matching-history-element
+         :map project-prefix-map
+         ("b" . consult-project-buffer))
   :init
   ;; TODO: this should be conditional on OS
   ;; gnu locate is glocate using macports
@@ -544,10 +543,10 @@ targets."
 			:background (doom-color 'bg)
 			:foreground (doom-color 'bg)))
 
-  :hook ((after-enable-theme-hook . my/apply-preferred-fonts)
-	 (after-enable-theme-hook . my/tweak-lsp-mode-faces)
-	 (after-enable-theme-hook . my/tweak-tab-bar-faces)
-	 (after-enable-theme-hook . my/tweak-fringe-faces)))
+  :hook ((after-enable-theme . my/apply-preferred-fonts)
+	 (after-enable-theme . my/tweak-lsp-mode-faces)
+	 (after-enable-theme . my/tweak-tab-bar-faces)
+	 (after-enable-theme . my/tweak-fringe-faces)))
 
 (use-package doom-themes
   :ensure t
@@ -592,7 +591,7 @@ targets."
   (doom-themes-visual-bell-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config)
-  :bind ("C-t t" . #'my/theme-toggle))
+  :bind ("C-c t t" . #'my/theme-toggle))
 
 (use-package doom-modeline
   :ensure t
@@ -658,7 +657,7 @@ targets."
     (tab-bar-rename-tab (project-name (project-current))))
   :bind (:map project-prefix-map
 	 ("TAB" . #'my/project-tab-name))
-  :bind-keymap ("C-c p" . project-prefix-map))
+  :bind-keymap ("C-c p" . p-prefix-map))
 
 ;; TODO: should this go under consult and then consult given :after tabspaces?
 ;; tab isolation w/ consult
@@ -1205,7 +1204,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                  `(lambda (c)
                     (if (char-equal c ?<)
                         t
-                      (,electric-pair-inhibit-predicate c))))))))
+                      (,electric-pair-inhibit-predicate c)))))))
   :config
   (setq org-default-notes-file "~/org/notes.org"
         org-startup-with-inline-images nil
