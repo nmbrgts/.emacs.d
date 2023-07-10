@@ -1301,10 +1301,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package org-capture
   :config
   (setq org-capture-templates '())
-  (define-key global-map (kbd "M-c") #'my/org-capture-project))
-
-;; rebind capitalize because it's still useful
-(define-key global-map (kbd "M-C") #'capitalize-dwim)
+  :bind ("C-c c" . #'my/org-capture-project))
 
 ;; do http requests with org
 (use-package verb
