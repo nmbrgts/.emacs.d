@@ -165,6 +165,7 @@
   (setq my/window-map (make-sparse-keymap))
   (bind-key "C-c w" my/window-map)
   :bind (("C-c s" . #'scratch-buffer)
+	 ("C-c t w" . #'window-toggle-side-windows)
 	 :map my/window-map
          ("t" . #'window-toggle-side-windows)
          ("o" . #'other-window)
