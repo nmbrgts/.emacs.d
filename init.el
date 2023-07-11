@@ -550,7 +550,7 @@ targets."
 
 ;; doom color tweaks
 (use-package faces
-  :after doom-themes
+  :after (fringe doom-themes)
   :config
   (defun my/tweak-tab-bar-faces ()
     (set-face-attribute 'tab-bar nil
@@ -569,44 +569,7 @@ targets."
 			:background (doom-color 'bg)
 			:foreground (doom-color 'bg)))
   :hook ((after-enable-theme . my/tweak-tab-bar-faces)
-	 (after-enable-theme . my/tweak-tab-bar-faces)))
-
-(use-package emacs
-  :after doom-themes
-  :config
-  ;; my theme selections for toggling
-  (setq my/light-theme 'doom-nord-light
-        my/dark-theme 'doom-nord-aurora
-        my/active-theme my/dark-theme)
-  ;; toggle theme
-  (defun my/theme-toggle (&optional light-or-dark)
-    (interactive)
-    (setq my/active-theme
-          (or (and (eq light-or-dark :light) my/light-theme)
-              (and (eq light-or-dark :dark) my/dark-theme)
-              (and (eq my/active-theme my/dark-theme) my/light-theme)
-              (and (eq my/active-theme my/light-theme) my/dark-theme)
-              my/dark-theme))
-    (mapcar 'disable-theme custom-enabled-themes)
-    (load-theme my/active-theme t))
-
-  ;; switch themes with system
-  (when (eq system-type 'darwin)
-    (defun my/match-theme-to-system ()
-      (let ((appearance (plist-get (mac-application-state)
-                                   :appearance)))
-        (my/theme-toggle
-         (if (string-equal
-              appearance
-              "NSAppearanceNameDarkAqua")
-             :dark
-           :light))))
-
-    (add-hook 'mac-effective-appearance-change-hook
-              #'my/match-theme-to-system))
-
-  (load-theme my/active-theme t)
-  :bind ("C-c t t" . #'my/theme-toggle))
+	 (after-enable-theme . my/tweak-fringe-faces)))
 
 (use-package doom-modeline
   :ensure t
@@ -1360,3 +1323,45 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; load external custom file
 (load custom-file)
+
+;; define theme toggle and load
+(use-package emacs
+  :after (faces doom-themes)
+  :config
+  ;; my theme selections for toggling
+  (setq my/light-theme 'doom-nord-light
+        my/dark-theme 'doom-nord-aurora
+        my/active-theme my/light-theme)
+  ;; toggle theme
+  (defun my/theme-toggle (&optional light-or-dark)
+    (interactive)
+    (setq my/active-theme
+          (or (and (eq light-or-dark :light) my/light-theme)
+              (and (eq light-or-dark :dark) my/dark-theme)
+              (and (eq my/active-theme my/dark-theme) my/light-theme)
+              (and (eq my/active-theme my/light-theme) my/dark-theme)
+              my/dark-theme))
+    (mapcar 'disable-theme custom-enabled-themes)
+    (load-theme my/active-theme t))
+
+  ;; switch themes with system
+  (if (eq system-type 'darwin)
+      (progn
+	(defun my/match-theme-to-system ()
+	  (let ((appearance (plist-get (mac-application-state)
+                                       :appearance)))
+            (my/theme-toggle
+             (if (string-equal
+		  appearance
+		  "NSAppearanceNameDarkAqua")
+		 :dark
+               :light))))
+
+	(add-hook 'mac-effective-appearance-change-hook
+		  #'my/match-theme-to-system)
+	(message "we matchin'")
+	(my/match-theme-to-system))
+    (progn
+      (message "we ain't matchin'")
+      (load-theme my/active-theme t)))
+  :bind ("C-c t t" . #'my/theme-toggle))
