@@ -921,7 +921,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; conf
 (use-package conf-mode
   :after (display-line-numbers)
-  :mode ("\\..*ignore\\'" "\\.fish\\'")
+  :mode ("\\..*ignore\\'" "\\.fish\\'" "\\.*rc\\'")
   :hook (conf-mode . display-line-numbers-mode))
 
 ;; csv
