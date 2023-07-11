@@ -176,7 +176,6 @@
 
 (use-package windmove
   :ensure f
-  :after window
   :init
   :bind (:map my/window-map
          ("<down>" . #'windmove-down)
@@ -191,7 +190,6 @@
 
 (use-package winner
   :ensure f
-  :after window
   :init (winner-mode 1)
   :bind (:map my/window-map
          ("u" . #'winner-undo)
