@@ -97,7 +97,7 @@
    backup-directory-alist `(("." . ,my/transient-files-backup-dir))
    auto-save-file-name-transforms `((".*" ,my/transient-files-auto-save-dir t)))
   :bind (("C-r" . #'revert-buffer)
-	 ("C-x C-r" . #'set-visited-file)))
+	 ("C-x C-r" . #'set-visited-file-name)))
 
 (use-package emacs
   :ensure f
