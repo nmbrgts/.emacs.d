@@ -261,6 +261,11 @@
 	 ([remap describe-key] . #'helpful-key)
 	 ("C-c C-d" . #'helpful-at-point)))
 
+;; keycasting
+(use-package keycast
+  :ensure t
+  :bind ("C-c t k" . #'keycast-tab-bar-mode))
+
 ;; get examples in help
 
 ;; define modal-like menus in a declarational style
