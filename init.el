@@ -1013,6 +1013,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :config
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
+;;; lisp
+(use-package paren-face
+  :ensure t
+  :hook ((lisp-data-mode scheme-mode) . paren-face-mode))
+
 ;;; elisp
 
 ;;; (guile) scheme
