@@ -1003,6 +1003,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; symbols for completion swag
 (use-package svg-lib
   :ensure t)
+
 (use-package kind-icon
   :ensure t
   :after corfu
