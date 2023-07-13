@@ -1286,7 +1286,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :after org
   :init
-  (define-key org-mode-map (kbd "C-c C-r") `("verb" . verb-command-map)))
+  (bind-key "C-c C-r" verb-command-map org-mode-map))
 
 ;; import from postman
 (use-package impostman
