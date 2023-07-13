@@ -1108,9 +1108,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (setq my/python-venv-map (make-sparse-keymap))
   (bind-key "C-c v" my/python-venv-map python-mode-map)
+  (defun my/project-pyenv-activate ()
+    (interactive)
+    (if-let* ((prj (project-current))
+	      (prj-root (project-root prj))
+	      (venv-dir (expand-file-name ".venv" prj-root))
+	      (venv-dir-valid (file-exists-p venv-dir)))
+	(pyvenv-activate venv-dir)
+      (message (string-join `("Could not find virtualenv at path: " ,venv-dir)))))
   :bind (:map my/python-venv-map
-         ("a" . 'pyenv-active)
-         ("b" . 'pyenv-deactivate)))
+         ("a" . #'pyvenv-active)
+         ("d" . #'pyvenv-deactivate)
+	 ("p" . #'my/project-pyenv-activate)))
 
 ;; test running
 
