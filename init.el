@@ -275,13 +275,22 @@
 (use-package vertico
   :ensure t
   :init
-  (setq vertico-buffer-display-action
+  (setq vertico-cycle t)
+  (vertico-mode))
+
+(use-package vertico-buffer
+  :after vertico
+  :init
+  (setq  vertico-buffer-display-action
         '(display-buffer-in-side-window
           (window-height . 0.20)
-          (side . top)
-          (window-parameters . ((mode-line-format . ("  ↑ make selection above ↑")))))
-	 vertico-cycle t)
-  (vertico-mode)
+          ;; (window-parameters . ((mode-line-format . ("  ↑ make selection above ↑"))))
+          (side . top)))
+
+  (define-advice vertico--setup
+      (:after (&rest args) my/vertico-buffer-mode-set-line-format)
+    (setq-local mode-line-format "  ↑ make selection above ↑"))
+
   (vertico-buffer-mode))
 
 ;; improved file navigation
