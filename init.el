@@ -284,6 +284,7 @@
   (setq  vertico-buffer-display-action
         '(display-buffer-in-side-window
           (window-height . 0.20)
+	  ;; this permanently sets the window's mode-line-format
           ;; (window-parameters . ((mode-line-format . ("  ↑ make selection above ↑"))))
           (side . top)))
 
