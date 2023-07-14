@@ -677,7 +677,9 @@ targets."
 (use-package menu-bar
   :init
   (unless (memq window-system '(mac ns))
-    (menu-bar-mode -1)))
+    (menu-bar-mode -1))
+  :bind (("C-c t e" . #'toggle-debug-on-error)
+	 ("C-c t q" . #'toggle-debug-on-quit)))
 
 ;; highlight line everywhere
 (use-package hl-line
