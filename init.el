@@ -242,7 +242,35 @@
            (my/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
-           (window-width . 0.30)))))
+           (window-width . 0.30))))
+
+  (defun my/promote-buffer (arg)
+    (interactive "P")
+    (let ((display-buffer-alist '())
+	  (buf (current-buffer))
+	  (win (selected-window))
+	  (arg-num (prefix-numeric-value arg))
+	  (target-win
+	   (car (seq-filter
+		 (lambda (w)
+		   (not (window-parameter w 'window-side)))
+		 (window-list)))))
+      (delete-window)
+      (select-window target-win)
+      (cond ((>= arg-num 16)
+	     (progn
+	       (when (seq-filter
+		      (lambda (w)
+			(window-parameter w 'window-side))
+		      (window-list))
+		 (window-toggle-side-windows))
+	       (delete-other-windows)
+	       (switch-to-buffer buf)))
+	    ((>= arg-num 4)
+	     (switch-to-buffer buf))
+	    (t
+	     (select-window (display-buffer buf))))))
+  :bind ("C-c p" . #'my/promote-buffer))
 
 ;; get helpful prompts for keys
 (use-package which-key
@@ -644,8 +672,7 @@ targets."
     (interactive)
     (tab-bar-rename-tab (project-name (project-current))))
   :bind (:map project-prefix-map
-	 ("TAB" . #'my/project-tab-name))
-  :bind-keymap ("C-c p" . project-prefix-map))
+	 ("TAB" . #'my/project-tab-name)))
 
 ;; TODO: should this go under consult and then consult given :after tabspaces?
 ;; tab isolation w/ consult
