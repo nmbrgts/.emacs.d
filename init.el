@@ -284,13 +284,16 @@
   (setq  vertico-buffer-display-action
         '(display-buffer-in-side-window
           (window-height . 0.20)
-	  ;; this permanently sets the window's mode-line-format
-          ;; (window-parameters . ((mode-line-format . ("  ↑ make selection above ↑"))))
           (side . top)))
 
   (define-advice vertico--setup
-      (:after (&rest args) my/vertico-buffer-mode-set-line-format)
-    (setq-local mode-line-format "  ↑ make selection above ↑"))
+      (:after
+       (&rest args)
+       my/vertico-buffer-mode-set-line-format)
+    (setq-local
+     mode-line-format (propertize
+		       "  * ↑ make selection above ↑ *"
+		       'face 'mode-line-emphasis)))
 
   (vertico-buffer-mode))
 
