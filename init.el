@@ -1059,6 +1059,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :hook ((lisp-data-mode scheme-mode) . paren-face-mode))
 
+(use-package rainbow-delimiters
+  :ensure t
+  :bind ("C-c t r" . #'rainbow-delimiters-mode))
+
 ;;; elisp
 
 ;;; (guile) scheme
