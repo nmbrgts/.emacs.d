@@ -592,10 +592,10 @@ targets."
   :config
   (defun my/tweak-tab-bar-faces ()
     (set-face-attribute 'tab-bar nil
-			:background (doom-color 'modeline-bg-alt)
-			:foreground (doom-color 'modeline-bg-alt))
+			:background (doom-color 'modeline-bg)
+			:foreground (doom-color 'modeline-bg))
     (set-face-attribute 'tab-bar-tab nil
-			:background (doom-color 'modeline-bg-alt)
+			:background (doom-color 'modeline-bg)
 			:weight 'normal)
     (set-face-attribute 'tab-bar-tab-inactive nil
 			:foreground (doom-color 'modeline-fg-alt)
