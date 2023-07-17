@@ -244,19 +244,18 @@
            (slot . 1)
            (window-width . 0.30))))
 
-  (defun my/promote-buffer (arg)
+  (defun my/promote-side-window-buffer (arg)
     (interactive "P")
     (let ((display-buffer-alist '())
 	  (buf (current-buffer))
-	  (win (selected-window))
 	  (arg-num (prefix-numeric-value arg))
-	  (target-win
+	  (non-side-window
 	   (car (seq-filter
 		 (lambda (w)
 		   (not (window-parameter w 'window-side)))
 		 (window-list)))))
       (delete-window)
-      (select-window target-win)
+      (select-window non-side-window)
       (cond ((>= arg-num 16)
 	     (progn
 	       (when (seq-filter
@@ -270,7 +269,7 @@
 	     (switch-to-buffer buf))
 	    (t
 	     (select-window (display-buffer buf))))))
-  :bind ("C-c p" . #'my/promote-buffer))
+  :bind ("C-c p" . #'my/promote-side-window-buffer))
 
 ;; get helpful prompts for keys
 (use-package which-key
