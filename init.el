@@ -712,7 +712,6 @@ targets."
 
 ;; highlight line everywhere
 (use-package hl-line
-  :after (vterm eshell)
   :init
   (global-hl-line-mode 1)
   :hook ((vterm-mode eshell-mode)
