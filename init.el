@@ -588,7 +588,7 @@ targets."
 
 ;; doom color tweaks
 (use-package faces
-  :after (fringe doom-themes)
+  :after (keycast fringe doom-themes)
   :config
   (defun my/tweak-tab-bar-faces ()
     (set-face-attribute 'tab-bar nil
@@ -606,8 +606,16 @@ targets."
     (set-face-attribute 'fringe nil
 			:background (doom-color 'bg)
 			:foreground (doom-color 'bg)))
+
+  (defun my/tweak-keycast-faces ()
+    (set-face-attribute 'keycast-key nil
+			:foreground (doom-color 'modeline-bg))
+    (when keycast-tab-bar-mode
+      (keycast-tab-bar-mode -1)
+      (keycast-tab-bar-mode +1)))
   :hook ((after-enable-theme . my/tweak-tab-bar-faces)
-	 (after-enable-theme . my/tweak-fringe-faces)))
+	 (after-enable-theme . my/tweak-fringe-faces)
+	 (after-enable-theme . my/tweak-keycast-faces)))
 
 (use-package doom-modeline
   :ensure t
