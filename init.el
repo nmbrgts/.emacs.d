@@ -171,22 +171,16 @@
   (bind-key "C-c w" my/window-map)
   :bind (("C-c s" . #'scratch-buffer)
 	 ("C-c t w" . #'window-toggle-side-windows)
-	 :map my/window-map
-         ("t" . #'window-toggle-side-windows)
-         ("o" . #'other-window)
-         ("b" . #'balance-windows)
-	 :repeat-map my/window-repeat-map
+	 :repeat-map my/buffer-move-repeat-map
 	 ("<right>" . #'next-buffer)
 	 ("<left>" . #'previous-buffer)))
 
 (use-package windmove
   :ensure f
-  :init
-  :bind (:map my/window-map
-         ("<down>" . #'windmove-down)
-         ("<up>" . #'windmove-up)
-         ("<left>" . #'windmove-left)
-         ("<right>" . #'windmove-right)
+  :bind (("C-c <down>" . #'windmove-down)
+         ("C-c <up>" . #'windmove-up)
+         ("C-c <left>" . #'windmove-left)
+         ("C-c <right>" . #'windmove-right)
          :repeat-map my/windmove-repeat-map
          ("<down>" . #'windmove-down)
          ("<up>" . #'windmove-up)
@@ -195,7 +189,9 @@
 
 (use-package winner
   :ensure f
-  :init (winner-mode 1)
+  :init
+  (setq winner-dont-bind-my-keys t)
+  (winner-mode 1)
   :bind (:map my/window-map
          ("u" . #'winner-undo)
          ("r" . #'winner-redo)
