@@ -40,6 +40,8 @@
 
 ;; misc. early settings
 (use-package emacs
+  :custom
+  (cursor-type 'bar)
   :init
   (setq lexical-binding t
         inhibit-splash-screen t
