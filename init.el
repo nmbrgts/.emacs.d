@@ -247,36 +247,32 @@
 
   (defun my/promote-side-window-buffer (arg)
     (interactive "P")
-    (let ((display-buffer-alist '())
-	  (buf (current-buffer))
-	  (arg-num (prefix-numeric-value arg))
-	  (non-side-window
-	   (car (seq-filter
-		 (lambda (w)
-		   (not (window-parameter w 'window-side)))
-		 (window-list)))))
-      (delete-window)
-      (select-window non-side-window)
-      (cond ((>= arg-num 16)
-	     (progn
-	       (when (seq-filter
-		      (lambda (w)
-			(window-parameter w 'window-side))
-		      (window-list))
-		 (window-toggle-side-windows))
-	       (delete-other-windows)
-	       (switch-to-buffer buf)))
-	    ((>= arg-num 4)
-	     (switch-to-buffer buf))
-	    (t
-	     (select-window (display-buffer buf))))))
+    (if (not (window-parameter (selected-window) 'window-side))
+	(message "Error: Selected window is not a side window!")
+      (let ((display-buffer-alist '())
+	    (buf (current-buffer))
+	    (arg-num (prefix-numeric-value arg))
+	    (non-side-window
+	     (car (seq-filter
+		   (lambda (w)
+		     (not (window-parameter w 'window-side)))
+		   (window-list)))))
+	(delete-window)
+	(select-window non-side-window)
+	(cond ((>= arg-num 16)
+	       (progn
+		 (when (seq-filter
+			(lambda (w)
+			  (window-parameter w 'window-side))
+			(window-list))
+		   (window-toggle-side-windows))
+		 (delete-other-windows)
+		 (switch-to-buffer buf)))
+	      ((>= arg-num 4)
+	       (switch-to-buffer buf))
+	      (t
+	       (select-window (display-buffer buf)))))))
   :bind ("C-c p" . #'my/promote-side-window-buffer))
-
-;; get helpful prompts for keys
-(use-package which-key
-  :ensure t
-  :init
-  (which-key-mode))
 
 ;; improved help
 (use-package helpful
