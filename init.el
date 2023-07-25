@@ -101,6 +101,9 @@
   :bind (("C-r" . #'revert-buffer)
 	 ("C-x C-r" . #'set-visited-file-name)))
 
+(use-package whitespace
+  :bind (("C-c t s" . whitespace-mode)))
+
 (use-package emacs
   :ensure f
   :init
