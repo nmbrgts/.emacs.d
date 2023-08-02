@@ -1207,10 +1207,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 	 (org-mode
 	  . (lambda ()
 	      (setq-local electric-pair-inhibit-predicate
-                 `(lambda (c)
-                    (if (char-equal c ?<)
-                        t
-                      (,electric-pair-inhibit-predicate c)))))))
+                          `(lambda (c)
+                             (if (char-equal c ?<)
+                                 t
+                               (,electric-pair-inhibit-predicate c)))))))
   :config
   (setq org-default-notes-file "~/org/notes.org"
         org-startup-with-inline-images nil
