@@ -308,11 +308,12 @@
 
 (use-package vertico-buffer
   :after vertico
+  :when nil
   :init
   (setq  vertico-buffer-display-action
-        '(display-buffer-in-side-window
-          (window-height . 0.20)
-          (side . top)))
+         '(display-buffer-in-side-window
+           (window-height . 0.20)
+           (side . top)))
 
   (define-advice vertico--setup
       (:after
