@@ -21,8 +21,8 @@
 (require 'package)
 
 (dolist (archive '(("nongnu" . "https://elpa.nongnu.org/nongnu/")
-		   ("melpa" . "https://melpa.org/packages/")
-		   ("org" . "https://orgmode.org/elpa/")))
+                   ("melpa" . "https://melpa.org/packages/")
+                   ("org" . "https://orgmode.org/elpa/")))
   (add-to-list 'package-archives archive))
 
 ;; pull latest package info
@@ -56,7 +56,7 @@
         mac-command-modifier 'meta
         mac-option-modifier 'super
         sentence-end-double-space nil)
-        (setq-default indent-tabs-mode nil)
+  (setq-default indent-tabs-mode nil)
   :bind ("C-M-<backspace>" . #'backward-kill-sexp))
 
 ;; set up external custom file
@@ -87,9 +87,9 @@
 (use-package files
   :ensure f
   :hook (before-save . (lambda ()
-			 (when (not (and (boundp 'markdown-mode)
-					 markdown-mode))
-			   (delete-trailing-whitespace))))
+                         (when (not (and (boundp 'markdown-mode)
+                                         markdown-mode))
+                           (delete-trailing-whitespace))))
   :init
   (setq
    require-final-newline t
@@ -103,7 +103,7 @@
    backup-directory-alist `(("." . ,my/transient-files-backup-dir))
    auto-save-file-name-transforms `((".*" ,my/transient-files-auto-save-dir t)))
   :bind (("C-r" . #'revert-buffer)
-	 ("C-x C-r" . #'set-visited-file-name)))
+         ("C-x C-r" . #'set-visited-file-name)))
 
 (use-package whitespace
   :bind (("C-c t s" . whitespace-mode)))
@@ -174,10 +174,10 @@
   (setq my/window-map (make-sparse-keymap))
   (bind-key "C-c w" my/window-map)
   :bind (("C-c s" . #'scratch-buffer)
-	 ("C-c t w" . #'window-toggle-side-windows)
-	 :repeat-map my/buffer-move-repeat-map
-	 ("<right>" . #'next-buffer)
-	 ("<left>" . #'previous-buffer)))
+         ("C-c t w" . #'window-toggle-side-windows)
+         :repeat-map my/buffer-move-repeat-map
+         ("<right>" . #'next-buffer)
+         ("<left>" . #'previous-buffer)))
 
 (use-package windmove
   :ensure f
@@ -213,11 +213,11 @@
       (select-window window)))
 
   (setq window-sides-slots '(0 1 1 1)
-	display-buffer-alist
-	;; TODO: add rules for pp-eval/expand and geiser
-	;; TODO: create a system for generalizing the display rules I want,
-	;;       so display definitions don't need to be centralized here.
-	'(;; top bar interactive
+        display-buffer-alist
+        ;; TODO: add rules for pp-eval/expand and geiser
+        ;; TODO: create a system for generalizing the display rules I want,
+        ;;       so display definitions don't need to be centralized here.
+        '(;; top bar interactive
           ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|Python\\)\\*$"
            (my/display-buffer-in-side-window-and-select)
            (side . top)
@@ -252,40 +252,40 @@
   (defun my/promote-side-window-buffer (arg)
     (interactive "P")
     (if (not (window-parameter (selected-window) 'window-side))
-	(message "Error: Selected window is not a side window!")
+        (message "Error: Selected window is not a side window!")
       (let ((display-buffer-alist '())
-	    (buf (current-buffer))
-	    (arg-num (prefix-numeric-value arg))
-	    (non-side-window
-	     (car (seq-filter
-		   (lambda (w)
-		     (not (window-parameter w 'window-side)))
-		   (window-list)))))
-	(delete-window)
-	(select-window non-side-window)
-	(cond ((>= arg-num 16)
-	       (progn
-		 (when (seq-filter
-			(lambda (w)
-			  (window-parameter w 'window-side))
-			(window-list))
-		   (window-toggle-side-windows))
-		 (delete-other-windows)
-		 (switch-to-buffer buf)))
-	      ((>= arg-num 4)
-	       (switch-to-buffer buf))
-	      (t
-	       (select-window (display-buffer buf)))))))
+            (buf (current-buffer))
+            (arg-num (prefix-numeric-value arg))
+            (non-side-window
+             (car (seq-filter
+                   (lambda (w)
+                     (not (window-parameter w 'window-side)))
+                   (window-list)))))
+        (delete-window)
+        (select-window non-side-window)
+        (cond ((>= arg-num 16)
+               (progn
+                 (when (seq-filter
+                        (lambda (w)
+                          (window-parameter w 'window-side))
+                        (window-list))
+                   (window-toggle-side-windows))
+                 (delete-other-windows)
+                 (switch-to-buffer buf)))
+              ((>= arg-num 4)
+               (switch-to-buffer buf))
+              (t
+               (select-window (display-buffer buf)))))))
   :bind ("C-c p" . #'my/promote-side-window-buffer))
 
 ;; improved help
 (use-package helpful
   :ensure t
   :bind (([remap describe-function] . #'helpful-callable)
-	 ([remap describe-variable] . #'helpful-variable)
-	 ([remap describe-command] . #'helpful-command)
-	 ([remap describe-key] . #'helpful-key)
-	 ("C-c C-d" . #'helpful-at-point)))
+         ([remap describe-variable] . #'helpful-variable)
+         ([remap describe-command] . #'helpful-command)
+         ([remap describe-key] . #'helpful-key)
+         ("C-c C-d" . #'helpful-at-point)))
 
 ;; keycasting
 (use-package keycast
@@ -321,8 +321,8 @@
        my/vertico-buffer-mode-set-line-format)
     (setq-local
      mode-line-format (propertize
-		       "  * ↑ make selection above ↑ *"
-		       'face 'mode-line-emphasis)))
+                       "  * ↑ make selection above ↑ *"
+                       'face 'mode-line-emphasis)))
 
   (vertico-buffer-mode))
 
@@ -390,13 +390,13 @@
          ("M-s u" . consult-focus-lines)
          ("M-s e" . consult-isearch-history)
          :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ("M-e" . consult-isearch-history)
+         ("M-s e" . consult-isearch-history)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
          :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history)                 ;; orig. previous-matching-history-element
+         ("M-s" . consult-history)
+         ("M-r" . consult-history)
          :map project-prefix-map
          ("b" . consult-project-buffer))
   :init
@@ -500,6 +500,9 @@
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
+(use-package ef-themes
+  :ensure t)
+
 ;; create after theme hook
 (use-package custom
   :config
@@ -517,24 +520,24 @@
 (use-package faces
   :config
   (setq my/default-fixed-pitch-font "JetBrains Mono"
-	my/default-variable-pitch-font "Iosevka Aile"
-	my/default-fixed-pitch-height 270
-	my/default-variable-pitch-height 270)
+        my/default-variable-pitch-font "Iosevka Aile"
+        my/default-fixed-pitch-height 270
+        my/default-variable-pitch-height 270)
 
   (defun my/apply-preferred-fonts ()
     (interactive)
     (set-face-attribute 'default nil
-			:font my/default-fixed-pitch-font
-			:weight 'light
-			:height my/default-fixed-pitch-height)
+                        :font my/default-fixed-pitch-font
+                        :weight 'light
+                        :height my/default-fixed-pitch-height)
     (set-face-attribute 'fixed-pitch nil
-			:font my/default-fixed-pitch-font
-			:weight 'light
-			:height my/default-fixed-pitch-height)
+                        :font my/default-fixed-pitch-font
+                        :weight 'light
+                        :height my/default-fixed-pitch-height)
     (set-face-attribute 'variable-pitch nil
-			:font my/default-variable-pitch-font
-			:weight 'light
-			:height my/default-variable-pitch-height)
+                        :font my/default-variable-pitch-font
+                        :weight 'light
+                        :height my/default-variable-pitch-height)
     (set-face-attribute 'bold nil :weight 'normal))
   :hook (after-enable-theme . my/apply-preferred-fonts))
 
@@ -544,41 +547,51 @@
   :config
   (defun my/tweak-lsp-mode-faces ()
     (set-face-attribute 'lsp-face-highlight-write nil
-			:weight 'normal)
+                        :weight 'normal)
     (set-face-attribute 'lsp-face-highlight-textual nil
-			:weight 'normal))
+                        :weight 'normal))
   :hook ((after-enable-theme lsp-mode) . my/tweak-lsp-mode-faces))
 
 ;; doom color tweaks
 (use-package faces
-  :after (keycast fringe doom-themes)
+  ;;    :after (mini-frame keycast fringe doom-themes)
   :config
   (defun my/tweak-tab-bar-faces ()
-    (set-face-attribute 'tab-bar nil
-			:background (doom-color 'modeline-bg)
-			:foreground (doom-color 'modeline-bg))
-    (set-face-attribute 'tab-bar-tab nil
-			:background (doom-color 'modeline-bg)
-			:weight 'normal)
-    (set-face-attribute 'tab-bar-tab-inactive nil
-			:foreground (doom-color 'modeline-fg-alt)
-			:background (doom-color 'modeline-bg-alt)
-			:weight 'normal))
+    (set-face-attribute
+     'tab-bar nil)
+    (set-face-attribute
+     'tab-bar-tab nil
+     :background (face-attribute 'mode-line :background)
+     :weight 'normal
+     :box nil)
+    (set-face-attribute
+     'tab-bar-tab-inactive nil
+     :background (face-attribute 'tab-bar :background)
+     :box nil
+     :weight 'normal))
 
   (defun my/tweak-fringe-faces ()
-    (set-face-attribute 'fringe nil
-			:background (doom-color 'bg)
-			:foreground (doom-color 'bg)))
+    (set-face-attribute
+     'fringe nil
+     :background (face-attribute 'default :background)
+     :foreground (face-attribute 'default :background)))
 
   (defun my/tweak-keycast-faces ()
     (set-face-attribute 'keycast-key nil
-			:foreground (doom-color 'modeline-bg))
+                        ;; :foreground (face-attribute 'mode-line :background)
+                        ;; :background (face-attribute 'mode-line-emphasis :foreground)
+                        :box nil)
     (when keycast-tab-bar-mode
       (keycast-tab-bar-mode -1)
       (keycast-tab-bar-mode +1)))
+
+  (defun my/tweak-miniframe-faces ()
+    (set-face-attribute 'child-frame-border nil
+                        :background (face-attribute 'font-lock-constant-face :foreground)))
   :hook ((after-enable-theme . my/tweak-tab-bar-faces)
-	 (after-enable-theme . my/tweak-fringe-faces)
-	 (after-enable-theme . my/tweak-keycast-faces)))
+         (after-enable-theme . my/tweak-fringe-faces)
+         (after-enable-theme . my/tweak-keycast-faces)
+         (after-enable-theme . my/tweak-miniframe-faces)))
 
 (use-package doom-modeline
   :ensure t
@@ -600,9 +613,9 @@
 (use-package tab-bar
   :init
   (setq tab-bar-close-button-show nil
-	tab-bar-new-button-show nil
-	tab-bar-tab-hints nil
-	tab-bar-new-tab-choice "*scratch*")
+        tab-bar-new-button-show nil
+        tab-bar-tab-hints nil
+        tab-bar-new-tab-choice "*scratch*")
   (tab-bar-mode 1)
   (tab-rename "default" 0)
   ;; fix bug with tab-new and side windows
@@ -642,7 +655,7 @@
     (interactive)
     (tab-bar-rename-tab (project-name (project-current))))
   :bind (:map project-prefix-map
-	 ("TAB" . #'my/project-tab-name)))
+         ("TAB" . #'my/project-tab-name)))
 
 ;; TODO: should this go under consult and then consult given :after tabspaces?
 ;; tab isolation w/ consult
@@ -679,15 +692,15 @@
   (unless (memq window-system '(mac ns))
     (menu-bar-mode -1))
   :bind (("C-c t e" . #'toggle-debug-on-error)
-	 ("C-c t q" . #'toggle-debug-on-quit)))
+         ("C-c t q" . #'toggle-debug-on-quit)))
 
 ;; highlight line everywhere
 (use-package hl-line
   :init
   (global-hl-line-mode 1)
   :hook ((vterm-mode eshell-mode)
-	 . (lambda ()
-	     (setq-local global-hl-line-mode nil))))
+         . (lambda ()
+             (setq-local global-hl-line-mode nil))))
 
 ;; display line numbers for code buffers
 (use-package display-line-numbers
@@ -736,12 +749,12 @@
   (bind-key "C-c g" my/git-prefix-map)
   :config
   (setq magit-bury-buffer-function 'magit-restore-window-configuration
-	magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
-	magit-pre-display-buffer-hook 'magit-save-window-configuration
+        magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
+        magit-pre-display-buffer-hook 'magit-save-window-configuration
         magit-save-repository-buffers 'dontask)
 
   (add-to-list 'project-switch-commands
-	       '(magit-project-status "Magit" ?m))
+               '(magit-project-status "Magit" ?m))
 
   ;; hardcode system git for performance on mac
   (when (eq system-type 'darwin)
@@ -749,9 +762,9 @@
 
   :hook (after-save . magit-after-save-refresh-status)
   :bind (:map my/git-prefix-map
-	 ("b" . #'magit-blame-addition)
-	 ("g" . #'magit-status)
-	 ("f" .  #'magit-file-dispatch)))
+         ("b" . #'magit-blame-addition)
+         ("g" . #'magit-status)
+         ("f" .  #'magit-file-dispatch)))
 
 ;; forge integration
 (use-package sqlite3
@@ -769,9 +782,9 @@
   (global-diff-hl-mode)
   :bind (:map diff-hl-command-map
          ("s" . #'diff-hl-show-hunk-stage-hunk)
-	 :map my/git-prefix-map
-	 ("H" . #'diff-hl-show-hunk-next)
-	 ("h" . #'diff-hl-show-hunk-previous)))
+         :map my/git-prefix-map
+         ("H" . #'diff-hl-show-hunk-next)
+         ("h" . #'diff-hl-show-hunk-previous)))
 
 ;; TODO: make ignored a grey block?
 (use-package diff-hl-dired
@@ -788,14 +801,14 @@
   :ensure t
   :after magit
   :bind (:map my/git-prefix-map
-	 ("t" . #'git-timemachine)))
+         ("t" . #'git-timemachine)))
 
 ;; jump to buffer or region in forge
 (use-package browse-at-remote
   :ensure t
   :after magit
   :bind (:map my/git-prefix-map
-	 ("r" . #'browse-at-remote)))
+         ("r" . #'browse-at-remote)))
 
 ;; handle conflics with a quick menu
 (use-package smerge-mode
@@ -835,7 +848,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
      "Save and bury buffer" :color blue)
     ("q" nil "cancel" :color blue))
   :hook (magit-diff-visit-file
-	 . (lambda ()
+         . (lambda ()
              (when smerge-mode
                (my/smerge-hydra/body)))))
 
@@ -861,9 +874,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         lsp-enable-file-watchers nil
         lsp-headerline-breadcrumb-enable nil
         lsp-imenu-index-function #'lsp-imenu-create-categorized-index
-	;; list of lsp-mode imenu types for consult-imenu
-	my/lsp-mode-imenu-types
-	'((?f "Functions")
+        ;; list of lsp-mode imenu types for consult-imenu
+        my/lsp-mode-imenu-types
+        '((?f "Functions")
           (?F "Fields")
           (?m "Methods")
           (?M "Modules")
@@ -895,18 +908,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after hydra
   :init
   (setq my/dap-mode-map (make-sparse-keymap)
-	dap-auto-configure-features '(sessions locals))
+        dap-auto-configure-features '(sessions locals))
   (bind-key "C-c d" my/dap-mode-map)
   :bind (:map my/dap-mode-map
-              ("n" . #'dap-next)
-              ("i" . #'dap-step-in)
-              ("o" . #'dap-step-out)
-              ("c" . #'dap-continue)
-              ("h" . #'dap-hydra)
-              ("r" . #'dap-debug-restart)
-              ("d" . #'dap-debug)
-              ("b" . #'dap-breakpoint-toggle)
-              ("s" . #'dap-disconnect)))
+         ("n" . #'dap-next)
+         ("i" . #'dap-step-in)
+         ("o" . #'dap-step-out)
+         ("c" . #'dap-continue)
+         ("h" . #'dap-hydra)
+         ("r" . #'dap-debug-restart)
+         ("d" . #'dap-debug)
+         ("b" . #'dap-breakpoint-toggle)
+         ("s" . #'dap-disconnect)))
 
 ;;; data formats
 
@@ -1088,9 +1101,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         lsp-pyright-use-library-code-for-types t
         lsp-pyright-diagnostic-mode "onlyOpenFiles")
   :hook (python-mode
-	 . (lambda ()
-	     (require 'lsp-pyright)
-	     (lsp))))
+         . (lambda ()
+             (require 'lsp-pyright)
+             (lsp))))
 
 (use-package dap-python
   :ensure nil
@@ -1111,13 +1124,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package python-black
   :ensure t
   :bind (:map python-mode-map
-              ("C-c f r" . #'python-black-region)
-              ("C-c f b" . #'python-black-buffer)))
+         ("C-c f r" . #'python-black-region)
+         ("C-c f b" . #'python-black-buffer)))
 
 (use-package python-isort
   :ensure t
   :bind (:map python-mode-map
-              ("C-c f o" . #'python-isort-buffer)))
+         ("C-c f o" . #'python-isort-buffer)))
 
 ;; virtual environments
 (use-package pyvenv
@@ -1128,15 +1141,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (defun my/project-pyenv-activate ()
     (interactive)
     (if-let* ((prj (project-current))
-	      (prj-root (project-root prj))
-	      (venv-dir (expand-file-name ".venv" prj-root))
-	      (venv-dir-valid (file-exists-p venv-dir)))
-	(pyvenv-activate venv-dir)
+              (prj-root (project-root prj))
+              (venv-dir (expand-file-name ".venv" prj-root))
+              (venv-dir-valid (file-exists-p venv-dir)))
+        (pyvenv-activate venv-dir)
       (message (string-join `("Could not find virtualenv at path: " ,venv-dir)))))
   :bind (:map my/python-venv-map
          ("a" . #'pyvenv-active)
          ("d" . #'pyvenv-deactivate)
-	 ("p" . #'my/project-pyenv-activate)))
+         ("p" . #'my/project-pyenv-activate)))
 
 ;; test running
 
@@ -1165,14 +1178,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                  :types ,my/lsp-mode-imenu-types))
   :hook (js-mode . lsp)
   :bind (:map js-mode-map
-              ("M-." . nil)))
+         ("M-." . nil)))
 
 (use-package prettier-js
   :ensure t
   :after js
   :commands (prettier-js)
   :bind (:map js-mode-map
-              ("C-c f b" . #'prettier-js)))
+         ("C-c f b" . #'prettier-js)))
 
 ;; vue
 
@@ -1204,9 +1217,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; org config
 (use-package org
   :hook ((org-mode . org-indent-mode)
-	 (org-mode
-	  . (lambda ()
-	      (setq-local electric-pair-inhibit-predicate
+         (org-mode
+          . (lambda ()
+              (setq-local electric-pair-inhibit-predicate
                           `(lambda (c)
                              (if (char-equal c ?<)
                                  t
@@ -1360,11 +1373,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; define theme toggle and load
 (use-package emacs
-  :after (faces doom-themes)
+  :after (faces ef-themes)
   :config
   ;; my theme selections for toggling
-  (setq my/light-theme 'doom-nord-light
-        my/dark-theme 'doom-nord-aurora
+  (setq my/light-theme 'ef-summer
+        my/dark-theme 'ef-cherie
         my/active-theme my/light-theme)
   ;; toggle theme
   (defun my/theme-toggle (&optional light-or-dark)
@@ -1375,26 +1388,26 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               (and (eq my/active-theme my/dark-theme) my/light-theme)
               (and (eq my/active-theme my/light-theme) my/dark-theme)
               my/dark-theme))
-    (mapcar 'disable-theme custom-enabled-themes)
+    (mapc 'disable-theme custom-enabled-themes)
     (load-theme my/active-theme t))
 
   ;; switch themes with system
   (if (eq system-type 'darwin)
       (progn
-	(defun my/match-theme-to-system ()
-	  (let ((appearance (plist-get (mac-application-state)
+        (defun my/match-theme-to-system ()
+          (let ((appearance (plist-get (mac-application-state)
                                        :appearance)))
             (my/theme-toggle
              (if (string-equal
-		  appearance
-		  "NSAppearanceNameDarkAqua")
-		 :dark
+                  appearance
+                  "NSAppearanceNameDarkAqua")
+                 :dark
                :light))))
 
-	(add-hook 'mac-effective-appearance-change-hook
-		  #'my/match-theme-to-system)
-	(message "we matchin'")
-	(my/match-theme-to-system))
+        (add-hook 'mac-effective-appearance-change-hook
+                  #'my/match-theme-to-system)
+        (message "we matchin'")
+        (my/match-theme-to-system))
     (progn
       (message "we ain't matchin'")
       (load-theme my/active-theme t)))
@@ -1404,13 +1417,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :init
   (setq mini-frame-show-parameters
-	`((top . 36)
-	  (width . 1.0)
-	  ;; (foreground-color . "#000000")
-	  (child-frame-border-width . 2)
-	  (no-accept-focus . t))
-	mini-frame-detach-on-hide nil
-	mini-frame-color-shift-step 0)
+        `((top . 36)
+          (width . 1.0)
+          (child-frame-border-width . 2)
+          (no-accept-focus . t))
+        mini-frame-detach-on-hide nil
+        mini-frame-color-shift-step 0)
   ;; '("consult-.*"
   ;;   "helpful-.*"
   ;;   "project-.*"
@@ -1419,9 +1431,3 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   ;;   list-directory
   ;;   execute-extended-command)
   (mini-frame-mode))
-
-;; TODO: this needs to be a my/tweak-* hook
-(custom-set-faces
- ;; set a border for the child frame mini frame uses. Set it to the
- ;; default text color.
- `(child-frame-border ((t (:background ,(face-attribute 'mode-line-emphasis :foreground))))))
