@@ -49,13 +49,14 @@
         read-process-output-max (* 5 1024 1024)
         ring-bell-function 'ignore
         tabs-always-indent nil
-        indent-tabs-mode nil
         use-short-answers t
-        kill-buffer-query-functions (remq 'process-kill-buffer-query-function
-                                          kill-buffer-query-functions)
+        kill-buffer-query-functions
+        (remq 'process-kill-buffer-query-function
+              kill-buffer-query-functions)
         mac-command-modifier 'meta
-	mac-option-modifier 'super
+        mac-option-modifier 'super
         sentence-end-double-space nil)
+        (setq-default indent-tabs-mode nil)
   :bind ("C-M-<backspace>" . #'backward-kill-sexp))
 
 ;; set up external custom file
@@ -79,13 +80,16 @@
 
 ;; helper function for setting paths in emacs dir
 (defun my/initialize-emacs-dir-path (sub-path)
-    (let ((path (expand-file-name sub-path user-emacs-directory)))
-      (make-directory path t)
-      path))
+  (let ((path (expand-file-name sub-path user-emacs-directory)))
+    (make-directory path t)
+    path))
 
 (use-package files
   :ensure f
-  :hook (before-save . delete-trailing-whitespace)
+  :hook (before-save . (lambda ()
+			 (when (not (and (boundp 'markdown-mode)
+					 markdown-mode))
+			   (delete-trailing-whitespace))))
   :init
   (setq
    require-final-newline t
