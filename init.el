@@ -839,6 +839,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
              (when smerge-mode
                (my/smerge-hydra/body)))))
 
+(use-package ediff-wind
+  :init
+  (setq ediff-window-setup-function #'ediff-setup-windows-plain))
+
 ;;; docker tooling
 
 (use-package dockerfile-mode
