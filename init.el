@@ -860,7 +860,35 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq lsp-keymap-prefix "C-c l"
         lsp-enable-file-watchers nil
         lsp-headerline-breadcrumb-enable nil
-        lsp-imenu-index-function #'lsp-imenu-create-categorized-index))
+        lsp-imenu-index-function #'lsp-imenu-create-categorized-index
+	;; list of lsp-mode imenu types for consult-imenu
+	my/lsp-mode-imenu-types
+	'((?f "Functions")
+          (?F "Fields")
+          (?m "Methods")
+          (?M "Modules")
+          (?c "Classes")
+          (?C "Constants")
+          (?v "Variables")
+          (?e "Enums")
+          (?E "Enum Members")
+          (?i "Interfaces")
+          (?s "Strings")
+          (?S "Structs")
+          (?n "Numbers")
+          (?N "Namespaces")
+          (?p "Properties")
+          (?P "Packages")
+          (?b "Booleans")
+          (?a "Arrays")
+          (?o "Objects")
+          (?O "Operators")
+          (?k "Keys")
+          (?K "Constructors")
+          (?_ "Nulls")
+          (?t "Type Parameters")
+          (?! "Events")
+          (?d "Files"))))
 
 (use-package dap-mode
   :ensure t
@@ -870,30 +898,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 	dap-auto-configure-features '(sessions locals))
   (bind-key "C-c d" my/dap-mode-map)
   :bind (:map my/dap-mode-map
-         ("n" . #'dap-next)
-         ("i" . #'dap-step-in)
-         ("o" . #'dap-step-out)
-         ("c" . #'dap-continue)
-         ("h" . #'dap-hydra)
-         ("r" . #'dap-debug-restart)
-         ("d" . #'dap-debug)
-         ("b" . #'dap-breakpoint-toggle)
-         ("s" . #'dap-disconnect)))
-
-(use-package dap-python
-  :ensure nil
-  :after dap-mode
-  :config
-  (setq dap-python-debugger 'debugpy)
-  (dap-register-debug-template
-   "Python :: Attach to Dockerized Django"
-   (list :name "Python :: Attach to Dockerized Django"
-         :type "python"
-         :request "attach"
-         :connect '(:port 5679 :host "localhost")
-         :django t
-         :pathMappings '((("localRoot" . "${workspaceFolder}")
-                          ("remoteRoot" . "/app/"))))))
+              ("n" . #'dap-next)
+              ("i" . #'dap-step-in)
+              ("o" . #'dap-step-out)
+              ("c" . #'dap-continue)
+              ("h" . #'dap-hydra)
+              ("r" . #'dap-debug-restart)
+              ("d" . #'dap-debug)
+              ("b" . #'dap-breakpoint-toggle)
+              ("s" . #'dap-disconnect)))
 
 ;;; data formats
 
@@ -1058,45 +1071,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; python
 
-;; consult imenu integration
-(setq my/lsp-mode-imenu-types
-      '((?f "Functions")
-        (?F "Fields")
-        (?m "Methods")
-        (?M "Modules")
-        (?c "Classes")
-        (?C "Constants")
-        (?v "Variables")
-        (?e "Enums")
-        (?E "Enum Members")
-        (?i "Interfaces")
-        (?s "Strings")
-        (?S "Structs")
-        (?n "Numbers")
-        (?N "Namespaces")
-        (?p "Properties")
-        (?P "Packages")
-        (?b "Booleans")
-        (?a "Arrays")
-        (?o "Objects")
-        (?O "Operators")
-        (?k "Keys")
-        (?K "Constructors")
-        (?_ "Nulls")
-        (?t "Type Parameters")
-        (?! "Events")
-        (?d "Files")))
-
 ;; lsp based imenu for python
-(with-eval-after-load 'consult-imenu
+(use-package emacs
+  :after (python consult-imenu lsp-mode)
+  :config
   (add-to-list 'consult-imenu-config
                `(python-mode
-                 :types ,my/lsp-mode-imenu-types)))
-
-;; lsp based imenu for js
-(with-eval-after-load 'consult-imenu
-  (add-to-list 'consult-imenu-config
-               `(js-mode
                  :types ,my/lsp-mode-imenu-types)))
 
 ;; setup pyright
@@ -1112,17 +1092,32 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 	     (require 'lsp-pyright)
 	     (lsp))))
 
+(use-package dap-python
+  :ensure nil
+  :after dap-mode
+  :config
+  (setq dap-python-debugger 'debugpy)
+  (dap-register-debug-template
+   "Python :: Attach to Dockerized Django"
+   (list :name "Python :: Attach to Dockerized Django"
+         :type "python"
+         :request "attach"
+         :connect '(:port 5679 :host "localhost")
+         :django t
+         :pathMappings '((("localRoot" . "${workspaceFolder}")
+                          ("remoteRoot" . "/app/"))))))
+
 ;; formatting
 (use-package python-black
   :ensure t
   :bind (:map python-mode-map
-         ("C-c f r" . #'python-black-region)
-         ("C-c f b" . #'python-black-buffer)))
+              ("C-c f r" . #'python-black-region)
+              ("C-c f b" . #'python-black-buffer)))
 
 (use-package python-isort
   :ensure t
   :bind (:map python-mode-map
-         ("C-c f o" . #'python-isort-buffer)))
+              ("C-c f o" . #'python-isort-buffer)))
 
 ;; virtual environments
 (use-package pyvenv
@@ -1164,16 +1159,20 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; javascript
 (use-package js
+  :config
+  (add-to-list 'consult-imenu-config
+               `(js-mode
+                 :types ,my/lsp-mode-imenu-types))
   :hook (js-mode . lsp)
   :bind (:map js-mode-map
-         ("M-." . nil)))
+              ("M-." . nil)))
 
 (use-package prettier-js
   :ensure t
   :after js
   :commands (prettier-js)
   :bind (:map js-mode-map
-         ("C-c f b" . #'prettier-js)))
+              ("C-c f b" . #'prettier-js)))
 
 ;; vue
 
