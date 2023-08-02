@@ -740,6 +740,9 @@
 	magit-pre-display-buffer-hook 'magit-save-window-configuration
         magit-save-repository-buffers 'dontask)
 
+  (add-to-list 'project-switch-commands
+	       '(magit-project-status "Magit" ?m))
+
   ;; hardcode system git for performance on mac
   (when (eq system-type 'darwin)
     (setq magit-git-executable "/usr/bin/git"))
