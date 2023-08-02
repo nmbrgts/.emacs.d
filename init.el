@@ -1399,3 +1399,29 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
       (message "we ain't matchin'")
       (load-theme my/active-theme t)))
   :bind ("C-c t t" . #'my/theme-toggle))
+
+(use-package mini-frame
+  :ensure t
+  :init
+  (setq mini-frame-show-parameters
+	`((top . 36)
+	  (width . 1.0)
+	  ;; (foreground-color . "#000000")
+	  (child-frame-border-width . 2)
+	  (no-accept-focus . t))
+	mini-frame-detach-on-hide nil
+	mini-frame-color-shift-step 0)
+  ;; '("consult-.*"
+  ;;   "helpful-.*"
+  ;;   "project-.*"
+  ;;   package-install
+  ;;   find-fileq
+  ;;   list-directory
+  ;;   execute-extended-command)
+  (mini-frame-mode))
+
+;; TODO: this needs to be a my/tweak-* hook
+(custom-set-faces
+ ;; set a border for the child frame mini frame uses. Set it to the
+ ;; default text color.
+ `(child-frame-border ((t (:background ,(face-attribute 'mode-line-emphasis :foreground))))))
