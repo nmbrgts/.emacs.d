@@ -1012,6 +1012,24 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;     (set var (cons 'my/caution-tape-bitmap
 ;;                    (cdr (symbol-value var))))))
 
+(use-package indent-bars
+  :quelpa (indent-bars
+           :fetcher github
+           :reropo "jdtsmith/indent-bars")
+  :hook ((js-mode . indent-bars-mode)
+         (python-mode . indent-bars-mode))
+  :bind ("C-c t i" . indent-bars-mode)
+  :init
+  (setq
+   indent-bars-pattern "."
+   indent-bars-width-frac 0.1
+   indent-bars-pad-frac 0.1
+   indent-bars-zigzag nil
+   indent-bars-color-by-depth nil
+   indent-bars-highlight-current-depth nil
+   indent-bars-display-on-blank-lines nil
+   indent-bars-highlight-current-depth nil))
+
 ;; run .env/rc automagically
 (use-package envrc
   :ensure t
