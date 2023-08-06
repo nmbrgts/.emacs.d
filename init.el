@@ -1392,8 +1392,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after (faces ef-themes)
   :config
   ;; my theme selections for toggling
-  (setq my/light-theme 'ef-summer
-        my/dark-theme 'ef-cherie
+  (setq my/light-theme 'ef-cyprus
+        my/dark-theme 'ef-elea-dark
         my/active-theme my/light-theme)
   ;; toggle theme
   (defun my/theme-toggle (&optional light-or-dark)
