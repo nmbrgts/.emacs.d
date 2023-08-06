@@ -106,7 +106,7 @@
          ("C-x C-r" . #'set-visited-file-name)))
 
 (use-package whitespace
-  :bind (("C-c t s" . whitespace-mode)))
+  :bind (("C-c t SPC" . whitespace-mode)))
 
 (use-package emacs
   :ensure f
@@ -1064,7 +1064,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package rainbow-delimiters
   :ensure t
-  :bind ("C-c t r" . #'rainbow-delimiters-mode))
+  :bind ("C-c t (" . #'rainbow-delimiters-mode))
 
 ;;; elisp
 
