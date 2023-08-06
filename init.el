@@ -100,10 +100,11 @@
 
 (use-package files
   :ensure f
-  :hook (before-save . (lambda ()
-                         (when (not (and (boundp 'markdown-mode)
-                                         markdown-mode))
-                           (delete-trailing-whitespace))))
+  :hook (before-save
+         . (lambda ()
+             (when (not (and (boundp 'markdown-mode)
+                             markdown-mode))
+               (delete-trailing-whitespace))))
   :init
   (setq
    require-final-newline t
