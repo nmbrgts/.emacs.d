@@ -223,8 +223,8 @@
   :config
   ;; adjust transient buffer behaviors to personal preference
   (defun my/display-buffer-in-side-window-and-select (buffer alist)
-    (let ((window (display-buffer-in-side-window buffer alist)))
-      (select-window window)))
+    (if-let ((window (display-buffer-in-side-window buffer alist)))
+        (select-window window)))
 
   (setq window-sides-slots '(0 1 1 1)
         display-buffer-alist
