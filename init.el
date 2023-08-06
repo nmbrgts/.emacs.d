@@ -628,10 +628,25 @@
 ;; add minimal tab bar
 (use-package tab-bar
   :init
+  (defun my/tab-name-format-function (tab idx)
+    (let ((current-p (eq (car tab) 'current-tab)))
+    (propertize
+     (concat (if tab-bar-tab-hints (format "%d " i) "")
+             " "
+             (alist-get 'name tab)
+             " "
+             (or (and tab-bar-close-button-show
+                      (not (eq tab-bar-close-button-show
+                               (if current-p 'non-selected 'selected)))
+                      tab-bar-close-button)
+                 ""))
+     'face (funcall tab-bar-tab-face-function tab))))
+
   (setq tab-bar-close-button-show nil
         tab-bar-new-button-show nil
         tab-bar-tab-hints nil
-        tab-bar-new-tab-choice "*scratch*")
+        tab-bar-new-tab-choice "*scratch*"
+        tab-bar-tab-name-format-function 'my/tab-name-format-function)
   (tab-bar-mode 1)
   (tab-rename "default" 0)
   ;; fix bug with tab-new and side windows
