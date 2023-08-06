@@ -552,7 +552,7 @@
                         :font my/default-variable-pitch-font
                         :weight 'light
                         :height my/default-variable-pitch-height)
-    (set-face-attribute 'bold nil :weight 'normal))
+    (set-face-attribute 'bold nil :weight 'light))
   :hook (after-enable-theme . my/apply-preferred-fonts))
 
 ;; lsp faces
@@ -560,10 +560,12 @@
   :after lsp-mode
   :config
   (defun my/tweak-lsp-mode-faces ()
+        (set-face-attribute 'lsp-face-highlight-read nil
+                        :weight 'light)
     (set-face-attribute 'lsp-face-highlight-write nil
-                        :weight 'normal)
+                        :weight 'light)
     (set-face-attribute 'lsp-face-highlight-textual nil
-                        :weight 'normal))
+                        :weight 'light))
   :hook ((after-enable-theme lsp-mode) . my/tweak-lsp-mode-faces))
 
 ;; doom color tweaks
