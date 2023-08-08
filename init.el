@@ -561,7 +561,7 @@
   :after lsp-mode
   :config
   (defun my/tweak-lsp-mode-faces ()
-        (set-face-attribute 'lsp-face-highlight-read nil
+    (set-face-attribute 'lsp-face-highlight-read nil
                         :weight 'light)
     (set-face-attribute 'lsp-face-highlight-write nil
                         :weight 'light)
