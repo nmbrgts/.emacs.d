@@ -437,6 +437,20 @@
 
   (setq consult-narrow-key "<"))
 
+;;; move minibuffer to top of frame
+
+(use-package mini-frame
+  :ensure t
+  :init
+  (setq mini-frame-show-parameters
+        `((top . 36)
+          (width . 1.0)
+          (child-frame-border-width . 2)
+          (no-accept-focus . t))
+        mini-frame-detach-on-hide nil
+        mini-frame-color-shift-step 0)
+  (mini-frame-mode))
+
 ;;; writable grep buffers
 
 (use-package wgrep
@@ -1462,22 +1476,3 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
       (message "we ain't matchin'")
       (load-theme my/active-theme t)))
   :bind ("C-c t t" . #'my/theme-toggle))
-
-(use-package mini-frame
-  :ensure t
-  :init
-  (setq mini-frame-show-parameters
-        `((top . 36)
-          (width . 1.0)
-          (child-frame-border-width . 2)
-          (no-accept-focus . t))
-        mini-frame-detach-on-hide nil
-        mini-frame-color-shift-step 0)
-  ;; '("consult-.*"
-  ;;   "helpful-.*"
-  ;;   "project-.*"
-  ;;   package-install
-  ;;   find-fileq
-  ;;   list-directory
-  ;;   execute-extended-command)
-  (mini-frame-mode))
