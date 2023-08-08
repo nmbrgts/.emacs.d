@@ -476,7 +476,13 @@
   (add-to-list 'display-buffer-alist
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                  nil
-                 (window-parameters (mode-line-format . none)))))
+                 (window-parameters (mode-line-format . none))))
+
+  (setq embark-indicators
+        '(embark--vertico-indicator
+          ;; embark-mixed-indicator
+          embark-highlight-indicator
+          embark-isearch-highlight-indicator)))
 
 ;; consult integration
 (use-package embark-consult
