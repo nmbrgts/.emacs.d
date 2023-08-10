@@ -1126,7 +1126,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (kind-icon-default-face 'corfu-default)
   (kind-icon-use-icons nil)
   :config
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
+  :hook (after-enable-theme . kind-icon-reset-cache))
 
 ;;; lisp
 (use-package paren-face
