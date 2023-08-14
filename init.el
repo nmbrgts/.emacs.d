@@ -324,7 +324,6 @@
 
 (use-package vertico-buffer
   :after vertico
-  :when nil
   :init
   (setq  vertico-buffer-display-action
          '(display-buffer-in-side-window
@@ -441,6 +440,7 @@
 ;;; move minibuffer to top of frame
 
 (use-package mini-frame
+  :when nil
   :ensure t
   :init
   (setq mini-frame-show-parameters
