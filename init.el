@@ -667,6 +667,7 @@
   (setq tab-bar-close-button-show nil
         tab-bar-new-button-show nil
         tab-bar-tab-hints nil
+        tab-bar-auto-width nil
         tab-bar-new-tab-choice "*scratch*"
         tab-bar-tab-name-format-function 'my/tab-name-format-function)
   (tab-bar-mode 1)
