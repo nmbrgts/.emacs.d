@@ -1441,7 +1441,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (call-interactively (car args) (cdr args))))
 
 ;; load external custom file
-(load custom-file)
+(load custom-file :no-error)
 
 ;; define theme toggle and load
 (use-package emacs
