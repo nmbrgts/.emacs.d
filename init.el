@@ -635,10 +635,10 @@
   :ensure t
   :init
   (setq doom-modeline-icon nil
-        doom-modeline-vcs-max-length 36
+        doom-modeline-vcs-max-length 40
         doom-modeline-support-imenu nil
         doom-modeline-height 0
-        doom-modeline-bar-width 0
+        doom-modeline-bar-width 35
         doom-modeline-project-detection nil
         doom-modeline-battery nil
         doom-modeline-time nil
