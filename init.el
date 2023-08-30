@@ -234,7 +234,7 @@
         ;; TODO: create a system for generalizing the display rules I want,
         ;;       so display definitions don't need to be centralized here.
         '(;; top bar interactive
-          ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|Python\\)\\*$"
+          ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|eat\\|Python\\)\\*$"
            (my/display-buffer-in-side-window-and-select)
            (side . top)
            (slot . 1)
@@ -619,7 +619,7 @@
                         ;; :foreground (face-attribute 'mode-line :background)
                         ;; :background (face-attribute 'mode-line-emphasis :foreground)
                         :box nil)
-    (when keycast-tab-bar-mode
+    (when (bound-and-true-p keycast-tab-bar-mode)
       (keycast-tab-bar-mode -1)
       (keycast-tab-bar-mode +1)))
 
@@ -638,12 +638,17 @@
         doom-modeline-vcs-max-length 40
         doom-modeline-support-imenu nil
         doom-modeline-height 0
-        doom-modeline-bar-width 35
+        doom-modeline-bar-width 40
         doom-modeline-project-detection nil
         doom-modeline-battery nil
         doom-modeline-time nil
         doom-modeline-display-misc-in-all-mode-lines nil)
-  :hook (after-init . doom-modeline-mode))
+  :hook ((after-init . doom-modeline-mode)
+         (after-enable-theme
+          . (lambda ()
+              (when (bound-and-true-p doom-modeline-mode)
+                (doom-modeline-mode -1)
+                (doom-modeline-mode +1))))))
 
 ;;; tabs and tabspaces
 
@@ -752,7 +757,7 @@
 (use-package hl-line
   :init
   (global-hl-line-mode 1)
-  :hook ((vterm-mode eshell-mode)
+  :hook ((vterm-mode eshell-mode eat-mode)
          . (lambda ()
              (setq-local global-hl-line-mode nil))))
 
@@ -792,6 +797,10 @@
         vterm-max-scrollback 100000
         vterm-tramp-shells '(("ssh" "/bin/bash")
                              ("podman" "/bin/bash"))))
+
+;; emulate a terminal
+(use-package eat
+  :ensure t)
 
 ;;; git tooling
 
@@ -1037,9 +1046,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package indent-bars
   :quelpa (indent-bars
            :fetcher github
-           :reropo "jdtsmith/indent-bars")
+           :repo "jdtsmith/indent-bars")
   :hook ((js-mode . indent-bars-mode)
-         (python-mode . indent-bars-mode))
+         (python-mode . indent-bars-mode)
+         (after-enable-theme
+          . (lambda ()
+              (when (bound-and-true-p indent-bars-mode)
+                (indent-bars-mode -1)
+                (indent-bars-mode +1)))))
   :bind ("C-c t i" . indent-bars-mode)
   :init
   (setq
@@ -1047,9 +1061,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
    indent-bars-width-frac 0.1
    indent-bars-pad-frac 0.1
    indent-bars-zigzag nil
-   indent-bars-color-by-depth nil
    indent-bars-highlight-current-depth nil
-   indent-bars-display-on-blank-lines nil
    indent-bars-highlight-current-depth nil))
 
 ;; run .env/rc automagically
@@ -1063,7 +1075,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; display current defun in modeline
 (use-package which-func
   :after (prog-mode)
-  :hook (prog-mode . which-function-mode))
+  :hook (prog-mode . which-function-mode)
+  :config
+  (defun my/kill-new-function-at-point ()
+    (interactive)
+    (kill-new (which-function))))
 
 ;; spellcheck strings and comments
 (use-package flyspell
@@ -1245,6 +1261,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; javascript
 (use-package js
+  :after (consult-imenu lsp-mode)
   :config
   (add-to-list 'consult-imenu-config
                `(js-mode
@@ -1428,19 +1445,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :bind (("C-c m c" . #'notmuch-mua-mail)
          ("C-c m i" . #'notmuch)))
 
-;; scratch
-(with-eval-after-load 'which-func
-  (defun my/kill-new-function-at-point ()
-    (interactive)
-    (kill-new (which-function))))
-
-(define-advice
-    org-change-tag-in-region
-    (:around (&rest args) my/dont-move-point)
-  (interactive)
-  (save-excursion
-    (call-interactively (car args) (cdr args))))
-
 ;; load external custom file
 (load custom-file :no-error)
 
@@ -1485,3 +1489,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
       (message "we ain't matchin'")
       (load-theme my/active-theme t)))
   :bind ("C-c t t" . #'my/theme-toggle))
+
+(use-package terraform-mode
+  :ensure t
+  :init
+  (add-to-list 'lsp-disabled-clients 'tfls)
+  :custom (terraform-indent-level 4)
+  :hook ((terraform-mode . outline-minor-mode)
+         (terraform-mode . lsp)))
