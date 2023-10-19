@@ -590,9 +590,9 @@
                         :weight 'light))
   :hook ((after-enable-theme lsp-mode) . my/tweak-lsp-mode-faces))
 
-;; doom color tweaks
+;; color tweaks
 (use-package faces
-  ;;    :after (mini-frame keycast fringe doom-themes)
+  :after (keycast fringe eros)
   :config
   (defun my/tweak-tab-bar-faces ()
     (set-face-attribute
@@ -626,10 +626,22 @@
   (defun my/tweak-miniframe-faces ()
     (set-face-attribute 'child-frame-border nil
                         :background (face-attribute 'font-lock-constant-face :foreground)))
+
+  (defun my/tweak-eros-faces ()
+    (set-face-attribute 'eros-result-overlay-face
+                        nil
+                        :background nil
+                        :box nil ;; `(:line-width -1
+                             ;;   :color
+                             ;;   `(face-attribute
+                             ;;     'font-lock-comment-face
+                             ;;     :foreground))
+                        :inherit 'font-lock-comment-face))
   :hook ((after-enable-theme . my/tweak-tab-bar-faces)
          (after-enable-theme . my/tweak-fringe-faces)
          (after-enable-theme . my/tweak-keycast-faces)
-         (after-enable-theme . my/tweak-miniframe-faces)))
+         (after-enable-theme . my/tweak-miniframe-faces)
+         (after-enable-theme . my/tweak-eros-faces)))
 
 (use-package doom-modeline
   :ensure t
@@ -706,9 +718,9 @@
 (use-package project
   :after tab-bar
   :config
-  (when (not (fboundp 'project-name))
-    (defun project-name (proj)
-      (cl-second (reverse (split-string (cdr proj) "/")))))
+  ;; (when (not (fboundp 'project-name))
+  ;;   (defun project-name (proj)
+  ;;     (cl-second (reverse (split-string (cdr proj) "/")))))
 
   (defun my/project-tab-name ()
     (interactive)
@@ -1156,6 +1168,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :bind ("C-c t (" . #'rainbow-delimiters-mode))
 
 ;;; elisp
+
+(use-package eros
+  :ensure t
+  :hook (emacs-lisp-mode . eros-mode))
 
 ;;; (guile) scheme
 (use-package geiser-mit
