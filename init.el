@@ -1,21 +1,6 @@
 ;;; early config
 
-;; no splash
-(setq inhibit-splash-screen t)
-
-;; general performance
-(setq gc-cons-threshold (* 100 1024 1024)
-      read-process-output-max (* 5 1024 1024))
-
-;; set up external custom file
-(setq custom-file (locate-user-emacs-file "custom.el"))
-
-;; macos native compilation fix
-(when (eq system-type 'darwin)
-  (customize-set-variable 'native-comp-driver-options '("-Wl,-w")))
-
-;; lexical binding
-(setq lexical-binding t)
+(setq native-comp-async-report-warnings-errors 'silent)
 
 ;; package archives
 (require 'package)
