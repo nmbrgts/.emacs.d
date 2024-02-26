@@ -1013,33 +1013,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; general
 
-;; error reporting
-;; (use-package flymake
-;;   :config
-;;   (define-fringe-bitmap
-;;     'my/caution-tape-bitmap
-;;     (let ((arrow (vector
-;;                   #b11000011
-;;                   #b10000111
-;;                   #b00001111
-;;                   #b00011111
-;;                   #b00111110
-;;                   #b01111100
-;;                   #b11111000
-;;                   #b11110000
-;;                   #b11100001))
-;;           (bitmap (vector)))
-;;       (dotimes (_ (+ 2 (/ my/default-fixed-pitch-height
-;;                           (length arrow)
-;;                           10)))
-;;         (setq bitmap (cl-concatenate 'vector bitmap arrow)))
-;;       bitmap))
-
-;;   (dolist (var '(flymake-note-bitmap
-;;                  flymake-warning-bitmap
-;;                  flymake-error-bitmap))
-;;     (set var (cons 'my/caution-tape-bitmap
-;;                    (cdr (symbol-value var))))))
 
 (use-package indent-bars
   :quelpa (indent-bars
