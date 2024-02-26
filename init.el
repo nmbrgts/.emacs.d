@@ -133,7 +133,8 @@
   (line-number-mode 1)
   :config
   ;; better default behavior for M-SPC
-  (global-set-key [remap just-one-space] #'cycle-spacing))
+  (global-set-key [remap just-one-space] #'cycle-spacing)
+  :bind ("C-c t RET" . #'toggle-word-wrap))
 
 ;; delete selected region on insert
 (use-package delsel
