@@ -1152,6 +1152,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; python
 
+(use-package python
+  :ensure f
+  :init
+  (setq python-shell-dedicated 'project))
+
 ;; lsp based imenu for python
 (use-package emacs
   :after (python consult-imenu lsp-mode)
