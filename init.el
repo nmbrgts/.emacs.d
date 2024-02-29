@@ -917,6 +917,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (setq ediff-window-setup-function #'ediff-setup-windows-plain))
 
+;; view todos
+(use-package hl-todo
+  :ensure t)
+
 ;;; docker tooling
 
 (use-package dockerfile-mode
