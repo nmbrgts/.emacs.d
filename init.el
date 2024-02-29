@@ -761,7 +761,11 @@
 
 ;; display line numbers for code buffers
 (use-package display-line-numbers
-  :hook (prog-mode . display-line-numbers-mode))
+  :hook (prog-mode . display-line-numbers-mode)
+  :init
+  (setq display-line-numbers-widen t
+        display-line-numbers-grow-only t
+        display-line-numbers-width-start t))
 
 ;; display only left fringe
 (use-package fringe
