@@ -1187,18 +1187,33 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; formatting
 (use-package python-black
   :ensure t
-  :bind (:map python-mode-map
-         ("C-c f r" . #'python-black-region)
-         ("C-c f b" . #'python-black-buffer)))
+  :demand t
+  :after python
+  :hook (python-mode . python-black-on-save-mode))
 
 (use-package python-isort
   :ensure t
-  :bind (:map python-mode-map
-         ("C-c f o" . #'python-isort-buffer)))
+  :demand t
+  :after python
+  :hook (python-mode . python-isort-on-save-mode))
+
+(use-package reformatter
+  :ensure t
+  :demand t
+  :after python
+  :init
+  (reformatter-define python-ruff-fix
+    :program "ruff"
+    :args `("--fix" ,input-file)
+    :lighter " ruff-fix"
+    :stdin nil
+    :stdout nil)
+  :hook (python-mode . python-ruff-fix-on-save-mode))
 
 ;; virtual environments
 (use-package pyvenv
   :ensure t
+  :after python
   :init
   (setq my/python-venv-map (make-sparse-keymap))
   (bind-key "C-c v" my/python-venv-map python-mode-map)
