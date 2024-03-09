@@ -1021,6 +1021,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package ini-mode
   :ensure t)
 
+;; terraform
+(use-package terraform-mode
+  :ensure t
+  :init
+  (add-to-list 'lsp-disabled-clients 'tfls)
+  :custom (terraform-indent-level 4)
+  :hook ((terraform-mode . outline-minor-mode)
+         (terraform-mode . lsp)))
+
 ;;; programming language support
 
 ;;; general
@@ -1426,11 +1435,3 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
       (message "we ain't matchin'")
       (load-theme my/active-theme t)))
   :bind ("C-c t t" . #'my/theme-toggle))
-
-(use-package terraform-mode
-  :ensure t
-  :init
-  (add-to-list 'lsp-disabled-clients 'tfls)
-  :custom (terraform-indent-level 4)
-  :hook ((terraform-mode . outline-minor-mode)
-         (terraform-mode . lsp)))
