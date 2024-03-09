@@ -116,7 +116,11 @@
    ;; keep transient files tidy (part 2)
    my/transient-files-auto-save-prefix (my/initialize-emacs-dir-path "tmp/auto-saves/sessions")
    auto-save-list-file-prefix my/transient-files-auto-save-prefix
-   create-lockfiles nil))
+   create-lockfiles nil)
+
+  (defun my/recompile-packages ()
+    (interactive)
+    (byte-recompile-directory package-user-dir nil 'force)))
 
 ;; contextually repeat commands with a single key press
 (use-package repeat
