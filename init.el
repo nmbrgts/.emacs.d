@@ -1318,6 +1318,26 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package markdown-mode
   :ensure t)
 
+;;; notes
+
+(use-package denote
+  :ensure t
+  :demand t
+  :init
+  (setq my/note-keymap (make-sparse-keymap))
+  (bind-key "C-c n" my/note-keymap)
+  :bind (:map my/note-keymap
+         ("n" . #'denote-create-note)
+         ("l" . #'denote-link)
+         ("b" . #'denote-backlinks)
+         ("d" . (lambda ()
+                  (interactive)
+                  (find-file denote-directory)))
+         ("D" . #'denote-sort-dired)
+         ("f" . #'denote-link-find-file)
+         ("r" . #'denote-rename-file))
+  :hook (dired-mode . (lambda () (denote-dired-mode))))
+
 ;;; org
 
 ;; org config
