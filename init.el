@@ -297,6 +297,7 @@
 ;; keycasting
 (use-package keycast
   :ensure t
+  :demand t
   :bind ("C-c t k" . #'keycast-tab-bar-mode))
 
 ;; get examples in help
@@ -770,6 +771,7 @@
 
 ;; display only left fringe
 (use-package fringe
+  :demand t
   :init
   (fringe-mode '(8 . 0)))
 
@@ -1148,6 +1150,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package eros
   :ensure t
+  :demand t
   :hook (emacs-lisp-mode . eros-mode))
 
 ;;; (guile) scheme
