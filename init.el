@@ -700,6 +700,11 @@
   ;; (tabspaces-session t)
   ;; (tabspaces-session-auto-restore t)
   :config
+  ;; temp fix remove later
+  (defun tabspaces--local-buffer-p (buffer)
+      "Return whether BUFFER is in the list of local buffers."
+      (or (member (buffer-name buffer) tabspaces-include-buffers)
+          (memq buffer (frame-parameter nil 'buffer-list))))
   (project-known-project-roots)
   :bind-keymap ("C-c TAB" . tabspaces-command-map))
 
