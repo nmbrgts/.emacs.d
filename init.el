@@ -151,7 +151,8 @@
   :ensure f
   :init
   ;; keep modeline up to date
-  (setq auto-revert-check-vc-info t)
+  (setq auto-revert-check-vc-info t
+        global-auto-revert-non-file-buffers t)
   (global-auto-revert-mode 1))
 
 ;; forward compatibility
