@@ -365,6 +365,7 @@
 
 ;; make searches interactive
 (use-package consult
+  :after tabspaces
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (;; C-c bindings (mode-specific-map)
          ("C-c m x" . consult-mode-command)
@@ -434,7 +435,25 @@
    consult--source-recent-file consult--source-project-recent-file
    :preview-key '(:debounce 0.4 any))
 
-  (setq consult-narrow-key "<"))
+  (setq consult-narrow-key "<")
+
+  ;; hide full buffer list (still available with "b" prefix)
+  (consult-customize consult--source-buffer :hidden t :default nil)
+  ;; set consult-workspace buffer list
+  (defvar consult--source-workspace
+    (list :name     "Workspace Buffers"
+          :narrow   ?w
+          :history  'buffer-name-history
+          :category 'buffer
+          :state    #'consult--buffer-state
+          :default  t
+          :items    (lambda () (consult--buffer-query
+                                :predicate #'tabspaces--local-buffer-p
+                                :sort 'visibility
+                                :as #'buffer-name)))
+
+    "Set workspace buffer list for consult-buffer.")
+  (add-to-list 'consult-buffer-sources 'consult--source-workspace))
 
 ;;; move minibuffer to top of frame
 
@@ -728,27 +747,6 @@
   :bind (:map project-prefix-map
          ("TAB" . #'my/project-tab-name)))
 
-;; TODO: should this go under consult and then consult given :after tabspaces?
-;; tab isolation w/ consult
-(with-eval-after-load 'consult
-  ;; hide full buffer list (still available with "b" prefix)
-  (consult-customize consult--source-buffer :hidden t :default nil)
-  ;; set consult-workspace buffer list
-  (defvar consult--source-workspace
-    (list :name     "Workspace Buffers"
-          :narrow   ?w
-          :history  'buffer-name-history
-          :category 'buffer
-          :state    #'consult--buffer-state
-          :default  t
-          :items    (lambda () (consult--buffer-query
-                                :predicate #'tabspaces--local-buffer-p
-                                :sort 'visibility
-                                :as #'buffer-name)))
-
-    "Set workspace buffer list for consult-buffer.")
-  (add-to-list 'consult-buffer-sources 'consult--source-workspace))
-
 ;; TODO: move to early init?
 (use-package tool-bar
   :init
@@ -1035,6 +1033,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; terraform
 (use-package terraform-mode
   :ensure t
+  :after (lsp-mode)
   :init
   (add-to-list 'lsp-disabled-clients 'tfls)
   :custom (terraform-indent-level 4)
