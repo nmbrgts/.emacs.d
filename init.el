@@ -1147,6 +1147,50 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
   :hook (after-enable-theme . kind-icon-reset-cache))
 
+;; snippets
+
+(use-package yasnippet
+  :ensure t
+  :hook (prog-mode . yas-minor-mode)
+  :bind (:map yas-minor-mode-map
+         ("TAB" . nil)))
+
+(use-package yasnippet-snippets
+  :after yasnippet
+  :ensure t)
+
+(use-package consult-yasnippet
+  :after (yasnippet consult)
+  :ensure t)
+
+;; compilation improvements
+
+(use-package fancy-compilation
+  :ensure t
+  :after compile
+  :commands (fancy-compilation-mode)
+  :config
+  (setq fancy-compilation-override-colors t)
+  (fancy-compilation-mode)
+  (dolist
+      (faces
+       '((fancy-compilation-default-face . default)
+         (fancy-compilation-function-name-face . font-lock-function-name-face)
+         (fancy-compilation-line-number-face . line-number)
+         (fancy-compilation-column-number-face . shadow)
+         (fancy-compilation-info-face . italic)
+         (fancy-compilation-warning-face . warning)
+         (fancy-compilation-error-face . error)
+         (fancy-compilation-complete-success-face . success)
+         (fancy-compilation-complete-error-face . error)))
+    (set-face-attribute
+     (car faces)
+     nil
+     :background 'unspecified
+     :foreground 'unspecified
+     :inherit (cdr faces))))
+
+
 ;;; lisp
 (use-package paren-face
   :ensure t
@@ -1270,6 +1314,30 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          ("p" . #'my/project-pyenv-activate)))
 
 ;; test running
+
+;; c#
+
+(use-package csharp-mode
+  :after (lsp-mode consult-imenu reformatter)
+  :init
+  (add-to-list 'major-mode-remap-alist
+               '(csharp-mode . csharp-ts-mode))
+  (dolist (mode '(csharp-mode
+                  csharp-ts-mode))
+    (add-to-list 'consult-imenu-config
+                 `(,mode :types ,my/lsp-mode-imenu-types)))
+  :hook ((csharp-mode csharp-ts-mode)
+          . (lambda ()
+              (require 'lsp-csharp)
+              (lsp))))
+
+(use-package dotnet
+  :ensure t
+  :after csharp-mode
+  :init
+  (setq dotnet-mode-keymap-prefix (kbd "C-c c"))
+  :hook ((csharp-mode csharp-ts-mode)
+         . dotnet-mode))
 
 ;; c
 
