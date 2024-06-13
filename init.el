@@ -1518,6 +1518,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   ;; switch themes with system
   (if (eq system-type 'darwin)
       (progn
+        (message "Matching emac theme to system theme...")
         (defun my/match-theme-to-system ()
           (let ((appearance (plist-get (mac-application-state)
                                        :appearance)))
@@ -1527,12 +1528,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                   "NSAppearanceNameDarkAqua")
                  :dark
                :light))))
-
         (add-hook 'mac-effective-appearance-change-hook
                   #'my/match-theme-to-system)
-        (message "we matchin'")
         (my/match-theme-to-system))
     (progn
-      (message "we ain't matchin'")
+      (message "Loading theme...")
       (load-theme my/active-theme t)))
   :bind ("C-c t t" . #'my/theme-toggle))
