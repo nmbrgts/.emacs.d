@@ -1044,13 +1044,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;;; general
 
-
 (use-package indent-bars
   :quelpa (indent-bars
            :fetcher github
            :repo "jdtsmith/indent-bars")
   :hook ((js-mode . indent-bars-mode)
-         (python-mode . indent-bars-mode)
+         ((python-mode python-ts-mode) . indent-bars-mode)
          (after-enable-theme
           . (lambda ()
               (when (bound-and-true-p indent-bars-mode)
@@ -1183,15 +1182,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package python
   :ensure f
   :init
-  (setq python-shell-dedicated 'project))
+  (setq python-shell-dedicated 'project)
+  (add-to-list 'major-mode-remap-alist
+               '(python-mode . python-ts-mode)))
 
 ;; lsp based imenu for python
 (use-package emacs
   :after (python consult-imenu lsp-mode)
   :config
-  (add-to-list 'consult-imenu-config
-               `(python-mode
-                 :types ,my/lsp-mode-imenu-types)))
+  (dolist (mode '(python-mode
+                  python-ts-mode))
+    (add-to-list 'consult-imenu-config
+                 `(,mode :types ,my/lsp-mode-imenu-types))))
 
 ;; setup pyright
 (use-package lsp-pyright
@@ -1200,8 +1202,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq lsp-pyright-disable-organize-imports t
         lsp-pyright-auto-import-completions t
         lsp-pyright-use-library-code-for-types t
-        lsp-pyright-diagnostic-mode "onlyOpenFiles")
-  :hook (python-mode
+        lsp-pyright-diagnostic-mode nil)
+  :hook ((python-mode python-ts-mode)
          . (lambda ()
              (require 'lsp-pyright)
              (lsp))))
@@ -1226,13 +1228,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :demand t
   :after python
-  :hook (python-mode . python-black-on-save-mode))
+  :hook ((python-mode python-ts-mode) . python-black-on-save-mode))
 
 (use-package python-isort
   :ensure t
   :demand t
   :after python
-  :hook (python-mode . python-isort-on-save-mode))
+  :hook ((python-mode python-ts-mode) . python-isort-on-save-mode))
 
 (use-package reformatter
   :ensure t
@@ -1245,7 +1247,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     :lighter " ruff-fix"
     :stdin nil
     :stdout nil)
-  :hook (python-mode . python-ruff-fix-on-save-mode))
+  :hook ((python-mode python-ts-mode) . python-ruff-fix-on-save-mode))
 
 ;; virtual environments
 (use-package pyvenv
