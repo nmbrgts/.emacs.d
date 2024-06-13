@@ -23,6 +23,13 @@
   (package-install 'use-package)
   (require 'use-package))
 
+;; use no-littering to manage emacs transient files
+(use-package no-littering
+  :when nil
+  :ensure t
+  :init
+  (no-littering-theme-backups))
+
 ;; quelpa
 (unless (package-installed-p 'quelpa)
   (with-temp-buffer
