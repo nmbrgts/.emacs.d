@@ -1248,7 +1248,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package lsp-pyright
   :ensure t
   :init
-  (setq lsp-pyright-disable-organize-imports t
+  (setq lsp-pyright-langserver-command "basedpyright"
+        lsp-pyright-disable-organize-imports t
         lsp-pyright-auto-import-completions t
         lsp-pyright-use-library-code-for-types t
         lsp-pyright-diagnostic-mode nil)
