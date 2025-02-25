@@ -1321,6 +1321,30 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; test running
 
+;; golang
+
+(use-package go-mode
+  :ensure t
+  :hook (go-mode
+         . (lambda ()
+             (require 'lsp-go)
+             (lsp))))
+
+;; formatting
+
+(use-package reformatter
+  :ensure t
+  :demand t
+  :after go-mode
+  :init
+  (reformatter-define go-gofmt
+    :program "gofmt"
+    :args `("-w" ,input-file)
+    :lighter " GOFMT"
+    :stdin nil
+    :stdout nil)
+  :hook (go-mode . go-gofmt-on-save-mode))
+
 ;; c#
 
 (use-package csharp-mode
