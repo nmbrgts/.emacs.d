@@ -1330,6 +1330,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          . (lambda ()
              (require 'lsp-go)
              (lsp))))
+;; lsp
+
+(use-package lsp-go
+  :init
+  (setq lsp-go-use-placeholders nil
+        lsp-go-use-gofumpt t))
 
 ;; formatting
 
@@ -1339,12 +1345,20 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after go-mode
   :init
   (reformatter-define go-gofmt
-    :program "gofmt"
+    :program "gofumpt"
     :args `("-w" ,input-file)
-    :lighter " GOFMT"
+    :lighter " GOFUPMT"
     :stdin nil
     :stdout nil)
   :hook (go-mode . go-gofmt-on-save-mode))
+
+;; interactive coding
+
+(use-package go-scratch
+  :ensure t)
+
+(use-package gorepl-mode
+  :ensure t)
 
 ;; c#
 
