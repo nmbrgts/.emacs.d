@@ -48,7 +48,8 @@
 ;; misc. early settings
 (use-package emacs
   :custom
-  (cursor-type 'bar)
+  ((cursor-type 'bar)
+   (tab-width 4))
   :init
   (setq lexical-binding t
         inhibit-splash-screen t
