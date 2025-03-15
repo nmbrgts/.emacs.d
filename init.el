@@ -618,8 +618,14 @@
      :weight 'normal
      :box nil)
     (set-face-attribute
+     'tab-bar nil
+     :background (face-attribute 'mode-line-inactive :background)
+     :box nil
+     :weight 'normal)
+    (set-face-attribute
      'tab-bar-tab-inactive nil
      :background (face-attribute 'tab-bar :background)
+     :foreground (face-attribute 'mode-line-inactive :foreground)
      :box nil
      :weight 'normal))
 
