@@ -1332,16 +1332,20 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package go-mode
   :ensure t
-  :hook (go-mode
-         . (lambda ()
-             (require 'lsp-go)
-             (lsp))))
+  :hook ((go-mode . (lambda () (require 'lsp-go) (lsp)))
+         (go-mode . subword-mode)))
 ;; lsp
 
 (use-package lsp-go
   :init
   (setq lsp-go-use-placeholders nil
         lsp-go-use-gofumpt t))
+
+(use-package emacs
+  :after (go-mode consult-imenu lsp-mode)
+  :config
+  (add-to-list 'consult-imenu-config
+               `(go-mode :types ,my/lsp-mode-imenu-types)))
 
 ;; formatting
 
