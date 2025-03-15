@@ -1,28 +1,13 @@
-;;; general usability
+;;; early config
 
-;; no splash
-(setq inhibit-splash-screen t)
+(setq native-comp-async-report-warnings-errors 'silent)
 
-;; general performance
-(setq gc-cons-threshold (* 100 1024 1024)
-      read-process-output-max (* 5 1024 1024))
-
-;; set up external custom file
-(setq custom-file (locate-user-emacs-file "custom.el"))
-
-;; macos native compilation fix
-(when (eq system-type 'darwin)
-  (customize-set-variable 'native-comp-driver-options '("-Wl,-w")))
-
-;; lexical binding
-(setq lexical-binding t)
-
-;; set up package archives
+;; package archives
 (require 'package)
 
 (dolist (archive '(("nongnu" . "https://elpa.nongnu.org/nongnu/")
-		   ("melpa" . "https://melpa.org/packages/")
-		   ("org" . "https://orgmode.org/elpa/")))
+                   ("melpa" . "https://melpa.org/packages/")
+                   ("org" . "https://orgmode.org/elpa/")))
   (add-to-list 'package-archives archive))
 
 ;; pull latest package info
@@ -30,21 +15,75 @@
 (unless package-archive-contents
   (package-refresh-contents))
 
-;; for pre 29 emacs
+;; use package imenu integration
+(setq use-package-enable-imenu-support t)
+
+;; ensure use-package is available (pre-29)
 (unless (package-installed-p 'use-package)
   (package-install 'use-package)
   (require 'use-package))
 
-;; pls no more ring
-(setq ring-bell-function 'ignore)
+;; use no-littering to manage emacs transient files
+(use-package no-littering
+  :when nil
+  :ensure t
+  :init
+  (no-littering-theme-backups))
 
-;; pls no more C-M-i
-(setq tabs-always-indent nil)
+;; quelpa
+(unless (package-installed-p 'quelpa)
+  (with-temp-buffer
+    (url-insert-file-contents
+     "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    (eval-buffer)
+    (quelpa-self-upgrade)))
 
-;; pls no more tabs
-(setq-default indent-tabs-mode nil)
+;; quelpa use-package integration
+(quelpa
+ '(quelpa-use-package
+   :fetcher git
+   :url "https://github.com/quelpa/quelpa-use-package.git"))
+(require 'quelpa-use-package)
 
-;; pls no more ugly wrap
+;; load private config
+(let ((private-config (expand-file-name "private.el" user-emacs-directory)))
+ (if (file-exists-p private-config)
+   (load private-config :no-error)))
+
+;; misc. early settings
+(use-package emacs
+  :custom
+  ((cursor-type 'bar)
+   (tab-width 4))
+  :init
+  (setq lexical-binding t
+        inhibit-splash-screen t
+        gc-cons-threshold (* 100 1024 1024)
+        read-process-output-max (* 5 1024 1024)
+        ring-bell-function 'ignore
+        tabs-always-indent nil
+        use-short-answers t
+        kill-buffer-query-functions
+        (remq 'process-kill-buffer-query-function
+              kill-buffer-query-functions)
+        mac-command-modifier 'meta
+        mac-option-modifier 'super
+        sentence-end-double-space nil)
+  (setq-default indent-tabs-mode nil)
+  :bind ("C-M-<backspace>" . #'backward-kill-sexp))
+
+;; set up external custom file
+(use-package cus-edit
+  :init
+  (setq custom-file (locate-user-emacs-file "custom.el")))
+
+;; macos native compilation fix
+(use-package comp
+  :if (eq system-type 'darwin)
+  :custom
+  (native-comp-driver-options '("-Wl,-w")))
+
+;; trying to make wrapping less ugly
 (use-package adaptive-wrap
   :ensure t
   :hook ((visual-line-mode . adaptive-wrap-prefix-mode)
@@ -52,47 +91,92 @@
   :init
   (global-visual-line-mode 1))
 
-;; pls no more dangling ws
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+;; helper function for setting paths in emacs dir
+(defun my/initialize-emacs-dir-path (sub-path)
+  (let ((path (expand-file-name sub-path user-emacs-directory)))
+    (make-directory path t)
+    path))
 
-;; pls just one more
-(repeat-mode 1)
+;; misc. file settings
+(use-package files
+  :ensure f
+  :hook (before-save
+         . (lambda ()
+             (when (not (and (boundp 'markdown-mode)
+                             markdown-mode))
+               (delete-trailing-whitespace))))
+  :init
+  (setq
+   require-final-newline t
+   ;; reduce nuisance prompts
+   confirm-nonexistent-file-or-buffer nil
+   ;; automatically refresh any file visiting buffers
+   revert-without-query '(".*")
+   ;; keep transient files tidy (part 1)
+   my/transient-files-backup-dir (my/initialize-emacs-dir-path "tmp/backups/")
+   my/transient-files-auto-save-dir (my/initialize-emacs-dir-path "tmp/auto-saves/")
+   backup-directory-alist `(("." . ,my/transient-files-backup-dir))
+   auto-save-file-name-transforms `((".*" ,my/transient-files-auto-save-dir t)))
+  :bind (("C-r" . #'revert-buffer)
+         ("C-x C-r" . #'set-visited-file-name)))
 
-;; pls another one, but marks this time
-(setq set-mark-command-repeat-pop t)
+(use-package whitespace
+  :bind (("C-c t SPC" . whitespace-mode)))
 
-;; pls delete highlighted regions on input
-(delete-selection-mode 1)
+(use-package emacs
+  :ensure f
+  :init
+  (setq
+   ;; keep transient files tidy (part 2)
+   my/transient-files-auto-save-prefix (my/initialize-emacs-dir-path "tmp/auto-saves/sessions")
+   auto-save-list-file-prefix my/transient-files-auto-save-prefix
+   create-lockfiles nil)
 
-;; pls no more nuisance prompts
-(setq use-short-answers t
-      confirm-nonexistent-file-or-buffer nil
-      revert-without-query '(".*")
-      kill-buffer-query-functions (remq 'process-kill-buffer-query-function
-                                        kill-buffer-query-functions))
+  (defun my/recompile-packages ()
+    (interactive)
+    (byte-recompile-directory package-user-dir nil 'force)))
 
-;; cycle spaces
-(global-set-key [remap just-one-space] #'cycle-spacing)
+;; contextually repeat commands with a single key press
+(use-package repeat
+  :ensure f
+  :init
+  (repeat-mode 1))
 
-;; keep transient files tidy
-(setq my/transient-files-backup-dir (expand-file-name "tmp/backups/" user-emacs-directory)
-      my/transient-files-auto-save-dir (expand-file-name "tmp/auto-saves/" user-emacs-directory)
-      my/transient-files-auto-save-prefix (expand-file-name "sessions" my/transient-files-auto-save-dir))
+(use-package simple
+  :ensure f
+  :init
+  ;; repeat-like behavior when popping mark
+  (setq set-mark-command-repeat-pop t)
+  (column-number-mode 1)
+  (line-number-mode 1)
+  :config
+  ;; better default behavior for M-SPC
+  (global-set-key [remap just-one-space] #'cycle-spacing)
+  :bind ("C-c t RET" . #'toggle-word-wrap))
 
-(make-directory my/transient-files-auto-save-dir t)
-(make-directory my/transient-files-backup-dir t)
-
-(setq backup-directory-alist `(("." . ,my/transient-files-backup-dir))
-      auto-save-file-name-transforms `((".*" ,my/transient-files-auto-save-dir t))
-      auto-save-list-file-prefix my/transient-files-auto-save-prefix
-      create-lockfiles nil)
+;; delete selected region on insert
+(use-package delsel
+  :ensure f
+  :init
+  (delete-selection-mode 1))
 
 ;; update buffers when files change
-(global-auto-revert-mode 1)
+(use-package autorevert
+  :ensure f
+  :init
+  ;; keep modeline up to date
+  (setq auto-revert-check-vc-info t
+        global-auto-revert-non-file-buffers t)
+  (global-auto-revert-mode 1))
 
 ;; forward compatibility
 (use-package compat
-  :ensure t)
+  :ensure t
+  :config
+  (when (not (fboundp #'scratch-buffer))
+    (defun scratch-buffer ()
+      (interactive)
+      (display-buffer (get-scratch-buffer-create)))))
 
 ;; make buffers unique based on directory
 (use-package uniquify
@@ -100,99 +184,135 @@
   :config
   (setq uniquify-buffer-name-style 'post-forward-angle-brackets))
 
-;; call scratch buffer
-(with-eval-after-load 'compat
-  (defun my/display-scratch ()
-    (interactive)
-    (display-buffer (get-scratch-buffer-create)))
+(use-package ibuffer
+  :ensure f
+  :bind ("C-x C-b" . #'ibuffer))
 
-  ;; buffer keymap
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "k") #'kill-buffer)
-    (define-key map (kbd "b") #'consult-buffer)
-    (define-key map (kbd "B") #'tabspaces-switch-buffer-and-tab)
-    (define-key map (kbd "i") #'ibuffer)
-    (define-key map (kbd "n") #'next-buffer)
-    (define-key map (kbd "p") #'previous-buffer)
-    (define-key map (kbd "r") #'revert-buffer)
-    (define-key map (kbd "s") (if (fboundp #'scratch-buffer)
-                                  #'scratch-buffer
-                                #'my/display-scratch))
-    (define-key global-map (kbd "C-c b") `("buffer" . ,map))))
-
-;; window undo/redo
-(winner-mode 1)
-
-;; window map
-(let ((map (make-sparse-keymap)))
-  (define-key map (kbd "k") #'delete-window)
-  (define-key map (kbd "K") #'delete-other-windows)
-  (define-key map (kbd "s") #'split-window-right)
-  (define-key map (kbd "S") #'split-window-below)
-  (define-key map (kbd "n") #'windmove-down)
-  (define-key map (kbd "p") #'windmove-up)
-  (define-key map (kbd "f") #'windmove-right)
-  (define-key map (kbd "b") #'windmove-left)
-  (define-key map (kbd "B") #'balance-windows)
-  (define-key map (kbd "u") #'winner-undo)
-  (define-key map (kbd "r") #'winner-redo)
-  (define-key map (kbd "t") #'window-toggle-side-windows)
-  (define-key global-map (kbd "C-c w") `("window" . ,map)))
-
-;; adjust transient buffer behaviors to personal preference
-(defun my/display-buffer-in-side-window-and-select (buffer alist)
-  (let ((window (display-buffer-in-side-window buffer alist)))
-    (select-window window)))
-
-(setq window-sides-slots '(0 1 1 1)
-      display-buffer-alist
-      '(;; top bar interactive
-        ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|Python\\)\\*$"
-         (my/display-buffer-in-side-window-and-select)
-         (side . top)
-         (slot . 1)
-         (window-height . 0.20))
-        ;; top bar informational
-        ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
-         (my/display-buffer-in-side-window-and-select)
-         (select. t)
-         (side . top)
-         (slot . 1)
-         (window-height . 0.20))
-        ;;
-        ("^\\*\\(scratch\\)"
-         (my/display-buffer-in-side-window-and-select)
-         (select. t)
-         (side . top)
-         (slot . 1)
-         (window-height . 0.20))
-        ;; side bar information
-        ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\)"
-         (my/display-buffer-in-side-window-and-select)
-         (side . right)
-         (slot . 1)
-         (window-width . 0.30))
-        ("^\\*\\( docker\\)"
-         (my/display-buffer-in-side-window-and-select)
-         (side . right)
-         (slot . 1)
-         (window-width . 0.30))))
-
-;; get helpful prompts for keys
-(use-package which-key
-  :ensure t
+;; helpful window operations
+(use-package window
+  :ensure f
   :init
-  (which-key-mode))
+  (setq my/window-map (make-sparse-keymap))
+  (bind-key "C-c w" my/window-map)
+  :bind (("C-c s" . #'scratch-buffer)
+         ("C-c t w" . #'window-toggle-side-windows)
+         :repeat-map my/buffer-move-repeat-map
+         ("<right>" . #'next-buffer)
+         ("<left>" . #'previous-buffer)))
+
+(use-package windmove
+  :ensure f
+  :bind (("C-c <down>" . #'windmove-down)
+         ("C-c <up>" . #'windmove-up)
+         ("C-c <left>" . #'windmove-left)
+         ("C-c <right>" . #'windmove-right)
+         :repeat-map my/windmove-repeat-map
+         ("<down>" . #'windmove-down)
+         ("<up>" . #'windmove-up)
+         ("<left>" . #'windmove-left)
+         ("<right>" . #'windmove-right)))
+
+(use-package winner
+  :ensure f
+  :init
+  (setq winner-dont-bind-my-keys t)
+  (winner-mode 1)
+  :bind (:map my/window-map
+         ("u" . #'winner-undo)
+         ("r" . #'winner-redo)
+         :repeat-map my/winner-repeat-map
+         ("u" . #'winner-undo)
+         ("r" . #'winner-redo)))
+
+;; window display behavior
+(use-package window
+  :ensure f
+  :config
+  ;; adjust transient buffer behaviors to personal preference
+  (defun my/display-buffer-in-side-window-and-select (buffer alist)
+    (if-let ((window (display-buffer-in-side-window buffer alist)))
+        (select-window window)))
+
+  (setq window-sides-slots '(0 1 1 1)
+        display-buffer-alist
+        ;; TODO: add rules for pp-eval/expand and geiser
+        ;; TODO: create a system for generalizing the display rules I want,
+        ;;       so display definitions don't need to be centralized here.
+        '(;; top bar interactive
+          ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|eat\\|Python\\)\\*$"
+           (my/display-buffer-in-side-window-and-select)
+           (side . top)
+           (slot . 1)
+           (window-height . 0.20))
+          ;; top bar informational
+          ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
+           (my/display-buffer-in-side-window-and-select)
+           (select. t)
+           (side . top)
+           (slot . 1)
+           (window-height . 0.20))
+          ;;
+          ("^\\*\\(scratch\\)"
+           (my/display-buffer-in-side-window-and-select)
+           (select. t)
+           (side . top)
+           (slot . 1)
+           (window-height . 0.20))
+          ;; side bar information
+          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\)"
+           (my/display-buffer-in-side-window-and-select)
+           (side . right)
+           (slot . 1)
+           (window-width . 0.30))
+          ("^\\*\\( docker\\)"
+           (my/display-buffer-in-side-window-and-select)
+           (side . right)
+           (slot . 1)
+           (window-width . 0.30))))
+
+  (defun my/promote-side-window-buffer (arg)
+    (interactive "P")
+    (if (not (window-parameter (selected-window) 'window-side))
+        (message "Error: Selected window is not a side window!")
+      (let ((display-buffer-alist '())
+            (buf (current-buffer))
+            (arg-num (prefix-numeric-value arg))
+            (non-side-window
+             (car (seq-filter
+                   (lambda (w)
+                     (not (window-parameter w 'window-side)))
+                   (window-list)))))
+        (delete-window)
+        (select-window non-side-window)
+        (cond ((>= arg-num 16)
+               (progn
+                 (when (seq-filter
+                        (lambda (w)
+                          (window-parameter w 'window-side))
+                        (window-list))
+                   (window-toggle-side-windows))
+                 (delete-other-windows)
+                 (switch-to-buffer buf)))
+              ((>= arg-num 4)
+               (switch-to-buffer buf))
+              (t
+               (select-window (display-buffer buf)))))))
+  :bind ("C-c p" . #'my/promote-side-window-buffer))
 
 ;; improved help
 (use-package helpful
   :ensure t
-  :config
-  (global-set-key (kbd "C-h f") #'helpful-callable)
-  (global-set-key (kbd "C-h v") #'helpful-variable)
-  (global-set-key (kbd "C-h k") #'helpful-key)
-  (global-set-key (kbd "C-h x") #'helpful-command)
-  (global-set-key (kbd "C-c C-d") #'helpful-at-point))
+  :bind (([remap describe-function] . #'helpful-callable)
+         ([remap describe-variable] . #'helpful-variable)
+         ([remap describe-command] . #'helpful-command)
+         ([remap describe-key] . #'helpful-key)
+         ("C-c C-d" . #'helpful-at-point)))
+
+;; keycasting
+(use-package keycast
+  :ensure t
+  :demand t
+  :bind ("C-c t k" . #'keycast-tab-bar-mode))
 
 ;; get examples in help
 
@@ -205,32 +325,41 @@
 (use-package vertico
   :ensure t
   :init
-  (setq vertico-buffer-display-action
-        '(display-buffer-in-side-window
-          (window-height . 0.20)
-          (side . top)
-          ;; (window-parameters . ((mode-line-format . (""))))
-          ))
-  (vertico-mode)
-  (vertico-buffer-mode)
-  (setq vertico-cycle t))
+  (setq vertico-cycle t)
+  (vertico-mode))
+
+(use-package vertico-buffer
+  :after vertico
+  :init
+  (setq  vertico-buffer-display-action
+         '(display-buffer-in-side-window
+           (window-height . 0.20)
+           (side . top)))
+
+  (define-advice vertico--setup
+      (:after
+       (&rest args)
+       my/vertico-buffer-mode-set-line-format)
+    (setq-local
+     mode-line-format (propertize
+                       "  * ↑ make selection above ↑ *"
+                       'face 'mode-line-emphasis)))
+
+  (vertico-buffer-mode))
 
 ;; improved file navigation
 (use-package vertico-directory
   :ensure nil
   :after vertico
   :bind (:map vertico-map
-              ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
+         ("RET" . vertico-directory-enter)
+         ("DEL" . vertico-directory-delete-char)
+         ("M-DEL" . vertico-directory-delete-word))
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 ;; additional data with suggestions
 (use-package marginalia
   :ensure t
-  :bind (("M-A" . marginalia-cycle)
-         :map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
   :init
   (marginalia-mode))
 
@@ -243,6 +372,7 @@
 
 ;; make searches interactive
 (use-package consult
+  :after tabspaces
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (;; C-c bindings (mode-specific-map)
          ("C-c m x" . consult-mode-command)
@@ -254,8 +384,6 @@
          ("C-x 4 b" . consult-buffer-other-window)
          ("C-x 5 b" . consult-buffer-other-frame)
          ("C-x r b" . consult-bookmark)
-         ("C-x p b" . consult-project-buffer)
-         ("C-c p b" . consult-project-buffer)
          ;; Custom M-# bindings for fast register access
          ("M-#" . consult-register-load)
          ("M-'" . consult-register-store)
@@ -284,15 +412,17 @@
          ("M-s u" . consult-focus-lines)
          ("M-s e" . consult-isearch-history)
          :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ("M-e" . consult-isearch-history)
+         ("M-s e" . consult-isearch-history)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
          :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
-
+         ("M-s" . consult-history)
+         ("M-r" . consult-history)
+         :map project-prefix-map
+         ("b" . consult-project-buffer))
   :init
+  ;; TODO: this should be conditional on OS
   ;; gnu locate is glocate using macports
   (setq consult-locate-args "glocate --ignore-case")
 
@@ -312,7 +442,40 @@
    consult--source-recent-file consult--source-project-recent-file
    :preview-key '(:debounce 0.4 any))
 
-  (setq consult-narrow-key "<"))
+  (setq consult-narrow-key "<")
+
+  ;; hide full buffer list (still available with "b" prefix)
+  (consult-customize consult--source-buffer :hidden t :default nil)
+  ;; set consult-workspace buffer list
+  (defvar consult--source-workspace
+    (list :name     "Workspace Buffers"
+          :narrow   ?w
+          :history  'buffer-name-history
+          :category 'buffer
+          :state    #'consult--buffer-state
+          :default  t
+          :items    (lambda () (consult--buffer-query
+                                :predicate #'tabspaces--local-buffer-p
+                                :sort 'visibility
+                                :as #'buffer-name)))
+
+    "Set workspace buffer list for consult-buffer.")
+  (add-to-list 'consult-buffer-sources 'consult--source-workspace))
+
+;;; move minibuffer to top of frame
+
+(use-package mini-frame
+  :when nil
+  :ensure t
+  :init
+  (setq mini-frame-show-parameters
+        `((top . 36)
+          (width . 1.0)
+          (child-frame-border-width . 2)
+          (no-accept-focus . t))
+        mini-frame-detach-on-hide nil
+        mini-frame-color-shift-step 0)
+  (mini-frame-mode))
 
 ;;; writable grep buffers
 
@@ -333,11 +496,18 @@
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
   :config
+  ;; TODO: maybe remove this??
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                  nil
-                 (window-parameters (mode-line-format . none)))))
+                 (window-parameters (mode-line-format . none))))
+
+  (setq embark-indicators
+        '(embark--vertico-indicator
+          ;; embark-mixed-indicator
+          embark-highlight-indicator
+          embark-isearch-highlight-indicator)))
 
 ;; consult integration
 (use-package embark-consult
@@ -345,53 +515,11 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-;; which-key integration
-(defun embark-which-key-indicator ()
-  "An embark indicator that displays keymaps using which-key.
-The which-key help message will show the type and value of the
-current target followed by an ellipsis if there are further
-targets."
-  (lambda (&optional keymap targets prefix)
-    (if (null keymap)
-        (which-key--hide-popup-ignore-command)
-      (which-key--show-keymap
-       (if (eq (plist-get (car targets) :type) 'embark-become)
-           "Become"
-         (format "Act on %s '%s'%s"
-                 (plist-get (car targets) :type)
-                 (embark--truncate-target (plist-get (car targets) :target))
-                 (if (cdr targets) "…" "")))
-       (if prefix
-           (pcase (lookup-key keymap prefix 'accept-default)
-             ((and (pred keymapp) km) km)
-             (_ (key-binding prefix 'accept-default)))
-         keymap)
-       nil nil t (lambda (binding)
-                   (not (string-suffix-p "-argument" (cdr binding))))))))
-
-(setq embark-indicators
-  '(embark-which-key-indicator
-    embark-highlight-indicator
-    embark-isearch-highlight-indicator))
-
-(defun embark-hide-which-key-indicator (fn &rest args)
-  "Hide the which-key indicator immediately when using the completing-read prompter."
-  (which-key--hide-popup-ignore-command)
-  (let ((embark-indicators
-         (remq #'embark-which-key-indicator embark-indicators)))
-      (apply fn args)))
-
-(advice-add #'embark-completing-read-prompter
-            :around #'embark-hide-which-key-indicator)
-
 ;; directory viewer
 (use-package dired
-  :ensure f
   :after files
   :hook ((dired-mode . dired-hide-details-mode)
-         (dired-mode . (lambda () (dired-omit-mode)))
-         ;; (dired-mode . (lambda () (direc-sort-toggle)))
-         )
+         (dired-mode . (lambda () (dired-omit-mode))))
   :init
   (setq insert-directory-program
         (if (and (eq system-type 'darwin)
@@ -399,7 +527,8 @@ targets."
             "gls"
           insert-directory-program)
         dired-listing-switches "-al --dired --group-directories-first -h -G"
-        dired-omit-files "\\`[.]?#\\|\\.java\\|snap\\|System\\|\\.ssh\\|\\.gitconfig\\|\\.wget\\|\\.aspell\\|\\.cache\\|\\.lesshst\\|\\.gftp\\|\\.pki\\|\\.gnome\\|VirtualBox\\|master\\.tar\\.gz\\|\\.wine\\|plan9port\\|\\.idm\\|\\.font\\|\\.iso\\|\\.cargo\\|lib\\|amd64\\|\\.gnupg\\|\\.python\\|\\.var\\|\\.local\\|\\`[.][.]?\\'"))
+        dired-omit-files "\\`[.]?#\\|\\.java\\|snap\\|System\\|\\.ssh\\|\\.gitconfig\\|\\.wget\\|\\.aspell\\|\\.cache\\|\\.lesshst\\|\\.gftp\\|\\.pki\\|\\.gnome\\|VirtualBox\\|master\\.tar\\.gz\\|\\.wine\\|plan9port\\|\\.idm\\|\\.font\\|\\.iso\\|\\.cargo\\|lib\\|amd64\\|\\.gnupg\\|\\.python\\|\\.var\\|\\.local\\|\\`[.][.]?\\'"
+        dired-auto-revert-buffer t))
 
 (use-package all-the-icons
   :ensure t
@@ -408,6 +537,7 @@ targets."
 
 (use-package all-the-icons-dired
   :ensure t
+  :after (all-the-icons dired)
   :hook ((dired-mode . all-the-icons-dired-mode))
   :config
   (setq all-the-icons-dired-monochrome nil))
@@ -420,106 +550,184 @@ targets."
   :init
   (exec-path-from-shell-initialize))
 
-;; comand -> meta and option -> super
-(setq mac-command-modifier 'meta
-      mac-option-modifier 'super)
+;;; themes
 
-;;; visual tweaks
+(use-package doom-themes
+  :ensure t
+  :config
+  (doom-themes-visual-bell-config))
 
-;; preferred fonts
-(setq my/default-fixed-pitch-font "JetBrains Mono"
-      my/default-variable-pitch-font "Iosevka Aile"
-      my/default-fixed-pitch-height 270
-      my/default-variable-pitch-height 270)
-
-(defun my/apply-preferred-fonts ()
-  (set-face-attribute 'default nil
-                      :font my/default-fixed-pitch-font
-                      :weight 'light
-                      :height my/default-fixed-pitch-height)
-  (set-face-attribute 'fixed-pitch nil
-                      :font my/default-fixed-pitch-font
-                      :weight 'light
-                      :height my/default-fixed-pitch-height)
-  (set-face-attribute 'variable-pitch nil
-                      :font my/default-variable-pitch-font
-                      :weight 'light
-                      :height my/default-variable-pitch-height)
-  (set-face-attribute 'bold nil :weight 'normal))
+(use-package ef-themes
+  :ensure t)
 
 ;; create after theme hook
-(defvar after-enable-theme-hook nil
-  "Normal hook run after enabling a theme.")
+(use-package custom
+  :config
+  (defvar after-enable-theme-hook nil
+    "Normal hook run after enabling a theme.")
 
-(defun run-after-enable-theme-hook (&rest _args)
-  "Run `after-enable-theme-hook'."
-  (run-hooks 'after-enable-theme-hook))
+  (defun run-after-enable-theme-hook (&rest _args)
+    "Run `after-enable-theme-hook'."
+    (run-hooks 'after-enable-theme-hook))
 
-(advice-add 'enable-theme :after #'run-after-enable-theme-hook)
+  (advice-add 'enable-theme :after #'run-after-enable-theme-hook))
 
-;; run font tweaks after theme change
-(add-hook 'after-enable-theme-hook #'my/apply-preferred-fonts)
+;; visual tweaks to apply after theme
+;; fonts
+(use-package faces
+  :config
+  (setq my/default-fixed-pitch-font "JetBrains Mono"
+        my/default-variable-pitch-font "Iosevka Aile"
+        my/default-fixed-pitch-height 270
+        my/default-variable-pitch-height 270)
 
-;; run lsp-mode visual tweaks after theme change
-(defun my/tweak-lsp-mode-faces ()
-  (set-face-attribute 'lsp-face-highlight-write nil :weight 'normal)
-  (set-face-attribute 'lsp-face-highlight-textual nil :weight 'normal))
+  (defun my/apply-preferred-fonts ()
+    (interactive)
+    (set-face-attribute 'default nil
+                        :font my/default-fixed-pitch-font
+                        :weight 'light
+                        :height my/default-fixed-pitch-height)
+    (set-face-attribute 'fixed-pitch nil
+                        :font my/default-fixed-pitch-font
+                        :weight 'light
+                        :height my/default-fixed-pitch-height)
+    (set-face-attribute 'variable-pitch nil
+                        :font my/default-variable-pitch-font
+                        :weight 'light
+                        :height my/default-variable-pitch-height)
+    (set-face-attribute 'bold nil :weight 'light))
+  :hook (after-enable-theme . my/apply-preferred-fonts))
 
-(with-eval-after-load 'lsp-mode
-  (add-hook 'after-enable-theme-hook #'my/tweak-lsp-mode-faces))
+;; lsp faces
+(use-package faces
+  :after lsp-mode
+  :config
+  (defun my/tweak-lsp-mode-faces ()
+    (set-face-attribute 'lsp-face-highlight-read nil
+                        :weight 'light)
+    (set-face-attribute 'lsp-face-highlight-write nil
+                        :weight 'light)
+    (set-face-attribute 'lsp-face-highlight-textual nil
+                        :weight 'light))
+  :hook ((after-enable-theme lsp-mode) . my/tweak-lsp-mode-faces))
 
-;; run tab-bar tweaks after theme change
-(defun my/tweak-tab-bar-faces ()
-  (set-face-attribute 'tab-bar nil
-                      :background (doom-color 'modeline-bg-alt)
-                      :foreground (doom-color 'modeline-bg-alt))
-  (set-face-attribute 'tab-bar-tab nil
-                      :background (doom-color 'modeline-bg-alt)
-                      :weight 'normal)
-  (set-face-attribute 'tab-bar-tab-inactive nil
-                      :foreground (doom-color 'modeline-fg-alt)
-                      :background (doom-color 'modeline-bg-alt)
-                      :weight 'normal))
+;; color tweaks
+(use-package faces
+  :after (keycast fringe eros)
+  :config
+  (defun my/tweak-tab-bar-faces ()
+    (set-face-attribute
+     'tab-bar nil)
+    (set-face-attribute
+     'tab-bar-tab nil
+     :background (face-attribute 'mode-line :background)
+     :weight 'normal
+     :box nil)
+    (set-face-attribute
+     'tab-bar nil
+     :background (face-attribute 'mode-line-inactive :background)
+     :box nil
+     :weight 'normal)
+    (set-face-attribute
+     'tab-bar-tab-inactive nil
+     :background (face-attribute 'tab-bar :background)
+     :foreground (face-attribute 'mode-line-inactive :foreground)
+     :box nil
+     :weight 'normal))
 
-(with-eval-after-load 'doom-themes
-  (add-hook 'after-enable-theme-hook #'my/tweak-tab-bar-faces))
+  (defun my/tweak-fringe-faces ()
+    (set-face-attribute
+     'fringe nil
+     :background (face-attribute 'default :background)
+     :foreground (face-attribute 'default :background)))
 
-;; run fringe tweaks after theme change
-(defun my/tweak-fringe-faces ()
-  (set-face-attribute 'fringe nil
-                      :background (doom-color 'bg)
-                      :foreground (doom-color 'bg)))
+  (defun my/tweak-keycast-faces ()
+    (set-face-attribute 'keycast-key nil
+                        ;; :foreground (face-attribute 'mode-line :background)
+                        ;; :background (face-attribute 'mode-line-emphasis :foreground)
+                        :box nil)
+    (when (bound-and-true-p keycast-tab-bar-mode)
+      (keycast-tab-bar-mode -1)
+      (keycast-tab-bar-mode +1)))
 
-(with-eval-after-load 'doom-themes
-  (add-hook 'after-enable-theme-hook #'my/tweak-fringe-faces))
+  (defun my/tweak-miniframe-faces ()
+    (set-face-attribute 'child-frame-border nil
+                        :background (face-attribute 'font-lock-constant-face :foreground)))
+
+  (defun my/tweak-eros-faces ()
+    (set-face-attribute 'eros-result-overlay-face
+                        nil
+                        :background nil
+                        :box nil ;; `(:line-width -1
+                             ;;   :color
+                             ;;   `(face-attribute
+                             ;;     'font-lock-comment-face
+                             ;;     :foreground))
+                        :inherit 'font-lock-comment-face))
+  :hook ((after-enable-theme . my/tweak-tab-bar-faces)
+         (after-enable-theme . my/tweak-fringe-faces)
+         (after-enable-theme . my/tweak-keycast-faces)
+         (after-enable-theme . my/tweak-miniframe-faces)
+         (after-enable-theme . my/tweak-eros-faces)))
+
+(use-package doom-modeline
+  :ensure t
+  :init
+  (setq doom-modeline-icon nil
+        doom-modeline-vcs-max-length 40
+        doom-modeline-support-imenu nil
+        doom-modeline-height 0
+        doom-modeline-bar-width 40
+        doom-modeline-project-detection nil
+        doom-modeline-battery nil
+        doom-modeline-time nil
+        doom-modeline-display-misc-in-all-mode-lines nil)
+  :hook ((after-init . doom-modeline-mode)
+         (after-enable-theme
+          . (lambda ()
+              (when (bound-and-true-p doom-modeline-mode)
+                (doom-modeline-mode -1)
+                (doom-modeline-mode +1))))))
 
 ;;; tabs and tabspaces
 
 ;; add minimal tab bar
-(setq tab-bar-close-button-show nil
-      tab-bar-new-button-show nil
-      tab-bar-tab-hints nil)
+(use-package tab-bar
+  :init
+  (defun my/tab-name-format-function (tab idx)
+    (let ((current-p (eq (car tab) 'current-tab)))
+    (propertize
+     (concat (if tab-bar-tab-hints (format "%d " i) "")
+             " "
+             (alist-get 'name tab)
+             " "
+             (or (and tab-bar-close-button-show
+                      (not (eq tab-bar-close-button-show
+                               (if current-p 'non-selected 'selected)))
+                      tab-bar-close-button)
+                 ""))
+     'face (funcall tab-bar-tab-face-function tab))))
 
-(tab-bar-mode 1)
-
-(tab-rename "default" 0)
-
-;; move tab-bar-map
-(define-key global-map (kbd "M-t") tab-prefix-map)
-(define-key global-map (kbd "C-c t") tab-prefix-map)
-(define-key global-map (kbd "s-t") tab-prefix-map)
-
-;; fix bug with tab-new and side windows
-(define-advice
-    tab-bar-new-tab
-    (:before (&rest args) my/side-window-new-tab-fix)
-  (when (window-parameter (selected-window) 'window-side)
-    (select-window (window-main-window))))
+  (setq tab-bar-close-button-show nil
+        tab-bar-new-button-show nil
+        tab-bar-tab-hints nil
+        tab-bar-auto-width nil
+        tab-bar-new-tab-choice "*scratch*"
+        tab-bar-tab-name-format-function 'my/tab-name-format-function)
+  (tab-bar-mode 1)
+  (tab-rename "default" 0)
+  ;; fix bug with tab-new and side windows
+  (define-advice
+      tab-bar-new-tab
+      (:before (&rest args) my/side-window-new-tab-fix)
+    (when (window-parameter (selected-window) 'window-side)
+      (select-window (window-main-window)))))
 
 ;; isolate tabs
 (use-package tabspaces
   :ensure t
-  :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup.
+  :after tab-bar
+  :hook (after-init . tabspaces-mode)
   :commands (tabspaces-switch-or-create-workspace
              tabspaces-open-or-create-project-and-workspace)
   :custom
@@ -531,190 +739,64 @@ targets."
   ;; (tabspaces-session t)
   ;; (tabspaces-session-auto-restore t)
   :config
+  ;; temp fix remove later
+  (defun tabspaces--local-buffer-p (buffer)
+      "Return whether BUFFER is in the list of local buffers."
+      (or (member (buffer-name buffer) tabspaces-include-buffers)
+          (memq buffer (frame-parameter nil 'buffer-list))))
   (project-known-project-roots)
-  (define-key tab-prefix-map (kbd "s") tabspaces-command-map))
+  :bind-keymap ("C-c TAB" . tabspaces-command-map))
 
+(use-package project
+  :after tab-bar
+  :config
+  ;; (when (not (fboundp 'project-name))
+  ;;   (defun project-name (proj)
+  ;;     (cl-second (reverse (split-string (cdr proj) "/")))))
 
-(when (not (fboundp 'project-name))
-  (defun project-name (proj)
-    (cl-second (reverse (split-string (cdr proj) "/")))))
+  (defun my/project-tab-name ()
+    (interactive)
+    (tab-bar-rename-tab (project-name (project-current))))
+  :bind (:map project-prefix-map
+         ("TAB" . #'my/project-tab-name)))
 
-;; rename current tab to project nameq
-(defun my/project-tab-name ()
-  (interactive)
-  (tab-bar-rename-tab (project-name (project-current))))
+;; TODO: move to early init?
+(use-package tool-bar
+  :init
+  (tool-bar-mode -1))
 
-(define-key project-prefix-map (kbd "TAB") #'my/project-tab-name)
+(use-package scroll-bar
+  :init
+  (scroll-bar-mode -1))
 
-;; tabs open to scratch buffer
-;; TODO: it would be neat to set this dynamically
-(setq tab-bar-new-tab-choice "*scratch*")
-
-;; tab isolation w/ consult
-(with-eval-after-load 'consult
-  ;; hide full buffer list (still available with "b" prefix)
-  (consult-customize consult--source-buffer :hidden t :default nil)
-  ;; set consult-workspace buffer list
-  (defvar consult--source-workspace
-    (list :name     "Workspace Buffers"
-          :narrow   ?w
-          :history  'buffer-name-history
-          :category 'buffer
-          :state    #'consult--buffer-state
-          :default  t
-          :items    (lambda () (consult--buffer-query
-                                :predicate #'tabspaces--local-buffer-p
-                                :sort 'visibility
-                                :as #'buffer-name)))
-
-    "Set workspace buffer list for consult-buffer.")
-  (add-to-list 'consult-buffer-sources 'consult--source-workspace))
-
-;; tab keymap
-(with-eval-after-load 'tabspaces
-  (let ((tab-map (make-sparse-keymap))
-        (tabspace-map (make-sparse-keymap)))
-    (define-key global-map (kbd "C-c t") `("tabs/spaces" . ,tab-map))
-    (define-key tab-map (kbd "n") #'tab-next)
-    (define-key tab-map (kbd "p") #'tab-previous)
-    (define-key tab-map (kbd "t") #'tab-switch)
-    (define-key tab-map (kbd "k") #'tab-close)
-    (define-key tab-map (kbd "K") #'tab-close-other)
-    (define-key tab-map (kbd "s") `("tabspaces" . ,tabspace-map))
-    (define-key tabspace-map (kbd "c") #'tabspaces-remove-current-buffer)
-    (define-key tabspace-map (kbd "C") #'tabspaces-clear-buffers)
-    (define-key tabspace-map (kbd "K") #'tabspaces-kill-buffers-close-workspace)
-    (define-key tabspace-map (kbd "s") #'tabspaces-switch-or-create-workspace)
-    (define-key tabspace-map (kbd "S") #'tab-detach)))
-
-;; move project keymap
-(with-eval-after-load 'project
-  (define-key global-map (kbd "C-c p") `("project" . ,project-prefix-map)))
-
-;; use project find file if in project
-(defun my/dwim-find-file ()
-  (interactive)
-  (if (project-current)
-      (project-find-file)
-    (call-interactively #'find-file)))
-
-;; use project dired if in project
-(defun my/dwim-dired ()
-  (interactive)
-  (if (project-current)
-      (project-dired)
-    (call-interactively #'dired)))
-
-;; file keymap
-(with-eval-after-load 'project
-  (let ((map (make-sparse-keymap)))
-    (define-key global-map (kbd "C-c f") `("file" . ,map))
-    (define-key map (kbd "f") #'find-file)
-    (define-key map (kbd "d") #'dired)
-    (define-key map (kbd "D") #'dired-jump)
-    (define-key map (kbd "s") #'save-buffer)
-    (define-key map (kbd "r") #'rename-visited-file)
-    (define-key map (kbd "R") #'file-notify-rm-all-watches)))
-
-;; remove tool bar and scroll bar
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-
-;; add line and colum number display to modeline
-(column-number-mode 1)
-(line-number-mode 1)
-
-;; remove menu bar unless mac ns
-(unless (memq window-system '(mac ns))
-  (menu-bar-mode -1))
+(use-package menu-bar
+  :init
+  (unless (memq window-system '(mac ns))
+    (menu-bar-mode -1))
+  :bind (("C-c t e" . #'toggle-debug-on-error)
+         ("C-c t q" . #'toggle-debug-on-quit)))
 
 ;; highlight line everywhere
-(global-hl-line-mode 1)
-
-;; ... except for in vterm and eshell
-(defun my/disable-global-hl-line-mode ()
-  (setq-local global-hl-line-mode nil))
-
-(dolist (hook '(vterm-mode-hook
-                eshell-mode-hook))
-  (add-hook hook #'my/disable-global-hl-line-mode))
+(use-package hl-line
+  :init
+  (global-hl-line-mode 1)
+  :hook ((vterm-mode eshell-mode eat-mode)
+         . (lambda ()
+             (setq-local global-hl-line-mode nil))))
 
 ;; display line numbers for code buffers
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
-
-;; display line numbers for config buffers
-(add-hook 'conf-mode-hook #'display-line-numbers-mode)
+(use-package display-line-numbers
+  :hook (prog-mode . display-line-numbers-mode)
+  :init
+  (setq display-line-numbers-widen t
+        display-line-numbers-grow-only t
+        display-line-numbers-width-start t))
 
 ;; display only left fringe
-(fringe-mode '(8 . 0))
-
-;; color theme
-(use-package doom-themes
-  :ensure t
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold nil
-        doom-themes-enable-italic nil)
-
-  (setq my/light-theme 'doom-nord-light
-        my/dark-theme 'doom-nord-aurora
-        my/active-theme my/dark-theme)
-
-  ;; toggle theme
-  (defun my/theme-toggle (&optional light-or-dark)
-    (interactive)
-    (setq my/active-theme
-          (or (and (eq light-or-dark :light) my/light-theme)
-              (and (eq light-or-dark :dark) my/dark-theme)
-              (and (eq my/active-theme my/dark-theme) my/light-theme)
-              (and (eq my/active-theme my/light-theme) my/dark-theme)
-              my/dark-theme))
-    (mapcar 'disable-theme custom-enabled-themes)
-    (load-theme my/active-theme t))
-
-  ;; switch themes with system
-  (when (eq system-type 'darwin)
-    (defun my/match-theme-to-system ()
-      (let ((appearance (plist-get (mac-application-state)
-                                   :appearance)))
-        (my/theme-toggle
-         (if (string-equal
-              appearance
-              "NSAppearanceNameDarkAqua")
-             :dark
-           :light))))
-
-    (add-hook 'mac-effective-appearance-change-hook
-              #'my/match-theme-to-system))
-
-  (define-key global-map (kbd "C-c T t") #'my/theme-toggle)
-
-  (load-theme my/active-theme t)
-
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  ;; (doom-themes-neotree-config)
-  ;; or for treemacs users
-  ;; (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  ;; (doom-themes-treemacs-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
-
-;; pretty mode line
-(use-package doom-modeline
-  :ensure t
+(use-package fringe
+  :demand t
   :init
-  (setq doom-modeline-icon nil
-        doom-modeline-vcs-max-length 36
-        doom-modeline-support-imenu nil
-        doom-modeline-height 0
-        doom-modeline-bar-width 0
-        doom-modeline-project-detection nil
-        doom-modeline-battery nil
-        doom-modeline-time nil
-        doom-modeline-display-misc-in-all-mode-lines nil)
-  :hook (after-init . doom-modeline-mode))
+  (fringe-mode '(8 . 0)))
 
 ;;; terminal
 
@@ -723,7 +805,7 @@ targets."
   :ensure t
   :after project
   :bind (:map project-prefix-map
-              ("t" . project-vterm))
+         ("t" . project-vterm))
   :preface
   (defun project-vterm ()
     (interactive)
@@ -744,35 +826,36 @@ targets."
         vterm-tramp-shells '(("ssh" "/bin/bash")
                              ("podman" "/bin/bash"))))
 
+;; emulate a terminal
+(use-package eat
+  :ensure t)
+
 ;;; git tooling
-
-;; keymap
-(setq my/git-prefix-map (make-sparse-keymap))
-
-;; mnemonic binding
-(define-key global-map (kbd "C-c g") `("git" . ,my/git-prefix-map))
-
-;; keep modeline up to date
-(setq auto-revert-check-vc-info t)
 
 ;; magical git porcelean
 (use-package magit
   :ensure t
+  :init
+  (setq my/git-prefix-map (make-sparse-keymap))
+  (bind-key "C-c g" my/git-prefix-map)
   :config
   (setq magit-bury-buffer-function 'magit-restore-window-configuration
-	magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
-	magit-pre-display-buffer-hook 'magit-save-window-configuration
+        magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
+        magit-pre-display-buffer-hook 'magit-save-window-configuration
         magit-save-repository-buffers 'dontask)
+
+  (add-to-list 'project-switch-commands
+               '(magit-project-status "Magit" ?m))
 
   ;; hardcode system git for performance on mac
   (when (eq system-type 'darwin)
     (setq magit-git-executable "/usr/bin/git"))
 
-  (add-hook 'after-save-hook 'magit-after-save-refresh-status t)
-
-  (define-key my/git-prefix-map (kbd "b") #'magit-blame-addition)
-  (define-key my/git-prefix-map (kbd "g") #'magit-status)
-  (define-key my/git-prefix-map (kbd "f") #'magit-file-dispatch))
+  :hook (after-save . magit-after-save-refresh-status)
+  :bind (:map my/git-prefix-map
+         ("b" . #'magit-blame-addition)
+         ("g" . #'magit-status)
+         ("f" .  #'magit-file-dispatch)))
 
 ;; forge integration
 (use-package sqlite3
@@ -780,39 +863,47 @@ targets."
 
 (use-package forge
   :ensure t
-  :after magit)
+  :after (magit sqlite3))
 
 ;; see changes in fringe
 (use-package diff-hl
   :ensure t
+  :after magit
   :init
   (global-diff-hl-mode)
-  :config
-  (define-key diff-hl-command-map (kbd "s") #'diff-hl-show-hunk-stage-hunk)
-  (define-key my/git-prefix-map (kbd "H") #'diff-hl-show-hunk-next)
-  (define-key my/git-prefix-map (kbd "h") #'diff-hl-show-hunk-previous))
+  :bind (:map diff-hl-command-map
+         ("s" . #'diff-hl-show-hunk-stage-hunk)
+         :map my/git-prefix-map
+         ("H" . #'diff-hl-show-hunk-next)
+         ("h" . #'diff-hl-show-hunk-previous)))
 
+;; TODO: make ignored a grey block?
+(use-package diff-hl-dired
+  :after (dired diff-hl)
+  :hook (dired-mode . diff-hl-dired-mode))
+
+;; TODO: drop popup for repeat map?
 (use-package diff-hl-inline-popup
-  :ensure f
-  :config
-  (define-key diff-hl-inline-popup-transient-mode-map (kbd "s") #'diff-hl-show-hunk-stage-hunk))
+  :bind (:map diff-hl-inline-popup-transient-mode-map
+         ("s" . #'diff-hl-show-hunk-stage-hunk)))
 
 ;; travel through time
 (use-package git-timemachine
   :ensure t
-  :config
-  (define-key my/git-prefix-map (kbd "t") #'git-timemachine))
+  :after magit
+  :bind (:map my/git-prefix-map
+         ("t" . #'git-timemachine)))
 
 ;; jump to buffer or region in forge
 (use-package browse-at-remote
   :ensure t
-  :config
-  (define-key my/git-prefix-map (kbd "r") #'browse-at-remote))
+  :after magit
+  :bind (:map my/git-prefix-map
+         ("r" . #'browse-at-remote)))
 
 ;; handle conflics with a quick menu
 (use-package smerge-mode
-  :ensure f
-  :after hydra
+  :after (hydra magit)
   :config
   (defhydra my/smerge-hydra
     (:color pink :hint nil :post (smerge-auto-leave))
@@ -847,84 +938,91 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
             (bury-buffer))
      "Save and bury buffer" :color blue)
     ("q" nil "cancel" :color blue))
-  :hook (magit-diff-visit-file . (lambda ()
-                                   (when smerge-mode
-                                     (my/smerge-hydra/body)))))
+  :hook (magit-diff-visit-file
+         . (lambda ()
+             (when smerge-mode
+               (my/smerge-hydra/body)))))
 
-;;; tree-sitter tweaks
+(use-package ediff-wind
+  :init
+  (setq ediff-window-setup-function #'ediff-setup-windows-plain))
 
-;; add mac-ports installed tree-sitter grammars
-(setq treesit-extra-load-path '("/opt/local/lib"))
-
-;; create a flag for checking for treesit
-(setq my/treesit-enabled  (and (fboundp 'treesit-available-p)
-                               (treesit-available-p)))
+;; view todos
+(use-package hl-todo
+  :ensure t)
 
 ;;; docker tooling
 
-;; edit docker
-(if my/treesit-enabled
-    (add-to-list 'auto-mode-alist '("\\.Dockerfile\\'" . dockerfile-ts-mode))
-  (use-package dockerfile-mode
-    :ensure t))
+(use-package dockerfile-mode
+  :ensure t)
 
-
-;; run docker
 (use-package docker
   :ensure t
   :bind ("C-c D" . docker))
 
 ;;; language server
 
-;; shared keymap setup
-(setq my/code-keymap (make-sparse-keymap))
-(define-key prog-mode-map (kbd "C-c c") `("code" . ,my/code-keymap))
-
-;; setup lsp mode
 (use-package lsp-mode
   :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l"
         lsp-enable-file-watchers nil
         lsp-headerline-breadcrumb-enable nil
-        lsp-imenu-index-function #'lsp-imenu-create-categorized-index))
-
-;; setup dap
-(setq my/dap-mode-map (make-sparse-keymap))
+        lsp-imenu-index-function #'lsp-imenu-create-categorized-index
+        ;; list of lsp-mode imenu types for consult-imenu
+        my/lsp-mode-imenu-types
+        '((?f "Functions")
+          (?F "Fields")
+          (?m "Methods")
+          (?M "Modules")
+          (?c "Classes")
+          (?C "Constants")
+          (?v "Variables")
+          (?e "Enums")
+          (?E "Enum Members")
+          (?i "Interfaces")
+          (?s "Strings")
+          (?S "Structs")
+          (?n "Numbers")
+          (?N "Namespaces")
+          (?p "Properties")
+          (?P "Packages")
+          (?b "Booleans")
+          (?a "Arrays")
+          (?o "Objects")
+          (?O "Operators")
+          (?k "Keys")
+          (?K "Constructors")
+          (?_ "Nulls")
+          (?t "Type Parameters")
+          (?! "Events")
+          (?d "Files"))))
 
 (use-package dap-mode
   :ensure t
+  :after hydra
   :init
-  (setq dap-auto-configure-features '(sessions locals))
-  :config
-  (require 'dap-python)
-
-  (setq dap-python-debugger 'debugpy)
-
-  (dap-register-debug-template
-   "Python :: Attach to Dockerized Django"
-   (list :name "Python :: Attach to Dockerized Django"
-         :type "python"
-         :request "attach"
-         :connect '(:port 5679 :host "localhost")
-         :django t
-         :pathMappings '((("localRoot" . "${workspaceFolder}")
-                          ("remoteRoot" . "/app/")))))
-
+  (setq my/dap-mode-map (make-sparse-keymap)
+        dap-auto-configure-features '(sessions locals))
+  (bind-key "C-c d" my/dap-mode-map)
   :bind (:map my/dap-mode-map
-              ("n" . #'dap-next)
-              ("i" . #'dap-step-in)
-              ("o" . #'dap-step-out)
-              ("c" . #'dap-continue)
-              ("h" . #'dap-hydra)
-              ("r" . #'dap-debug-restart)
-              ("d" . #'dap-debug)
-              ("b" . #'dap-breakpoint-toggle)
-              ("s" . #'dap-disconnect)))
-
-(define-key global-map (kbd "C-c d") (cons "debug" my/dap-mode-map))
+         ("n" . #'dap-next)
+         ("i" . #'dap-step-in)
+         ("o" . #'dap-step-out)
+         ("c" . #'dap-continue)
+         ("h" . #'dap-hydra)
+         ("r" . #'dap-debug-restart)
+         ("d" . #'dap-debug)
+         ("b" . #'dap-breakpoint-toggle)
+         ("s" . #'dap-disconnect)))
 
 ;;; data formats
+
+;; conf
+(use-package conf-mode
+  :after (display-line-numbers)
+  :mode ("\\..*ignore\\'" "\\.fish\\'" "\\.*rc\\'")
+  :hook (conf-mode . display-line-numbers-mode))
 
 ;; csv
 (use-package csv-mode
@@ -932,7 +1030,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; yaml
 (use-package yaml-mode
-  :ensure t)
+  :ensure t
+  :after (display-line-numbers)
+  ;; yaml doesn't inherit from conf mode
+  :hook (yaml-mode . display-line-numbers-mode))
 
 ;; toml
 (use-package toml-mode
@@ -942,76 +1043,94 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package ini-mode
   :ensure t)
 
+;; terraform
+(use-package terraform-mode
+  :ensure t
+  :after (lsp-mode)
+  :init
+  (add-to-list 'lsp-disabled-clients 'tfls)
+  :custom (terraform-indent-level 4)
+  :hook ((terraform-mode . outline-minor-mode)
+         (terraform-mode . lsp)))
+
 ;;; programming language support
 
 ;;; general
 
-;; error reporting
-(use-package flymake
-  :config
-  (define-fringe-bitmap
-    'my/caution-tape-bitmap
-    (let ((arrow (vector
-                  #b11000011
-                  #b10000111
-                  #b00001111
-                  #b00011111
-                  #b00111110
-                  #b01111100
-                  #b11111000
-                  #b11110000
-                  #b11100001))
-          (bitmap (vector)))
-      (dotimes (_ (+ 2 (/ my/default-fixed-pitch-height
-                          (length arrow)
-                          10)))
-        (setq bitmap (cl-concatenate 'vector bitmap arrow)))
-      bitmap))
+(use-package treesit
+  :init
+  (setq
+   treesit-extra-load-path '("/usr/local/lib/")))
 
-  (dolist (var '(flymake-note-bitmap
-                 flymake-warning-bitmap
-                 flymake-error-bitmap))
-    (set var (cons 'my/caution-tape-bitmap
-                   (cdr (symbol-value var))))))
+(use-package indent-bars
+  :quelpa (indent-bars
+           :fetcher github
+           :repo "jdtsmith/indent-bars")
+  :hook ((js-mode . indent-bars-mode)
+         ((python-mode python-ts-mode) . indent-bars-mode)
+         (after-enable-theme
+          . (lambda ()
+              (when (bound-and-true-p indent-bars-mode)
+                (indent-bars-mode -1)
+                (indent-bars-mode +1)))))
+  :bind ("C-c t i" . indent-bars-mode)
+  :init
+  (setq
+   indent-bars-pattern "."
+   indent-bars-width-frac 0.1
+   indent-bars-pad-frac 0.1
+   indent-bars-zigzag nil
+   indent-bars-highlight-current-depth nil
+   indent-bars-highlight-current-depth nil))
+
+;; run .env/rc automagically
+(use-package envrc
+  :ensure t
+  :init
+  ;; I'm not ready to turn it on yet
+  ;; (envrc-global-mode)
+  )
 
 ;; display current defun in modeline
 (use-package which-func
-  :hook (prog-mode . which-function-mode))
+  :after (prog-mode)
+  :hook (prog-mode . which-function-mode)
+  :config
+  (defun my/kill-new-function-at-point ()
+    (interactive)
+    (kill-new (which-function))))
 
 ;; spellcheck strings and comments
 (use-package flyspell
-  :hook ((prog-mode . flyspell-prog-mode)
-         ((markdown-mode org-mode git-commit-mode) . flyspell-mode))
+  :after (prog-mode markdown-mode org git-commit)
   :init
   (setq flyspell-mode-map (make-sparse-keymap)
-        flyspell-mouse-map (make-sparse-keymap)))
+        flyspell-mouse-map (make-sparse-keymap))
+  :hook ((prog-mode . flyspell-prog-mode)
+         ((markdown-mode org-mode git-commit-mode) . flyspell-mode)))
 
 ;; improved structural navigation and editing
 (use-package puni
   :ensure t
   :bind (:map prog-mode-map
-              ("C-M-f" . puni-forward-sexp-or-up-list)
-              ("C-M-b" . puni-backward-sexp-or-up-list)
-              ;; slurping & barfing
-              ("C-}" . puni-barf-forward)
-              ("C-)" . puni-slurp-forward)
-              ("C-(" . puni-slurp-backward)
-              ("C-{" . puni-barf-backward)
-              ;; depth changing
-              ("M-r" . puni-raise)
-              ("M-=" . puni-splice)
-              ("M-_" . puni-split)
-              ("M-<up>" . puni-splice-killing-backward)
-              ("M-<down>" . puni-splice-killing-forward)))
+         ("C-M-f" . puni-forward-sexp-or-up-list)
+         ("C-M-b" . puni-backward-sexp-or-up-list)
+         ;; slurping & barfing
+         ("C-}" . puni-barf-forward)
+         ("C-)" . puni-slurp-forward)
+         ("C-(" . puni-slurp-backward)
+         ("C-{" . puni-barf-backward)
+         ;; depth changing
+         ("C-M-r" . puni-raise)
+         ("M-=" . puni-splice)
+         ("M-_" . puni-split)
+         ("M-<up>" . puni-splice-killing-backward)
+         ("M-<down>" . puni-splice-killing-forward)))
 
 ;; insert closing delimiters
-(electric-pair-mode 1)
-
-;; always add newline at the end of the file
-(setq require-final-newline t)
-
-;; define keybinding missing in 28?
-(define-key global-map (kbd "C-M-<backspace>") #'backward-kill-sexp)
+(use-package elec-pair
+  :init
+  (electric-pair-mode 1))
 
 ;; completions nice-to-haves
 (setq tab-always-indent 'complete
@@ -1035,6 +1154,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; symbols for completion swag
 (use-package svg-lib
   :ensure t)
+
 (use-package kind-icon
   :ensure t
   :after corfu
@@ -1042,9 +1162,68 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (kind-icon-default-face 'corfu-default)
   (kind-icon-use-icons nil)
   :config
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
+  :hook (after-enable-theme . kind-icon-reset-cache))
+
+;; snippets
+
+(use-package yasnippet
+  :ensure t
+  :hook (prog-mode . yas-minor-mode)
+  :bind (:map yas-minor-mode-map
+         ("TAB" . nil)))
+
+(use-package yasnippet-snippets
+  :after yasnippet
+  :ensure t)
+
+(use-package consult-yasnippet
+  :after (yasnippet consult)
+  :ensure t)
+
+;; compilation improvements
+
+(use-package fancy-compilation
+  :ensure t
+  :after compile
+  :commands (fancy-compilation-mode)
+  :config
+  (setq fancy-compilation-override-colors t)
+  (fancy-compilation-mode)
+  (dolist
+      (faces
+       '((fancy-compilation-default-face . default)
+         (fancy-compilation-function-name-face . font-lock-function-name-face)
+         (fancy-compilation-line-number-face . line-number)
+         (fancy-compilation-column-number-face . shadow)
+         (fancy-compilation-info-face . italic)
+         (fancy-compilation-warning-face . warning)
+         (fancy-compilation-error-face . error)
+         (fancy-compilation-complete-success-face . success)
+         (fancy-compilation-complete-error-face . error)))
+    (set-face-attribute
+     (car faces)
+     nil
+     :background 'unspecified
+     :foreground 'unspecified
+     :inherit (cdr faces))))
+
+
+;;; lisp
+(use-package paren-face
+  :ensure t
+  :hook ((lisp-data-mode scheme-mode) . paren-face-mode))
+
+(use-package rainbow-delimiters
+  :ensure t
+  :bind ("C-c t (" . #'rainbow-delimiters-mode))
 
 ;;; elisp
+
+(use-package eros
+  :ensure t
+  :demand t
+  :hook (emacs-lisp-mode . eros-mode))
 
 ;;; (guile) scheme
 (use-package geiser-mit
@@ -1054,112 +1233,177 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after geiser-mit
   :ensure t)
 
+(use-package info
+  :init
+  (when (eq system-type 'darwin)
+    (add-to-list 'Info-directory-list
+                 "/opt/local/share/info/")))
+
 ;;; python
 
-;; consult imenu integration
-(setq my/lsp-mode-imenu-types
-      '((?f "Functions")
-        (?F "Fields")
-        (?m "Methods")
-        (?M "Modules")
-        (?c "Classes")
-        (?C "Constants")
-        (?v "Variables")
-        (?e "Enums")
-        (?E "Enum Members")
-        (?i "Interfaces")
-        (?s "Strings")
-        (?S "Structs")
-        (?n "Numbers")
-        (?N "Namespaces")
-        (?p "Properties")
-        (?P "Packages")
-        (?b "Booleans")
-        (?a "Arrays")
-        (?o "Objects")
-        (?O "Operators")
-        (?k "Keys")
-        (?K "Constructors")
-        (?_ "Nulls")
-        (?t "Type Parameters")
-        (?! "Events")
-        (?d "Files")))
+(use-package python
+  :ensure f
+  :init
+  (setq python-shell-dedicated 'project)
+  (add-to-list 'major-mode-remap-alist
+               '(python-mode . python-ts-mode)))
 
 ;; lsp based imenu for python
-(with-eval-after-load 'consult-imenu
-  (add-to-list 'consult-imenu-config
-               `(,(if my/treesit-enabled
-                      'python-base-mode
-                    'python-mode)
-                 :types ,my/lsp-mode-imenu-types)))
-
-;; lsp based imenu for js
-(with-eval-after-load 'consult-imenu
-  (add-to-list 'consult-imenu-config
-               `(,(if my/treesit-enabled
-                      'js-base-mode
-                    'js-mode)
-                 :types ,my/lsp-mode-imenu-types)))
-
-;; use tree-sitter mode by default
-(when my/treesit-enabled
-  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
+(use-package emacs
+  :after (python consult-imenu lsp-mode)
+  :config
+  (dolist (mode '(python-mode
+                  python-ts-mode))
+    (add-to-list 'consult-imenu-config
+                 `(,mode :types ,my/lsp-mode-imenu-types))))
 
 ;; setup pyright
 (use-package lsp-pyright
   :ensure t
   :init
-  (setq lsp-pyright-disable-organize-imports t
+  (setq lsp-pyright-langserver-command "basedpyright"
+        lsp-pyright-disable-organize-imports t
         lsp-pyright-auto-import-completions t
         lsp-pyright-use-library-code-for-types t
-        lsp-pyright-diagnostic-mode "onlyOpenFiles")
+        lsp-pyright-diagnostic-mode nil)
+  :hook ((python-mode python-ts-mode)
+         . (lambda ()
+             (require 'lsp-pyright)
+             (lsp))))
 
-  (add-hook (if my/treesit-enabled
-                'python-ts-mode-hook
-              'python-mode-hook)
-            (lambda ()
-              (require 'lsp-pyright)
-              (lsp))))
+(use-package dap-python
+  :ensure nil
+  :after dap-mode
+  :config
+  (setq dap-python-debugger 'debugpy)
+  (dap-register-debug-template
+   "Python :: Attach to Dockerized Django"
+   (list :name "Python :: Attach to Dockerized Django"
+         :type "python"
+         :request "attach"
+         :connect '(:port 5679 :host "localhost")
+         :django t
+         :pathMappings '((("localRoot" . "${workspaceFolder}")
+                          ("remoteRoot" . "/app/"))))))
 
 ;; formatting
 (use-package python-black
   :ensure t
   :demand t
-  :after python-ts-mode
-  :config
-  (define-key python-ts-mode-map (kbd "C-c c f") '("format-buffer" . python-black-buffer))
-  (define-key python-ts-mode-map (kbd "C-c c F") '("format-region" . python-black-region)))
+  :after python
+  :hook ((python-mode python-ts-mode) . python-black-on-save-mode))
 
 (use-package python-isort
   :ensure t
   :demand t
-  :after python-ts-mode
-  :config
-  (define-key python-ts-mode-map (kbd "C-c c o") '("organize-imports" . python-isort-buffer)))
+  :after python
+  :hook ((python-mode python-ts-mode) . python-isort-on-save-mode))
+
+(use-package reformatter
+  :ensure t
+  :demand t
+  :after python
+  :init
+  (reformatter-define python-ruff-fix
+    :program "ruff"
+    :args `("--fix" ,input-file)
+    :lighter " ruff-fix"
+    :stdin nil
+    :stdout nil)
+  :hook ((python-mode python-ts-mode) . python-ruff-fix-on-save-mode))
 
 ;; virtual environments
 (use-package pyvenv
   :ensure t
-  :after python-ts-mode
+  :after python
   :init
   (setq my/python-venv-map (make-sparse-keymap))
-  (define-key python-ts-mode-map (kbd "C-c c v") `("virtualenv" . ,my/python-venv-map))
-  (define-key my/python-venv-map (kbd "a") '("activate" . pyvenv-activate))
-  (define-key my/python-venv-map (kbd "d") '("de-activate" . pyvenv-deactivate)))
+  (bind-key "C-c v" my/python-venv-map python-mode-map)
+  (defun my/project-pyenv-activate ()
+    (interactive)
+    (if-let* ((prj (project-current))
+              (prj-root (project-root prj))
+              (venv-dir (expand-file-name ".venv" prj-root))
+              (venv-dir-valid (file-exists-p venv-dir)))
+        (pyvenv-activate venv-dir)
+      (message (string-join `("Could not find virtualenv at path: " ,venv-dir)))))
+  :bind (:map my/python-venv-map
+         ("a" . #'pyvenv-active)
+         ("d" . #'pyvenv-deactivate)
+         ("p" . #'my/project-pyenv-activate)))
 
 ;; test running
 
+;; golang
+
+(use-package go-mode
+  :ensure t
+  :hook ((go-mode . (lambda () (require 'lsp-go) (lsp)))
+         (go-mode . subword-mode)))
+;; lsp
+
+(use-package lsp-go
+  :init
+  (setq lsp-go-use-placeholders nil
+        lsp-go-use-gofumpt t))
+
+(use-package emacs
+  :after (go-mode consult-imenu lsp-mode)
+  :config
+  (add-to-list 'consult-imenu-config
+               `(go-mode :types ,my/lsp-mode-imenu-types)))
+
+;; formatting
+
+(use-package reformatter
+  :ensure t
+  :demand t
+  :after go-mode
+  :init
+  (reformatter-define go-gofmt
+    :program "gofumpt"
+    :args `("-w" ,input-file)
+    :lighter " GOFUPMT"
+    :stdin nil
+    :stdout nil)
+  :hook (go-mode . go-gofmt-on-save-mode))
+
+;; interactive coding
+
+(use-package go-scratch
+  :ensure t)
+
+(use-package gorepl-mode
+  :ensure t)
+
+;; c#
+
+(use-package csharp-mode
+  :after (lsp-mode consult-imenu reformatter)
+  :init
+  (add-to-list 'major-mode-remap-alist
+               '(csharp-mode . csharp-ts-mode))
+  (dolist (mode '(csharp-mode
+                  csharp-ts-mode))
+    (add-to-list 'consult-imenu-config
+                 `(,mode :types ,my/lsp-mode-imenu-types)))
+  :hook ((csharp-mode csharp-ts-mode)
+          . (lambda ()
+              (require 'lsp-csharp)
+              (lsp))))
+
+(use-package dotnet
+  :ensure t
+  :after csharp-mode
+  :init
+  (setq dotnet-mode-keymap-prefix (kbd "C-c c"))
+  :hook ((csharp-mode csharp-ts-mode)
+         . dotnet-mode))
+
 ;; c
 
-;; use tree-sitter mode by default
-(when my/treesit-enabled
-  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode)))
-
 ;; enable lsp automatically
-(add-hook (if my/treesit-enabled
-              'c-ts-mode
-            'c-mode)
-          #'lsp)
+(add-hook 'c-mode-hook #'lsp)
 
 ;; use k&r style
 (setq c-default-style "linux"
@@ -1174,31 +1418,22 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; elixir
 
 ;; javascript
+(use-package js
+  :after (consult-imenu lsp-mode)
+  :config
+  (add-to-list 'consult-imenu-config
+               `(js-mode
+                 :types ,my/lsp-mode-imenu-types))
+  :hook (js-mode . lsp)
+  :bind (:map js-mode-map
+         ("M-." . nil)))
 
-;; use treesit tsx mode if possible
-(when my/treesit-enabled
-  (add-to-list 'major-mode-remap-alist '(js-mode . js-ts-mode)))
-
-;; remove horrible mode keymap
-(with-eval-after-load 'js
-  (define-key js-mode-map (kbd "M-.") #'xref-find-definitions))
-
-;; enable lsp by default
-(add-hook (if my/treesit-enabled
-              'js-ts-mode-hook
-            'js-mode-hook)
-          #'lsp)
-
-
-;; format with prettier
 (use-package prettier-js
   :ensure t
   :after js
   :commands (prettier-js)
-  :init
-  (define-key (if my/treesit-enabled js-base-mode-map js-mode-map)
-    (kbd "C-c c f ")
-    #'prettier-js))
+  :bind (:map js-mode-map
+         ("C-c f b" . #'prettier-js)))
 
 ;; vue
 
@@ -1207,17 +1442,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :config
   (define-derived-mode my/vue-mode web-mode "Vue.js")
-  (add-to-list 'auto-mode-alist '("\\.vue\\'" . my/vue-mode)))
-
-;; run lsp automatically
-(add-hook 'my/vue-mode-hook #'lsp)
+  (add-to-list 'auto-mode-alist '("\\.vue\\'" . my/vue-mode))
+  :hook (my/vue-mode . lsp))
 
 ;;; writing
 
 (use-package olivetti
   :ensure t
-  :hook ((org-mode . olivetti-mode)
-         (markdown-mode . olivetti-mode)))
+  :hook (((org-mode
+           markdown-mode
+           message-mode)
+          . olivetti-mode)))
 
 ;;; markdown
 
@@ -1225,26 +1460,44 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package markdown-mode
   :ensure t)
 
+;;; notes
+
+(use-package denote
+  :ensure t
+  :demand t
+  :init
+  (setq my/note-keymap (make-sparse-keymap))
+  (bind-key "C-c n" my/note-keymap)
+  :bind (:map my/note-keymap
+         ("n" . #'denote-create-note)
+         ("l" . #'denote-link)
+         ("b" . #'denote-backlinks)
+         ("d" . (lambda ()
+                  (interactive)
+                  (find-file denote-directory)))
+         ("D" . #'denote-sort-dired)
+         ("f" . #'denote-link-find-file)
+         ("r" . #'denote-rename-file))
+  :hook (dired-mode . (lambda () (denote-dired-mode))))
+
 ;;; org
 
 ;; org config
 (use-package org
-  :hook (org-mode . org-indent-mode)
+  :hook ((org-mode . org-indent-mode)
+         (org-mode
+          . (lambda ()
+              (setq-local electric-pair-inhibit-predicate
+                          `(lambda (c)
+                             (if (char-equal c ?<)
+                                 t
+                               (,electric-pair-inhibit-predicate c)))))))
   :config
   (setq org-default-notes-file "~/org/notes.org"
         org-startup-with-inline-images nil
         org-return-follows-link t)
 
   (add-to-list 'org-modules 'org-tempo)
-
-  (add-hook
-   'org-mode-hook
-   (lambda ()
-     (setq-local electric-pair-inhibit-predicate
-                 `(lambda (c)
-                    (if (char-equal c ?<)
-                        t
-                      (,electric-pair-inhibit-predicate c))))))
 
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -1260,86 +1513,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         '((:session . "sh")
           (:results . "verbatim"))))
 
-;; org-capture project notes
-(defun my/get-project-notes-or-default-filepath ()
-  (or (and (project-current)
-           (expand-file-name
-            "notes.org"
-            (project-root (project-current))))
-      (progn
-        (message "No project found. Using default notes file.")
-        org-default-notes-file)))
-
-(defun my/initialize-org-file-with-headline (filepath headline)
-  (progn
-    ;; initialize empty file if none exists
-    (when (not (file-exists-p filepath))
-      (message "File doesn't exist... Initializing...")
-      (with-temp-buffer (write-file filepath)))
-    ;; add headline
-    (with-temp-buffer
-      (insert-file-contents filepath)
-      (let* ((headline-fmt (concat "* " headline))
-             (headline-exists (save-excursion
-                                (goto-char (point-min))
-                                (search-forward headline-fmt nil t))))
-        (when (not headline-exists)
-          (message "No existing headline... Adding to file...")
-          (save-excursion
-            (goto-char (point-max))
-            (insert "\n" headline-fmt))
-          (write-file filepath))))
-    filepath))
-
-(defun my/project-or-default-file+headline (headline)
-  `(file+headline
-    ,(my/initialize-org-file-with-headline
-      (my/get-project-notes-or-default-filepath)
-      headline)
-    ,headline))
-
-
-(setq my/project-capture-prefix "p")
-
-(defun my/org-capture-project ()
-  (interactive)
-  (let* ((my/project-capture-list
-          `(("t" "TODO" entry
-             ,(my/project-or-default-file+headline "Tasks")
-             "* TODO %?\nContext:%a\n")
-            ("n" "Note" entry
-             ,(my/project-or-default-file+headline "Notes")
-             "* %?\nContext:%a\n")))
-         (org-capture-templates
-          (cl-concatenate
-           'list
-           org-capture-templates
-           (when (project-current)
-             (cons
-              `(,my/project-capture-prefix "project")
-              (mapcar
-               (lambda (xs)
-                 (cons (concat my/project-capture-prefix
-                               (car xs))
-                       (cdr xs)))
-               my/project-capture-list))))))
-    (org-capture)))
-
-;; capture notes on the fly
-(use-package org-capture
-  :config
-  (setq org-capture-templates '())
-  (define-key global-map (kbd "M-c") #'my/org-capture-project))
-
-;; rebind capitalize because it's still useful
-(define-key global-map (kbd "M-C") #'capitalize-dwim)
-
 ;; do http requests with org
 (use-package verb
   :ensure t
   :after org
   :init
-  (define-key org-mode-map (kbd "C-c C-r") `("verb" . verb-command-map)))
+  (bind-key "C-c C-r" verb-command-map org-mode-map))
 
 ;; import from postman
 (use-package impostman
@@ -1362,7 +1541,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; email
 
 (use-package sendmail
-  :ensure f
   :init
   (setq send-mail-function 'sendmail-send-it
         sendmail-program "/opt/local/bin/msmtp"
@@ -1376,4 +1554,46 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          ("C-c m i" . #'notmuch)))
 
 ;; load external custom file
-(load custom-file)
+(load custom-file :no-error)
+
+;; define theme toggle and load
+(use-package emacs
+  :after (faces ef-themes)
+  :config
+  ;; my theme selections for toggling
+  (setq my/light-theme 'ef-cyprus
+        my/dark-theme 'ef-elea-dark
+        my/active-theme my/light-theme)
+  ;; toggle theme
+  (defun my/theme-toggle (&optional light-or-dark)
+    (interactive)
+    (setq my/active-theme
+          (or (and (eq light-or-dark :light) my/light-theme)
+              (and (eq light-or-dark :dark) my/dark-theme)
+              (and (eq my/active-theme my/dark-theme) my/light-theme)
+              (and (eq my/active-theme my/light-theme) my/dark-theme)
+              my/dark-theme))
+    (mapc 'disable-theme custom-enabled-themes)
+    (load-theme my/active-theme t))
+
+  ;; switch themes with system
+  (if (and (eq system-type 'darwin)
+           (boundp 'mac-application-state))
+      (progn
+        (message "Matching emac theme to system theme...")
+        (defun my/match-theme-to-system ()
+          (let ((appearance (plist-get (mac-application-state)
+                                       :appearance)))
+            (my/theme-toggle
+             (if (string-equal
+                  appearance
+                  "NSAppearanceNameDarkAqua")
+                 :dark
+               :light))))
+        (add-hook 'mac-effective-appearance-change-hook
+                  #'my/match-theme-to-system)
+        (my/match-theme-to-system))
+    (progn
+      (message "Loading theme...")
+      (load-theme my/active-theme t)))
+  :bind ("C-c t t" . #'my/theme-toggle))
