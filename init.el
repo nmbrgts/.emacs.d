@@ -97,6 +97,7 @@
     (make-directory path t)
     path))
 
+;; misc. file settings
 (use-package files
   :ensure f
   :hook (before-save
