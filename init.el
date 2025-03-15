@@ -1571,7 +1571,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (load-theme my/active-theme t))
 
   ;; switch themes with system
-  (if (eq system-type 'darwin)
+  (if (and (eq system-type 'darwin)
+           (boundp 'mac-application-state))
       (progn
         (message "Matching emac theme to system theme...")
         (defun my/match-theme-to-system ()
