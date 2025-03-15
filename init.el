@@ -45,6 +45,11 @@
    :url "https://github.com/quelpa/quelpa-use-package.git"))
 (require 'quelpa-use-package)
 
+;; load private config
+(let ((private-config (expand-file-name "private.el" user-emacs-directory)))
+ (if (file-exists-p private-config)
+   (load private-config :no-error)))
+
 ;; misc. early settings
 (use-package emacs
   :custom
