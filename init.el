@@ -92,7 +92,7 @@
   (global-visual-line-mode 1))
 
 ;; helper function for setting paths in emacs dir
-(defun my/initialize-emacs-dir-path (sub-path)
+(defun nmbrgts/initialize-emacs-dir-path (sub-path)
   (let ((path (expand-file-name sub-path user-emacs-directory)))
     (make-directory path t)
     path))
@@ -113,10 +113,10 @@
    ;; automatically refresh any file visiting buffers
    revert-without-query '(".*")
    ;; keep transient files tidy (part 1)
-   my/transient-files-backup-dir (my/initialize-emacs-dir-path "tmp/backups/")
-   my/transient-files-auto-save-dir (my/initialize-emacs-dir-path "tmp/auto-saves/")
-   backup-directory-alist `(("." . ,my/transient-files-backup-dir))
-   auto-save-file-name-transforms `((".*" ,my/transient-files-auto-save-dir t)))
+   nmbrgts/transient-files-backup-dir (nmbrgts/initialize-emacs-dir-path "tmp/backups/")
+   nmbrgts/transient-files-auto-save-dir (nmbrgts/initialize-emacs-dir-path "tmp/auto-saves/")
+   backup-directory-alist `(("." . ,nmbrgts/transient-files-backup-dir))
+   auto-save-file-name-transforms `((".*" ,nmbrgts/transient-files-auto-save-dir t)))
   :bind (("C-r" . #'revert-buffer)
          ("C-x C-r" . #'set-visited-file-name)))
 
@@ -128,11 +128,11 @@
   :init
   (setq
    ;; keep transient files tidy (part 2)
-   my/transient-files-auto-save-prefix (my/initialize-emacs-dir-path "tmp/auto-saves/sessions")
-   auto-save-list-file-prefix my/transient-files-auto-save-prefix
+   nmbrgts/transient-files-auto-save-prefix (nmbrgts/initialize-emacs-dir-path "tmp/auto-saves/sessions")
+   auto-save-list-file-prefix nmbrgts/transient-files-auto-save-prefix
    create-lockfiles nil)
 
-  (defun my/recompile-packages ()
+  (defun nmbrgts/recompile-packages ()
     (interactive)
     (byte-recompile-directory package-user-dir nil 'force)))
 
@@ -192,11 +192,11 @@
 (use-package window
   :ensure f
   :init
-  (setq my/window-map (make-sparse-keymap))
-  (bind-key "C-c w" my/window-map)
+  (setq nmbrgts/window-map (make-sparse-keymap))
+  (bind-key "C-c w" nmbrgts/window-map)
   :bind (("C-c s" . #'scratch-buffer)
          ("C-c t w" . #'window-toggle-side-windows)
-         :repeat-map my/buffer-move-repeat-map
+         :repeat-map nmbrgts/buffer-move-repeat-map
          ("<right>" . #'next-buffer)
          ("<left>" . #'previous-buffer)))
 
@@ -206,7 +206,7 @@
          ("C-c <up>" . #'windmove-up)
          ("C-c <left>" . #'windmove-left)
          ("C-c <right>" . #'windmove-right)
-         :repeat-map my/windmove-repeat-map
+         :repeat-map nmbrgts/windmove-repeat-map
          ("<down>" . #'windmove-down)
          ("<up>" . #'windmove-up)
          ("<left>" . #'windmove-left)
@@ -217,10 +217,10 @@
   :init
   (setq winner-dont-bind-my-keys t)
   (winner-mode 1)
-  :bind (:map my/window-map
+  :bind (:map nmbrgts/window-map
          ("u" . #'winner-undo)
          ("r" . #'winner-redo)
-         :repeat-map my/winner-repeat-map
+         :repeat-map nmbrgts/winner-repeat-map
          ("u" . #'winner-undo)
          ("r" . #'winner-redo)))
 
@@ -229,9 +229,10 @@
   :ensure f
   :config
   ;; adjust transient buffer behaviors to personal preference
-  (defun my/display-buffer-in-side-window-and-select (buffer alist)
+  (defun nmbrgts/display-buffer-in-side-window-and-select (buffer alist)
     (if-let ((window (display-buffer-in-side-window buffer alist)))
-        (select-window window)))
+        (progn
+          (select-window window))))
 
   (setq window-sides-slots '(0 1 1 1)
         display-buffer-alist
@@ -239,38 +240,39 @@
         ;; TODO: create a system for generalizing the display rules I want,
         ;;       so display definitions don't need to be centralized here.
         '(;; top bar interactive
-          ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|eat\\|Python\\)\\*$"
-           (my/display-buffer-in-side-window-and-select)
-           (side . top)
+          ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|eat\\|Python\\|ielm\\)\\*$"
+           (nmbrgts/display-buffer-in-side-window-and-select)
+           (side . bottom)
            (slot . 1)
-           (window-height . 0.20))
+           (window-height . 0.30))
           ;; top bar informational
           ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
-           (my/display-buffer-in-side-window-and-select)
+           (nmbrgts/display-buffer-in-side-window-and-select)
            (select. t)
            (side . top)
            (slot . 1)
            (window-height . 0.20))
-          ;;
-          ("^\\*\\(scratch\\)"
-           (my/display-buffer-in-side-window-and-select)
+          ;; quick doodling
+          ("^\\*\\(.*scratch\\)"
+           (nmbrgts/display-buffer-in-side-window-and-select)
            (select. t)
-           (side . top)
+           (side . bottom)
            (slot . 1)
-           (window-height . 0.20))
+           (window-height . 0.30))
           ;; side bar information
-          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\)"
-           (my/display-buffer-in-side-window-and-select)
+          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\|lsp-help\\)"
+           (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
            (window-width . 0.30))
-          ("^\\*\\( docker\\)"
-           (my/display-buffer-in-side-window-and-select)
+          ;; side bar tooling
+          ("^\\*\\( docker\\|compilation\\)"
+           (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
            (window-width . 0.30))))
 
-  (defun my/promote-side-window-buffer (arg)
+  (defun nmbrgts/promote-side-window-buffer (arg)
     (interactive "P")
     (if (not (window-parameter (selected-window) 'window-side))
         (message "Error: Selected window is not a side window!")
@@ -297,7 +299,31 @@
                (switch-to-buffer buf))
               (t
                (select-window (display-buffer buf)))))))
-  :bind ("C-c p" . #'my/promote-side-window-buffer))
+
+  (setq nmbrgts/last-quit-side-window nil)
+
+  (defun nmbrgts/quit-side-window ()
+    (interactive)
+    (if (not (window-parameter (selected-window) 'window-side))
+        (message "Error: Selected window is no a side window!")
+      (progn
+        (setq nmbrgts/last-quit-side-window (buffer-name (current-buffer)))
+        (delete-window))))
+
+  (defun nmbrgts/revive-side-window ()
+    (interactive)
+    (if nmbrgts/last-quit-side-window
+        (display-buffer nmbrgts/last-quit-side-window)
+      (message "Error: No side window to display!")))
+
+  (defun nmbrgts/set-last-quit ()
+    (if (window-parameter (selected-window) 'window-side)
+        (setq nmbrgts/last-quit-side-window (buffer-name (current-buffer)))))
+
+  :hook ((quit-window . nmbrgts/set-last-quit))
+  :bind (("s-P" . #'nmbrgts/promote-side-window-buffer)
+         ("s-q" . #'nmbrgts/quit-side-window)
+         ("s-r" . #'nmbrgts/revive-side-window)))
 
 ;; improved help
 (use-package helpful
@@ -339,7 +365,7 @@
   (define-advice vertico--setup
       (:after
        (&rest args)
-       my/vertico-buffer-mode-set-line-format)
+       nmbrgts/vertico-buffer-mode-set-line-format)
     (setq-local
      mode-line-format (propertize
                        "  * ↑ make selection above ↑ *"
@@ -576,46 +602,46 @@
 ;; fonts
 (use-package faces
   :config
-  (setq my/default-fixed-pitch-font "JetBrains Mono"
-        my/default-variable-pitch-font "Iosevka Aile"
-        my/default-fixed-pitch-height 270
-        my/default-variable-pitch-height 270)
+  (setq nmbrgts/default-fixed-pitch-font "JetBrains Mono"
+        nmbrgts/default-variable-pitch-font "Iosevka Aile"
+        nmbrgts/default-fixed-pitch-height 270
+        nmbrgts/default-variable-pitch-height 270)
 
-  (defun my/apply-preferred-fonts ()
+  (defun nmbrgts/apply-preferred-fonts ()
     (interactive)
     (set-face-attribute 'default nil
-                        :font my/default-fixed-pitch-font
+                        :font nmbrgts/default-fixed-pitch-font
                         :weight 'light
-                        :height my/default-fixed-pitch-height)
+                        :height nmbrgts/default-fixed-pitch-height)
     (set-face-attribute 'fixed-pitch nil
-                        :font my/default-fixed-pitch-font
+                        :font nmbrgts/default-fixed-pitch-font
                         :weight 'light
-                        :height my/default-fixed-pitch-height)
+                        :height nmbrgts/default-fixed-pitch-height)
     (set-face-attribute 'variable-pitch nil
-                        :font my/default-variable-pitch-font
+                        :font nmbrgts/default-variable-pitch-font
                         :weight 'light
-                        :height my/default-variable-pitch-height)
+                        :height nmbrgts/default-variable-pitch-height)
     (set-face-attribute 'bold nil :weight 'light))
-  :hook (after-enable-theme . my/apply-preferred-fonts))
+  :hook (after-enable-theme . nmbrgts/apply-preferred-fonts))
 
 ;; lsp faces
 (use-package faces
   :after lsp-mode
   :config
-  (defun my/tweak-lsp-mode-faces ()
+  (defun nmbrgts/tweak-lsp-mode-faces ()
     (set-face-attribute 'lsp-face-highlight-read nil
                         :weight 'light)
     (set-face-attribute 'lsp-face-highlight-write nil
                         :weight 'light)
     (set-face-attribute 'lsp-face-highlight-textual nil
                         :weight 'light))
-  :hook ((after-enable-theme lsp-mode) . my/tweak-lsp-mode-faces))
+  :hook ((after-enable-theme lsp-mode) . nmbrgts/tweak-lsp-mode-faces))
 
 ;; color tweaks
 (use-package faces
   :after (keycast fringe eros)
   :config
-  (defun my/tweak-tab-bar-faces ()
+  (defun nmbrgts/tweak-tab-bar-faces ()
     (set-face-attribute
      'tab-bar nil)
     (set-face-attribute
@@ -635,13 +661,13 @@
      :box nil
      :weight 'normal))
 
-  (defun my/tweak-fringe-faces ()
+  (defun nmbrgts/tweak-fringe-faces ()
     (set-face-attribute
      'fringe nil
      :background (face-attribute 'default :background)
      :foreground (face-attribute 'default :background)))
 
-  (defun my/tweak-keycast-faces ()
+  (defun nmbrgts/tweak-keycast-faces ()
     (set-face-attribute 'keycast-key nil
                         ;; :foreground (face-attribute 'mode-line :background)
                         ;; :background (face-attribute 'mode-line-emphasis :foreground)
@@ -650,11 +676,11 @@
       (keycast-tab-bar-mode -1)
       (keycast-tab-bar-mode +1)))
 
-  (defun my/tweak-miniframe-faces ()
+  (defun nmbrgts/tweak-miniframe-faces ()
     (set-face-attribute 'child-frame-border nil
                         :background (face-attribute 'font-lock-constant-face :foreground)))
 
-  (defun my/tweak-eros-faces ()
+  (defun nmbrgts/tweak-eros-faces ()
     (set-face-attribute 'eros-result-overlay-face
                         nil
                         :background nil
@@ -664,11 +690,11 @@
                              ;;     'font-lock-comment-face
                              ;;     :foreground))
                         :inherit 'font-lock-comment-face))
-  :hook ((after-enable-theme . my/tweak-tab-bar-faces)
-         (after-enable-theme . my/tweak-fringe-faces)
-         (after-enable-theme . my/tweak-keycast-faces)
-         (after-enable-theme . my/tweak-miniframe-faces)
-         (after-enable-theme . my/tweak-eros-faces)))
+  :hook ((after-enable-theme . nmbrgts/tweak-tab-bar-faces)
+         (after-enable-theme . nmbrgts/tweak-fringe-faces)
+         (after-enable-theme . nmbrgts/tweak-keycast-faces)
+         (after-enable-theme . nmbrgts/tweak-miniframe-faces)
+         (after-enable-theme . nmbrgts/tweak-eros-faces)))
 
 (use-package doom-modeline
   :ensure t
@@ -694,7 +720,7 @@
 ;; add minimal tab bar
 (use-package tab-bar
   :init
-  (defun my/tab-name-format-function (tab idx)
+  (defun nmbrgts/tab-name-format-function (tab idx)
     (let ((current-p (eq (car tab) 'current-tab)))
     (propertize
      (concat (if tab-bar-tab-hints (format "%d " i) "")
@@ -713,13 +739,13 @@
         tab-bar-tab-hints nil
         tab-bar-auto-width nil
         tab-bar-new-tab-choice "*scratch*"
-        tab-bar-tab-name-format-function 'my/tab-name-format-function)
+        tab-bar-tab-name-format-function 'nmbrgts/tab-name-format-function)
   (tab-bar-mode 1)
   (tab-rename "default" 0)
   ;; fix bug with tab-new and side windows
   (define-advice
       tab-bar-new-tab
-      (:before (&rest args) my/side-window-new-tab-fix)
+      (:before (&rest args) nmbrgts/side-window-new-tab-fix)
     (when (window-parameter (selected-window) 'window-side)
       (select-window (window-main-window)))))
 
@@ -754,11 +780,11 @@
   ;;   (defun project-name (proj)
   ;;     (cl-second (reverse (split-string (cdr proj) "/")))))
 
-  (defun my/project-tab-name ()
+  (defun nmbrgts/project-tab-name ()
     (interactive)
     (tab-bar-rename-tab (project-name (project-current))))
   :bind (:map project-prefix-map
-         ("TAB" . #'my/project-tab-name)))
+         ("TAB" . #'nmbrgts/project-tab-name)))
 
 ;; TODO: move to early init?
 (use-package tool-bar
@@ -836,12 +862,12 @@
 (use-package magit
   :ensure t
   :init
-  (setq my/git-prefix-map (make-sparse-keymap))
-  (bind-key "C-c g" my/git-prefix-map)
+  (setq nmbrgts/git-prefix-map (make-sparse-keymap))
+  (bind-key "C-c g" nmbrgts/git-prefix-map)
   :config
   (setq magit-bury-buffer-function 'magit-restore-window-configuration
         magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
-        magit-pre-display-buffer-hook 'magit-save-window-configuration
+        magit-pre-display--hook 'magit-save-window-configuration
         magit-save-repository-buffers 'dontask)
 
   (add-to-list 'project-switch-commands
@@ -852,7 +878,7 @@
     (setq magit-git-executable "/usr/bin/git"))
 
   :hook (after-save . magit-after-save-refresh-status)
-  :bind (:map my/git-prefix-map
+  :bind (:map nmbrgts/git-prefix-map
          ("b" . #'magit-blame-addition)
          ("g" . #'magit-status)
          ("f" .  #'magit-file-dispatch)))
@@ -873,7 +899,7 @@
   (global-diff-hl-mode)
   :bind (:map diff-hl-command-map
          ("s" . #'diff-hl-show-hunk-stage-hunk)
-         :map my/git-prefix-map
+         :map nmbrgts/git-prefix-map
          ("H" . #'diff-hl-show-hunk-next)
          ("h" . #'diff-hl-show-hunk-previous)))
 
@@ -891,21 +917,21 @@
 (use-package git-timemachine
   :ensure t
   :after magit
-  :bind (:map my/git-prefix-map
+  :bind (:map nmbrgts/git-prefix-map
          ("t" . #'git-timemachine)))
 
 ;; jump to buffer or region in forge
 (use-package browse-at-remote
   :ensure t
   :after magit
-  :bind (:map my/git-prefix-map
+  :bind (:map nmbrgts/git-prefix-map
          ("r" . #'browse-at-remote)))
 
 ;; handle conflics with a quick menu
 (use-package smerge-mode
   :after (hydra magit)
   :config
-  (defhydra my/smerge-hydra
+  (defhydra nmbrgts/smerge-hydra
     (:color pink :hint nil :post (smerge-auto-leave))
     "
 ^Move^       ^Keep^               ^Diff^                 ^Other^
@@ -941,7 +967,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :hook (magit-diff-visit-file
          . (lambda ()
              (when smerge-mode
-               (my/smerge-hydra/body)))))
+               (nmbrgts/smerge-hydra/body)))))
 
 (use-package ediff-wind
   :init
@@ -970,7 +996,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         lsp-headerline-breadcrumb-enable nil
         lsp-imenu-index-function #'lsp-imenu-create-categorized-index
         ;; list of lsp-mode imenu types for consult-imenu
-        my/lsp-mode-imenu-types
+        nmbrgts/lsp-mode-imenu-types
         '((?f "Functions")
           (?F "Fields")
           (?m "Methods")
@@ -1002,10 +1028,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :after hydra
   :init
-  (setq my/dap-mode-map (make-sparse-keymap)
+  (setq nmbrgts/dap-mode-map (make-sparse-keymap)
         dap-auto-configure-features '(sessions locals))
-  (bind-key "C-c d" my/dap-mode-map)
-  :bind (:map my/dap-mode-map
+  (bind-key "C-c d" nmbrgts/dap-mode-map)
+  :bind (:map nmbrgts/dap-mode-map
          ("n" . #'dap-next)
          ("i" . #'dap-step-in)
          ("o" . #'dap-step-out)
@@ -1096,7 +1122,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after (prog-mode)
   :hook (prog-mode . which-function-mode)
   :config
-  (defun my/kill-new-function-at-point ()
+  (defun nmbrgts/kill-new-function-at-point ()
     (interactive)
     (kill-new (which-function))))
 
@@ -1255,7 +1281,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (dolist (mode '(python-mode
                   python-ts-mode))
     (add-to-list 'consult-imenu-config
-                 `(,mode :types ,my/lsp-mode-imenu-types))))
+                 `(,mode :types ,nmbrgts/lsp-mode-imenu-types))))
 
 ;; setup pyright
 (use-package lsp-pyright
@@ -1317,9 +1343,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :after python
   :init
-  (setq my/python-venv-map (make-sparse-keymap))
-  (bind-key "C-c v" my/python-venv-map python-mode-map)
-  (defun my/project-pyenv-activate ()
+  (setq nmbrgts/python-venv-map (make-sparse-keymap))
+  (bind-key "C-c v" nmbrgts/python-venv-map python-mode-map)
+  (defun nmbrgts/project-pyenv-activate ()
     (interactive)
     (if-let* ((prj (project-current))
               (prj-root (project-root prj))
@@ -1327,10 +1353,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               (venv-dir-valid (file-exists-p venv-dir)))
         (pyvenv-activate venv-dir)
       (message (string-join `("Could not find virtualenv at path: " ,venv-dir)))))
-  :bind (:map my/python-venv-map
+  :bind (:map nmbrgts/python-venv-map
          ("a" . #'pyvenv-active)
          ("d" . #'pyvenv-deactivate)
-         ("p" . #'my/project-pyenv-activate)))
+         ("p" . #'nmbrgts/project-pyenv-activate)))
 
 ;; test running
 
@@ -1351,7 +1377,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after (go-mode consult-imenu lsp-mode)
   :config
   (add-to-list 'consult-imenu-config
-               `(go-mode :types ,my/lsp-mode-imenu-types)))
+               `(go-mode :types ,nmbrgts/lsp-mode-imenu-types)))
 
 ;; formatting
 
@@ -1386,7 +1412,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (dolist (mode '(csharp-mode
                   csharp-ts-mode))
     (add-to-list 'consult-imenu-config
-                 `(,mode :types ,my/lsp-mode-imenu-types)))
+                 `(,mode :types ,nmbrgts/lsp-mode-imenu-types)))
   :hook ((csharp-mode csharp-ts-mode)
           . (lambda ()
               (require 'lsp-csharp)
@@ -1423,7 +1449,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :config
   (add-to-list 'consult-imenu-config
                `(js-mode
-                 :types ,my/lsp-mode-imenu-types))
+                 :types ,nmbrgts/lsp-mode-imenu-types))
   :hook (js-mode . lsp)
   :bind (:map js-mode-map
          ("M-." . nil)))
@@ -1441,9 +1467,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package web-mode
   :ensure t
   :config
-  (define-derived-mode my/vue-mode web-mode "Vue.js")
-  (add-to-list 'auto-mode-alist '("\\.vue\\'" . my/vue-mode))
-  :hook (my/vue-mode . lsp))
+  (define-derived-mode nmbrgts/vue-mode web-mode "Vue.js")
+  (add-to-list 'auto-mode-alist '("\\.vue\\'" . nmbrgts/vue-mode))
+  :hook (nmbrgts/vue-mode . lsp))
 
 ;;; writing
 
@@ -1466,9 +1492,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :demand t
   :init
-  (setq my/note-keymap (make-sparse-keymap))
-  (bind-key "C-c n" my/note-keymap)
-  :bind (:map my/note-keymap
+  (setq nmbrgts/note-keymap (make-sparse-keymap))
+  (bind-key "C-c n" nmbrgts/note-keymap)
+  :bind (:map nmbrgts/note-keymap
          ("n" . #'denote-create-note)
          ("l" . #'denote-link)
          ("b" . #'denote-backlinks)
@@ -1561,39 +1587,39 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after (faces ef-themes)
   :config
   ;; my theme selections for toggling
-  (setq my/light-theme 'ef-cyprus
-        my/dark-theme 'ef-elea-dark
-        my/active-theme my/light-theme)
+  (setq nmbrgts/light-theme 'ef-cyprus
+        nmbrgts/dark-theme 'ef-elea-dark
+        nmbrgts/active-theme nmbrgts/light-theme)
   ;; toggle theme
-  (defun my/theme-toggle (&optional light-or-dark)
+  (defun nmbrgts/theme-toggle (&optional light-or-dark)
     (interactive)
-    (setq my/active-theme
-          (or (and (eq light-or-dark :light) my/light-theme)
-              (and (eq light-or-dark :dark) my/dark-theme)
-              (and (eq my/active-theme my/dark-theme) my/light-theme)
-              (and (eq my/active-theme my/light-theme) my/dark-theme)
-              my/dark-theme))
+    (setq nmbrgts/active-theme
+          (or (and (eq light-or-dark :light) nmbrgts/light-theme)
+              (and (eq light-or-dark :dark) nmbrgts/dark-theme)
+              (and (eq nmbrgts/active-theme nmbrgts/dark-theme) nmbrgts/light-theme)
+              (and (eq nmbrgts/active-theme nmbrgts/light-theme) nmbrgts/dark-theme)
+              nmbrgts/dark-theme))
     (mapc 'disable-theme custom-enabled-themes)
-    (load-theme my/active-theme t))
+    (load-theme nmbrgts/active-theme t))
 
   ;; switch themes with system
   (if (and (eq system-type 'darwin)
            (boundp 'mac-application-state))
       (progn
         (message "Matching emac theme to system theme...")
-        (defun my/match-theme-to-system ()
+        (defun nmbrgts/match-theme-to-system ()
           (let ((appearance (plist-get (mac-application-state)
                                        :appearance)))
-            (my/theme-toggle
+            (nmbrgts/theme-toggle
              (if (string-equal
                   appearance
                   "NSAppearanceNameDarkAqua")
                  :dark
                :light))))
         (add-hook 'mac-effective-appearance-change-hook
-                  #'my/match-theme-to-system)
-        (my/match-theme-to-system))
+                  #'nmbrgts/match-theme-to-system)
+        (nmbrgts/match-theme-to-system))
     (progn
       (message "Loading theme...")
-      (load-theme my/active-theme t)))
-  :bind ("C-c t t" . #'my/theme-toggle))
+      (load-theme nmbrgts/active-theme t)))
+  :bind ("C-c t t" . #'nmbrgts/theme-toggle))
