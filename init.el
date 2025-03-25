@@ -231,7 +231,8 @@
   ;; adjust transient buffer behaviors to personal preference
   (defun nmbrgts/display-buffer-in-side-window-and-select (buffer alist)
     (if-let ((window (display-buffer-in-side-window buffer alist)))
-        (select-window window)))
+        (progn
+          (select-window window))))
 
   (setq window-sides-slots '(0 1 1 1)
         display-buffer-alist
@@ -239,11 +240,11 @@
         ;; TODO: create a system for generalizing the display rules I want,
         ;;       so display definitions don't need to be centralized here.
         '(;; top bar interactive
-          ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|eat\\|Python\\)\\*$"
+          ("^\\*[[:alnum:]-\.]*\\(shell\\|term\\|eshell\\|vterm\\|eat\\|Python\\|ielm\\)\\*$"
            (nmbrgts/display-buffer-in-side-window-and-select)
-           (side . top)
+           (side . bottom)
            (slot . 1)
-           (window-height . 0.20))
+           (window-height . 0.30))
           ;; top bar informational
           ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
@@ -251,20 +252,21 @@
            (side . top)
            (slot . 1)
            (window-height . 0.20))
-          ;;
-          ("^\\*\\(scratch\\)"
+          ;; quick doodling
+          ("^\\*\\(.*scratch\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
            (select. t)
-           (side . top)
+           (side . bottom)
            (slot . 1)
-           (window-height . 0.20))
+           (window-height . 0.30))
           ;; side bar information
-          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\)"
+          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\|lsp-help\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
            (window-width . 0.30))
-          ("^\\*\\( docker\\)"
+          ;; side bar tooling
+          ("^\\*\\( docker\\|compilation\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
@@ -297,7 +299,31 @@
                (switch-to-buffer buf))
               (t
                (select-window (display-buffer buf)))))))
-  :bind ("C-c p" . #'nmbrgts/promote-side-window-buffer))
+
+  (setq nmbrgts/last-quit-side-window nil)
+
+  (defun nmbrgts/quit-side-window ()
+    (interactive)
+    (if (not (window-parameter (selected-window) 'window-side))
+        (message "Error: Selected window is no a side window!")
+      (progn
+        (setq nmbrgts/last-quit-side-window (buffer-name (current-buffer)))
+        (delete-window))))
+
+  (defun nmbrgts/revive-side-window ()
+    (interactive)
+    (if nmbrgts/last-quit-side-window
+        (display-buffer nmbrgts/last-quit-side-window)
+      (message "Error: No side window to display!")))
+
+  (defun nmbrgts/set-last-quit ()
+    (if (window-parameter (selected-window) 'window-side)
+        (setq nmbrgts/last-quit-side-window (buffer-name (current-buffer)))))
+
+  :hook ((quit-window . nmbrgts/set-last-quit))
+  :bind (("s-P" . #'nmbrgts/promote-side-window-buffer)
+         ("s-q" . #'nmbrgts/quit-side-window)
+         ("s-r" . #'nmbrgts/revive-side-window)))
 
 ;; improved help
 (use-package helpful
@@ -841,7 +867,7 @@
   :config
   (setq magit-bury-buffer-function 'magit-restore-window-configuration
         magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
-        magit-pre-display-buffer-hook 'magit-save-window-configuration
+        magit-pre-display--hook 'magit-save-window-configuration
         magit-save-repository-buffers 'dontask)
 
   (add-to-list 'project-switch-commands
