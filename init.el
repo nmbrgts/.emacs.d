@@ -196,6 +196,10 @@
   (bind-key "C-c w" nmbrgts/window-map)
   :bind (("C-c s" . #'scratch-buffer)
          ("C-c t w" . #'window-toggle-side-windows)
+         ("C-x O" . (lambda ()
+                      (interactive)
+                      (setq repeat-map 'other-window-repeat-map)
+                      (other-window -1)))
          :repeat-map nmbrgts/buffer-move-repeat-map
          ("<right>" . #'next-buffer)
          ("<left>" . #'previous-buffer)))
