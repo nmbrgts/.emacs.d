@@ -1028,6 +1028,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
           (?! "Events")
           (?d "Files"))))
 
+(use-package consult-lsp
+  :after (consult lsp-mode)
+  :ensure t
+  :bind (("M-g s" . #'consult-lsp-symbols)
+         ("M-g d" . #'consult-lsp-diagnostics)))
+
 (use-package dap-mode
   :ensure t
   :after hydra
