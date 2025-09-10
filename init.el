@@ -320,6 +320,10 @@
         (display-buffer nmbrgts/last-quit-side-window)
       (message "Error: No side window to display!")))
 
+  ;; note: this isn't working with some operations like `magit-mode-bury-buffer'
+  ;; note: doesn't include lsp treemacs error list
+  ;; note: revive should change focus
+  ;; note: revive is non-symetrical if window isn't on the display a-list
   (defun nmbrgts/set-last-quit ()
     (if (window-parameter (selected-window) 'window-side)
         (setq nmbrgts/last-quit-side-window (buffer-name (current-buffer)))))
