@@ -99,7 +99,7 @@
 
 ;; misc. file settings
 (use-package files
-  :ensure f
+  :ensure nil
   :hook (before-save
          . (lambda ()
              (when (not (and (boundp 'markdown-mode)
@@ -124,7 +124,7 @@
   :bind (("C-c t SPC" . whitespace-mode)))
 
 (use-package emacs
-  :ensure f
+  :ensure nil
   :init
   (setq
    ;; keep transient files tidy (part 2)
@@ -138,12 +138,12 @@
 
 ;; contextually repeat commands with a single key press
 (use-package repeat
-  :ensure f
+  :ensure nil
   :init
   (repeat-mode 1))
 
 (use-package simple
-  :ensure f
+  :ensure nil
   :init
   ;; repeat-like behavior when popping mark
   (setq set-mark-command-repeat-pop t)
@@ -156,13 +156,13 @@
 
 ;; delete selected region on insert
 (use-package delsel
-  :ensure f
+  :ensure nil
   :init
   (delete-selection-mode 1))
 
 ;; update buffers when files change
 (use-package autorevert
-  :ensure f
+  :ensure nil
   :init
   ;; keep modeline up to date
   (setq auto-revert-check-vc-info t
@@ -185,12 +185,12 @@
   (setq uniquify-buffer-name-style 'post-forward-angle-brackets))
 
 (use-package ibuffer
-  :ensure f
+  :ensure nil
   :bind ("C-x C-b" . #'ibuffer))
 
 ;; helpful window operations
 (use-package window
-  :ensure f
+  :ensure nil
   :init
   (setq nmbrgts/window-map (make-sparse-keymap))
   (bind-key "C-c w" nmbrgts/window-map)
@@ -205,7 +205,7 @@
          ("<left>" . #'previous-buffer)))
 
 (use-package windmove
-  :ensure f
+  :ensure nil
   :bind (("C-c <down>" . #'windmove-down)
          ("C-c <up>" . #'windmove-up)
          ("C-c <left>" . #'windmove-left)
@@ -217,7 +217,7 @@
          ("<right>" . #'windmove-right)))
 
 (use-package winner
-  :ensure f
+  :ensure nil
   :init
   (setq winner-dont-bind-my-keys t)
   (winner-mode 1)
@@ -230,7 +230,7 @@
 
 ;; window display behavior
 (use-package window
-  :ensure f
+  :ensure nil
   :config
   ;; adjust transient buffer behaviors to personal preference
   (defun nmbrgts/display-buffer-in-side-window-and-select (buffer alist)
@@ -1323,7 +1323,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; python
 
 (use-package python
-  :ensure f
+  :ensure nil
   :init
   (setq python-shell-dedicated 'project)
   (add-to-list 'major-mode-remap-alist
