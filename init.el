@@ -1485,11 +1485,32 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; c
 
 ;; enable lsp automatically
-(add-hook 'c-mode-hook #'lsp)
+(add-hook 'c-mode-hook
+          (lambda ()
+            (setq-local lsp-enable-on-type-formatting nil)
+            (lsp)))
 
-;; use k&r style
-(setq c-default-style "linux"
-      c-basic-offset 4)
+(c-add-style
+ "modern-c"
+ '("stroustrup"
+   (c-basic-offset . 2)
+   (indent-tabs-mode . nil)
+   (tab-width . 2)
+   (c-offsets-alist
+    . ((substatement-open . 0)
+       (arglist-intro . +)
+       (arglist-cont-nonempty . 0)
+       (arglist-close . 0)
+       (statement-case-open . +)
+       (brace-list-open . 0)
+       (brace-list-intro . +)
+       (brace-list-entry . 0)
+       (block-open . 0)
+       (inclass . +)
+       (inline-open . 0)))))
+
+;; style approximating clang-format's llvm formatting
+(setq c-default-style "modern-c")
 
 ;; common-lisp
 (use-package sly
