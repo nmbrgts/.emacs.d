@@ -363,6 +363,7 @@
   (vertico-mode))
 
 (use-package vertico-buffer
+  :when (> emacs-major-version 30)
   :after vertico
   :init
   (setq  vertico-buffer-display-action
@@ -499,7 +500,7 @@
 ;;; move minibuffer to top of frame
 
 (use-package mini-frame
-  :when nil
+  :when (>= emacs-major-version 30)
   :ensure t
   :init
   (setq mini-frame-show-parameters
