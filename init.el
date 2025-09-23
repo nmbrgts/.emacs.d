@@ -1148,9 +1148,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :quelpa (indent-bars
            :fetcher github
            :repo "jdtsmith/indent-bars")
-  :hook ((js-mode . indent-bars-mode)
-         ((python-mode python-ts-mode) . indent-bars-mode)
-         (after-enable-theme
+  :hook ((after-enable-theme
           . (lambda ()
               (when (bound-and-true-p indent-bars-mode)
                 (indent-bars-mode -1)
@@ -1159,8 +1157,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (setq
    indent-bars-pattern "."
-   indent-bars-width-frac 0.1
-   indent-bars-pad-frac 0.1
+   indent-bars-width-frac 0.01
+   indent-bars-pad-frac 0.01
    indent-bars-zigzag nil
    indent-bars-highlight-current-depth nil
    indent-bars-highlight-current-depth nil))
