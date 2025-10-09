@@ -407,6 +407,7 @@
 
 ;; make searches interactive
 (use-package consult
+  :ensure t
   :after tabspaces
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (;; C-c bindings (mode-specific-map)
