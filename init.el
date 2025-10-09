@@ -1360,11 +1360,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :config
   (setq dap-python-debugger 'debugpy)
   (dap-register-debug-template
-   "Python :: Attach to Dockerized Django"
-   (list :name "Python :: Attach to Dockerized Django"
+   "Python :: Remote Attach :: Localhost"
+   (list :name "Python :: Remote Attach :: Localhost"
          :type "python"
          :request "attach"
-         :connect '(:port 5679 :host "localhost")
+         :connect '(:port 5678 :host "localhost")
          :django t
          :pathMappings '((("localRoot" . "${workspaceFolder}")
                           ("remoteRoot" . "/app/"))))))
