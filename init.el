@@ -1347,6 +1347,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         lsp-pyright-disable-organize-imports t
         lsp-pyright-auto-import-completions t
         lsp-pyright-use-library-code-for-types t
+        lsp-pyright-multi-root nil
         lsp-pyright-diagnostic-mode nil)
   :hook ((python-mode python-ts-mode)
          . (lambda ()
