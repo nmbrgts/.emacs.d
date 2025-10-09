@@ -1169,9 +1169,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package envrc
   :ensure t
   :init
-  ;; I'm not ready to turn it on yet
-  ;; (envrc-global-mode)
-  )
+  (envrc-global-mode))
 
 ;; display current defun in modeline
 (use-package which-func
