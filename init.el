@@ -1665,8 +1665,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after (faces ef-themes)
   :config
   ;; my theme selections for toggling
-  (setq nmbrgts/light-theme 'ef-cyprus
-        nmbrgts/dark-theme 'ef-elea-dark
+  (setq nmbrgts/light-theme 'ef-melissa-light
+        nmbrgts/dark-theme 'ef-melissa-dark
         nmbrgts/active-theme nmbrgts/light-theme)
   ;; toggle theme
   (defun nmbrgts/theme-toggle (&optional light-or-dark)
