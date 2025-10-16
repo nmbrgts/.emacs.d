@@ -1391,6 +1391,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     :lighter " ruff-fix"
     :stdin nil
     :stdout nil)
+
+  (reformatter-define python-reorder-python-imports
+    :program "reorder-python-imports"
+    :args `("--exit-zero-even-if-changed"
+            "--application-directories" ,(project-root (project-current))
+            "--py39-plus"
+            "-")
+    :lighter " reorder-python-imports")
   :hook ((python-mode python-ts-mode) . python-ruff-fix-on-save-mode))
 
 ;; virtual environments
