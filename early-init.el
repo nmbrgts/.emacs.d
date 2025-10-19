@@ -1,4 +1,5 @@
 ;;; startup tweaks
 
 ;; start maximized
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+;; bugged in emacs30
+;; (add-to-list 'initial-frame-alist '(fullscreen . maximized))
