@@ -358,19 +358,20 @@
 ;; vertical suggestions for many minibuffer operations
 (use-package vertico
   :ensure t
+  :custom
+  ((vertico-cycle t))
   :init
-  (setq vertico-cycle t)
   (vertico-mode))
 
 (use-package vertico-buffer
   :when t
   :after vertico
+  :custom
+  (vertico-buffer-display-action
+   '(display-buffer-in-side-window
+     (window-height . 0.20)
+     (side . top)))
   :init
-  (setq  vertico-buffer-display-action
-         '(display-buffer-in-side-window
-           (window-height . 0.20)
-           (side . top)))
-
   (define-advice vertico--setup
       (:after
        (&rest args)
@@ -896,12 +897,13 @@ targets."
   :init
   (add-to-list 'project-switch-commands     '(project-vterm "Vterm") t)
   (add-to-list 'project-kill-buffer-conditions  '(major-mode . vterm-mode))
-  :config
-  (setq vterm-copy-exclude-prompt t
-        vterm-disable-bold t
-        vterm-max-scrollback 100000
-        vterm-tramp-shells '(("ssh" "/bin/bash")
-                             ("podman" "/bin/bash"))))
+  :custom
+  ((vterm-copy-exclude-prompt t)
+   (vterm-always-compile-module t)
+   (vterm-disable-bold t)
+   (vterm-max-scrollback 100000)
+   (vterm-tramp-shells '(("ssh" "/bin/bash")
+                         ("podman" "/bin/bash")))))
 
 ;; emulate a terminal
 (use-package eat
