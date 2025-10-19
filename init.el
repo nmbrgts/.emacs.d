@@ -1519,7 +1519,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
        (inline-open . 0)))))
 
 ;; style approximating clang-format's llvm formatting
-(setq c-default-style "modern-c")
+(setq c-default-style "modern-c"
+      lsp-clients-clangd-args '("--header-insertion-decorators=0"
+        "--enable-config" "--log=verbose"))
 
 ;; common-lisp
 (use-package sly
