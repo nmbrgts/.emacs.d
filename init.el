@@ -1452,7 +1452,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after go-mode
   :init
   (reformatter-define go-gofmt
-    :program "gofumpt"
+    :program "~/go/bin/gofumpt"
     :args `("-w" ,input-file)
     :lighter " GOFUPMT"
     :stdin nil
