@@ -1709,4 +1709,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (progn
       (message "Loading theme...")
       (load-theme nmbrgts/active-theme t)))
-  :bind ("C-c t t" . #'nmbrgts/theme-toggle))
+  :bind ("C-c t t" . #'nmbrgts/theme-toggle)
+  :hook ((after-enable-theme
+          . (lambda ()
+              (setenv "EMACS_THEME" (format "%s" nmbrgts/active-theme))))))
