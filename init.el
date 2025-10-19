@@ -1319,7 +1319,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (when (eq system-type 'darwin)
     (add-to-list 'Info-directory-list
-                 "/opt/local/share/info/")))
+                 "/usr/local/opt/emacs-plus@30/share/info/emacs/")))
 
 ;;; python
 
