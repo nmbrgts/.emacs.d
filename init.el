@@ -1627,7 +1627,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; do http requests with org
 (use-package verb
-  :ensure t
+  :when nil
+  :ensure nil
   :after org
   :init
   (bind-key "C-c C-r" verb-command-map org-mode-map))
