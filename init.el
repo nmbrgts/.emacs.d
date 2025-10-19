@@ -1457,7 +1457,16 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     :lighter " GOFUPMT"
     :stdin nil
     :stdout nil)
-  :hook (go-mode . go-gofmt-on-save-mode))
+
+  (reformatter-define go-goimports
+    :program "/Users/nmbrgts/go/bin/goimports"
+    :args `("-w" ,input-file)
+    :lighter " GOIMPORTS"
+    :stdout nil
+    :stdin nil)
+
+  :hook ((go-mode . go-gofmt-on-save-mode)
+         (go-mode . go-goimports-on-save-mode)))
 
 ;; interactive coding
 
