@@ -1227,9 +1227,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package corfu
   :ensure t
   :custom
-  (corfu-cycle t)
-  ;; (corfu-auto t)
-  (corfu-separator ?\s)
+  ((corfu-cycle t)
+   (corfu-separator ?\s))
   :init
   (global-corfu-mode))
 
