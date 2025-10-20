@@ -47,8 +47,8 @@
 
 ;; load private config
 (let ((private-config (expand-file-name "private.el" user-emacs-directory)))
- (if (file-exists-p private-config)
-   (load private-config :no-error)))
+  (if (file-exists-p private-config)
+      (load private-config :no-error)))
 
 ;; misc. early settings
 (use-package emacs
@@ -221,12 +221,12 @@
   :init
   (setq winner-dont-bind-my-keys t)
   (winner-mode 1)
-  :bind (:map nmbrgts/window-map
-         ("u" . #'winner-undo)
-         ("r" . #'winner-redo)
-         :repeat-map nmbrgts/winner-repeat-map
-         ("u" . #'winner-undo)
-         ("r" . #'winner-redo)))
+  :bind ( :map nmbrgts/window-map
+          ("u" . #'winner-undo)
+          ("r" . #'winner-redo)
+          :repeat-map nmbrgts/winner-repeat-map
+          ("u" . #'winner-undo)
+          ("r" . #'winner-redo)))
 
 ;; window display behavior
 (use-package window
@@ -387,10 +387,10 @@
 (use-package vertico-directory
   :ensure nil
   :after vertico
-  :bind (:map vertico-map
-         ("RET" . vertico-directory-enter)
-         ("DEL" . vertico-directory-delete-char)
-         ("M-DEL" . vertico-directory-delete-word))
+  :bind ( :map vertico-map
+          ("RET" . vertico-directory-enter)
+          ("DEL" . vertico-directory-delete-char)
+          ("M-DEL" . vertico-directory-delete-word))
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 ;; additional data with suggestions
@@ -736,11 +736,7 @@ targets."
     (set-face-attribute 'eros-result-overlay-face
                         nil
                         :background nil
-                        :box nil ;; `(:line-width -1
-                             ;;   :color
-                             ;;   `(face-attribute
-                             ;;     'font-lock-comment-face
-                             ;;     :foreground))
+                        :box nil
                         :inherit 'font-lock-comment-face))
   :hook ((after-enable-theme . nmbrgts/tweak-tab-bar-faces)
          (after-enable-theme . nmbrgts/tweak-fringe-faces)
@@ -774,17 +770,17 @@ targets."
   :init
   (defun nmbrgts/tab-name-format-function (tab idx)
     (let ((current-p (eq (car tab) 'current-tab)))
-    (propertize
-     (concat (if tab-bar-tab-hints (format "%d " i) "")
-             " "
-             (alist-get 'name tab)
-             " "
-             (or (and tab-bar-close-button-show
-                      (not (eq tab-bar-close-button-show
-                               (if current-p 'non-selected 'selected)))
-                      tab-bar-close-button)
-                 ""))
-     'face (funcall tab-bar-tab-face-function tab))))
+      (propertize
+       (concat (if tab-bar-tab-hints (format "%d " i) "")
+               " "
+               (alist-get 'name tab)
+               " "
+               (or (and tab-bar-close-button-show
+                        (not (eq tab-bar-close-button-show
+                                 (if current-p 'non-selected 'selected)))
+                        tab-bar-close-button)
+                   ""))
+       'face (funcall tab-bar-tab-face-function tab))))
 
   (setq tab-bar-close-button-show nil
         tab-bar-new-button-show nil
@@ -819,9 +815,9 @@ targets."
   :config
   ;; temp fix remove later
   (defun tabspaces--local-buffer-p (buffer)
-      "Return whether BUFFER is in the list of local buffers."
-      (or (member (buffer-name buffer) tabspaces-include-buffers)
-          (memq buffer (frame-parameter nil 'buffer-list))))
+    "Return whether BUFFER is in the list of local buffers."
+    (or (member (buffer-name buffer) tabspaces-include-buffers)
+        (memq buffer (frame-parameter nil 'buffer-list))))
   (project-known-project-roots)
   :bind-keymap ("C-c TAB" . tabspaces-command-map))
 
@@ -835,8 +831,8 @@ targets."
   (defun nmbrgts/project-tab-name ()
     (interactive)
     (tab-bar-rename-tab (project-name (project-current))))
-  :bind (:map project-prefix-map
-         ("TAB" . #'nmbrgts/project-tab-name)))
+  :bind ( :map project-prefix-map
+          ("TAB" . #'nmbrgts/project-tab-name)))
 
 ;; TODO: move to early init?
 (use-package tool-bar
@@ -882,8 +878,8 @@ targets."
 (use-package vterm
   :ensure t
   :after project
-  :bind (:map project-prefix-map
-         ("t" . project-vterm))
+  :bind ( :map project-prefix-map
+          ("t" . project-vterm))
   :preface
   (defun project-vterm ()
     (interactive)
@@ -931,10 +927,10 @@ targets."
     (setq magit-git-executable "/usr/bin/git"))
 
   :hook (after-save . magit-after-save-refresh-status)
-  :bind (:map nmbrgts/git-prefix-map
-         ("b" . #'magit-blame-addition)
-         ("g" . #'magit-status)
-         ("f" .  #'magit-file-dispatch)))
+  :bind ( :map nmbrgts/git-prefix-map
+          ("b" . #'magit-blame-addition)
+          ("g" . #'magit-status)
+          ("f" .  #'magit-file-dispatch)))
 
 ;; forge integration
 (use-package sqlite3
@@ -950,11 +946,11 @@ targets."
   :after magit
   :init
   (global-diff-hl-mode)
-  :bind (:map diff-hl-command-map
-         ("s" . #'diff-hl-show-hunk-stage-hunk)
-         :map nmbrgts/git-prefix-map
-         ("H" . #'diff-hl-show-hunk-next)
-         ("h" . #'diff-hl-show-hunk-previous)))
+  :bind ( :map diff-hl-command-map
+          ("s" . #'diff-hl-show-hunk-stage-hunk)
+          :map nmbrgts/git-prefix-map
+          ("H" . #'diff-hl-show-hunk-next)
+          ("h" . #'diff-hl-show-hunk-previous)))
 
 ;; TODO: make ignored a grey block?
 (use-package diff-hl-dired
@@ -963,22 +959,22 @@ targets."
 
 ;; TODO: drop popup for repeat map?
 (use-package diff-hl-inline-popup
-  :bind (:map diff-hl-inline-popup-transient-mode-map
-         ("s" . #'diff-hl-show-hunk-stage-hunk)))
+  :bind ( :map diff-hl-inline-popup-transient-mode-map
+          ("s" . #'diff-hl-show-hunk-stage-hunk)))
 
 ;; travel through time
 (use-package git-timemachine
   :ensure t
   :after magit
-  :bind (:map nmbrgts/git-prefix-map
-         ("t" . #'git-timemachine)))
+  :bind ( :map nmbrgts/git-prefix-map
+          ("t" . #'git-timemachine)))
 
 ;; jump to buffer or region in forge
 (use-package browse-at-remote
   :ensure t
   :after magit
-  :bind (:map nmbrgts/git-prefix-map
-         ("r" . #'browse-at-remote)))
+  :bind ( :map nmbrgts/git-prefix-map
+          ("r" . #'browse-at-remote)))
 
 ;; handle conflics with a quick menu
 (use-package smerge-mode
@@ -1090,16 +1086,16 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq nmbrgts/dap-mode-map (make-sparse-keymap)
         dap-auto-configure-features '(sessions locals))
   (bind-key "C-c d" nmbrgts/dap-mode-map)
-  :bind (:map nmbrgts/dap-mode-map
-         ("n" . #'dap-next)
-         ("i" . #'dap-step-in)
-         ("o" . #'dap-step-out)
-         ("c" . #'dap-continue)
-         ("h" . #'dap-hydra)
-         ("r" . #'dap-debug-restart)
-         ("d" . #'dap-debug)
-         ("b" . #'dap-breakpoint-toggle)
-         ("s" . #'dap-disconnect)))
+  :bind ( :map nmbrgts/dap-mode-map
+          ("n" . #'dap-next)
+          ("i" . #'dap-step-in)
+          ("o" . #'dap-step-out)
+          ("c" . #'dap-continue)
+          ("h" . #'dap-hydra)
+          ("r" . #'dap-debug-restart)
+          ("d" . #'dap-debug)
+          ("b" . #'dap-breakpoint-toggle)
+          ("s" . #'dap-disconnect)))
 
 ;;; data formats
 
@@ -1194,20 +1190,20 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; improved structural navigation and editing
 (use-package puni
   :ensure t
-  :bind (:map prog-mode-map
-         ("C-M-f" . puni-forward-sexp-or-up-list)
-         ("C-M-b" . puni-backward-sexp-or-up-list)
-         ;; slurping & barfing
-         ("C-}" . puni-barf-forward)
-         ("C-)" . puni-slurp-forward)
-         ("C-(" . puni-slurp-backward)
-         ("C-{" . puni-barf-backward)
-         ;; depth changing
-         ("C-M-r" . puni-raise)
-         ("M-=" . puni-splice)
-         ("M-_" . puni-split)
-         ("M-<up>" . puni-splice-killing-backward)
-         ("M-<down>" . puni-splice-killing-forward)))
+  :bind ( :map prog-mode-map
+          ("C-M-f" . puni-forward-sexp-or-up-list)
+          ("C-M-b" . puni-backward-sexp-or-up-list)
+          ;; slurping & barfing
+          ("C-}" . puni-barf-forward)
+          ("C-)" . puni-slurp-forward)
+          ("C-(" . puni-slurp-backward)
+          ("C-{" . puni-barf-backward)
+          ;; depth changing
+          ("C-M-r" . puni-raise)
+          ("M-=" . puni-splice)
+          ("M-_" . puni-split)
+          ("M-<up>" . puni-splice-killing-backward)
+          ("M-<down>" . puni-splice-killing-forward)))
 
 ;; insert closing delimiters
 (use-package elec-pair
@@ -1251,8 +1247,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package yasnippet
   :ensure t
   :hook (prog-mode . yas-minor-mode)
-  :bind (:map yas-minor-mode-map
-         ("TAB" . nil)))
+  :bind ( :map yas-minor-mode-map
+          ("TAB" . nil)))
 
 (use-package yasnippet-snippets
   :after yasnippet
@@ -1417,10 +1413,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               (venv-dir-valid (file-exists-p venv-dir)))
         (pyvenv-activate venv-dir)
       (message (string-join `("Could not find virtualenv at path: " ,venv-dir)))))
-  :bind (:map nmbrgts/python-venv-map
-         ("a" . #'pyvenv-active)
-         ("d" . #'pyvenv-deactivate)
-         ("p" . #'nmbrgts/project-pyenv-activate)))
+  :bind ( :map nmbrgts/python-venv-map
+          ("a" . #'pyvenv-active)
+          ("d" . #'pyvenv-deactivate)
+          ("p" . #'nmbrgts/project-pyenv-activate)))
 
 ;; test running
 
@@ -1487,9 +1483,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (add-to-list 'consult-imenu-config
                  `(,mode :types ,nmbrgts/lsp-mode-imenu-types)))
   :hook ((csharp-mode csharp-ts-mode)
-          . (lambda ()
-              (require 'lsp-csharp)
-              (lsp))))
+         . (lambda ()
+             (require 'lsp-csharp)
+             (lsp))))
 
 (use-package dotnet
   :ensure t
@@ -1548,15 +1544,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                `(js-mode
                  :types ,nmbrgts/lsp-mode-imenu-types))
   :hook (js-mode . lsp)
-  :bind (:map js-mode-map
-         ("M-." . nil)))
+  :bind ( :map js-mode-map
+          ("M-." . nil)))
 
 (use-package prettier-js
   :ensure t
   :after js
   :commands (prettier-js)
-  :bind (:map js-mode-map
-         ("C-c f b" . #'prettier-js)))
+  :bind ( :map js-mode-map
+          ("C-c f b" . #'prettier-js)))
 
 ;; vue
 
@@ -1591,16 +1587,16 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (setq nmbrgts/note-keymap (make-sparse-keymap))
   (bind-key "C-c n" nmbrgts/note-keymap)
-  :bind (:map nmbrgts/note-keymap
-         ("n" . #'denote-create-note)
-         ("l" . #'denote-link)
-         ("b" . #'denote-backlinks)
-         ("d" . (lambda ()
-                  (interactive)
-                  (find-file denote-directory)))
-         ("D" . #'denote-sort-dired)
-         ("f" . #'denote-link-find-file)
-         ("r" . #'denote-rename-file))
+  :bind ( :map nmbrgts/note-keymap
+          ("n" . #'denote-create-note)
+          ("l" . #'denote-link)
+          ("b" . #'denote-backlinks)
+          ("d" . (lambda ()
+                   (interactive)
+                   (find-file denote-directory)))
+          ("D" . #'denote-sort-dired)
+          ("f" . #'denote-link-find-file)
+          ("r" . #'denote-rename-file))
   :hook (dired-mode . (lambda () (denote-dired-mode))))
 
 ;;; org
