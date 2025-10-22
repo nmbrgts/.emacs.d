@@ -951,7 +951,12 @@ targets."
           ("s" . #'diff-hl-show-hunk-stage-hunk)
           :map nmbrgts/git-prefix-map
           ("H" . #'diff-hl-show-hunk-next)
-          ("h" . #'diff-hl-show-hunk-previous)))
+          ("h" . #'diff-hl-show-hunk-previous)
+          ("n" . #'diff-hl-next-hunk)
+          ("p" . #'diff-hl-previous-hunk)
+          :repeat-map nmbrgts/diff-hl-repeat-map
+          ("n" . #'diff-hl-next-hunk)
+          ("p" . #'diff-hl-previous-hunk)))
 
 ;; TODO: make ignored a grey block?
 (use-package diff-hl-dired
