@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;; startup tweaks
 
 ;; start maximized

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;; early config
 
 (setq native-comp-async-report-warnings-errors 'silent)
@@ -56,8 +58,7 @@
   ((cursor-type 'bar)
    (tab-width 4))
   :init
-  (setq lexical-binding t
-        inhibit-splash-screen t
+  (setq inhibit-splash-screen t
         gc-cons-threshold (* 100 1024 1024)
         read-process-output-max (* 5 1024 1024)
         ring-bell-function 'ignore
