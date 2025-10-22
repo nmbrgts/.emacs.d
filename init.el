@@ -1319,8 +1319,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package info
   :init
   (when (eq system-type 'darwin)
-    (add-to-list 'Info-directory-list
-                 "/usr/local/opt/emacs-plus@30/share/info/emacs/")))
+    (add-to-list
+     'Info-directory-list
+     (expand-file-name
+      "share/emacs/info"
+      (string-trim-right
+       (shell-command-to-string "brew --prefix emacs-plus")
+       "\n+")))))
 
 ;;; python
 
