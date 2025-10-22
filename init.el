@@ -883,7 +883,6 @@ targets."
   :preface
   (defun project-vterm ()
     (interactive)
-    (defvar vterm-buffer-name)
     (let* ((default-directory (project-root (project-current t)))
            (vterm-buffer-name (project-prefixed-buffer-name "vterm"))
            (vterm-buffer (get-buffer vterm-buffer-name)))
