@@ -485,16 +485,16 @@
   (consult-customize consult--source-buffer :hidden t :default nil)
   ;; set consult-workspace buffer list
   (defvar consult--source-workspace
-    (list :name     "Workspace Buffers"
-          :narrow   ?w
-          :history  'buffer-name-history
+    (list :name "Workspace Buffers"
+          :narrow ?w
+          :history 'buffer-name-history
           :category 'buffer
-          :state    #'consult--buffer-state
-          :default  t
-          :items    (lambda () (consult--buffer-query
-                                :predicate #'tabspaces--local-buffer-p
-                                :sort 'visibility
-                                :as #'buffer-name)))
+          :state #'consult--buffer-state
+          :default t
+          :items (lambda () (consult--buffer-query
+                             :predicate #'tabspaces--local-buffer-p
+                             :sort 'visibility
+                             :as #'buffer-name)))
 
     "Set workspace buffer list for consult-buffer.")
   (add-to-list 'consult-buffer-sources 'consult--source-workspace))
@@ -884,15 +884,16 @@ targets."
   (defun project-vterm ()
     (interactive)
     (defvar vterm-buffer-name)
-    (let* ((default-directory (project-root     (project-current t)))
+    (let* ((default-directory (project-root (project-current t)))
            (vterm-buffer-name (project-prefixed-buffer-name "vterm"))
            (vterm-buffer (get-buffer vterm-buffer-name)))
       (if (and vterm-buffer (not current-prefix-arg))
-          (pop-to-buffer vterm-buffer  (bound-and-true-p display-comint-buffer-action))
+          (pop-to-buffer vterm-buffer
+                         (bound-and-true-p display-comint-buffer-action))
         (vterm))))
   :init
-  (add-to-list 'project-switch-commands     '(project-vterm "Vterm") t)
-  (add-to-list 'project-kill-buffer-conditions  '(major-mode . vterm-mode))
+  (add-to-list 'project-switch-commands '(project-vterm "Vterm") t)
+  (add-to-list 'project-kill-buffer-conditions '(major-mode . vterm-mode))
   :custom
   ((vterm-copy-exclude-prompt t)
    (vterm-always-compile-module t)
@@ -930,7 +931,7 @@ targets."
   :bind ( :map nmbrgts/git-prefix-map
           ("b" . #'magit-blame-addition)
           ("g" . #'magit-status)
-          ("f" .  #'magit-file-dispatch)))
+          ("f" . #'magit-file-dispatch)))
 
 ;; forge integration
 (use-package sqlite3
