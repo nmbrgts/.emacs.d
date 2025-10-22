@@ -956,7 +956,8 @@ targets."
           ("p" . #'diff-hl-previous-hunk)
           :repeat-map nmbrgts/diff-hl-repeat-map
           ("n" . #'diff-hl-next-hunk)
-          ("p" . #'diff-hl-previous-hunk)))
+          ("p" . #'diff-hl-previous-hunk))
+  :hook (magit-post-refresh . #'diff-hl-magit-post-refresh))
 
 ;; TODO: make ignored a grey block?
 (use-package diff-hl-dired
