@@ -1232,6 +1232,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :custom
   ((corfu-cycle t)
    (corfu-separator ?\s))
+  :config
+  (add-to-list 'corfu--frame-parameters '(left-fringe . 0))
   :init
   (global-corfu-mode))
 
