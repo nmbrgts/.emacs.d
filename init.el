@@ -515,21 +515,6 @@
     "Set workspace buffer list for consult-buffer.")
   (add-to-list 'consult-buffer-sources 'consult--source-workspace))
 
-;;; move minibuffer to top of frame
-
-(use-package mini-frame
-  :when nil
-  :ensure t
-  :init
-  (setq mini-frame-show-parameters
-        `((top . 36)
-          (width . 1.0)
-          (child-frame-border-width . 2)
-          (no-accept-focus . t))
-        mini-frame-detach-on-hide nil
-        mini-frame-color-shift-step 0)
-  (mini-frame-mode))
-
 ;;; writable grep buffers
 
 (use-package wgrep
