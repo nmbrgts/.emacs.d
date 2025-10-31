@@ -203,6 +203,7 @@
                       (other-window -1)))
          :map nmbrgts/window-map
          ("s" . #'window-toggle-side-windows)
+         ("=" . #'balance-windows)
          :repeat-map nmbrgts/buffer-move-repeat-map
          ("<right>" . #'next-buffer)
          ("<left>" . #'previous-buffer)))
