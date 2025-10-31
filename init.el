@@ -153,7 +153,8 @@
   :config
   ;; better default behavior for M-SPC
   (global-set-key [remap just-one-space] #'cycle-spacing)
-  :bind ("C-c t RET" . #'toggle-word-wrap))
+  :bind (("C-c t RET" . #'toggle-word-wrap)
+         ("C-c s" . #'scratch-buffer)))
 
 ;; delete selected region on insert
 (use-package delsel
@@ -195,8 +196,7 @@
   :init
   (setq nmbrgts/window-map (make-sparse-keymap))
   (bind-key "C-c w" nmbrgts/window-map)
-  :bind (("C-c s" . #'scratch-buffer)
-         ("C-c t w" . #'window-toggle-side-windows)
+  :bind (("C-c t w" . #'window-toggle-side-windows)
          ("C-x O" . (lambda ()
                       (interactive)
                       (setq repeat-map 'other-window-repeat-map)
