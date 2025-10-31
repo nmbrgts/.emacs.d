@@ -257,6 +257,12 @@
            (side . top)
            (slot . 1)
            (window-height . 0.20))
+          ;; side bar information
+          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\|lsp-help\\)"
+           (nmbrgts/display-buffer-in-side-window-and-select)
+           (side . right)
+           (slot . 1)
+           (window-width . 0.30))
           ;; quick doodling
           ("^\\*\\(.*scratch\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
@@ -264,12 +270,6 @@
            (side . bottom)
            (slot . 1)
            (window-height . 0.30))
-          ;; side bar information
-          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\|lsp-help\\)"
-           (nmbrgts/display-buffer-in-side-window-and-select)
-           (side . right)
-           (slot . 1)
-           (window-width . 0.30))
           ;; side bar tooling
           ("^\\*\\( docker\\|compilation\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
