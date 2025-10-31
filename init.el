@@ -191,11 +191,12 @@
   :bind ("C-x C-b" . #'ibuffer))
 
 ;; helpful window operations
+
+(setq nmbrgts/window-map (make-sparse-keymap))
+(bind-key "C-c w" nmbrgts/window-map)
+
 (use-package window
   :ensure nil
-  :init
-  (setq nmbrgts/window-map (make-sparse-keymap))
-  (bind-key "C-c w" nmbrgts/window-map)
   :bind (("C-x O" . (lambda ()
                       (interactive)
                       (setq repeat-map 'other-window-repeat-map)
