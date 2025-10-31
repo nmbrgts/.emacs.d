@@ -196,11 +196,12 @@
   :init
   (setq nmbrgts/window-map (make-sparse-keymap))
   (bind-key "C-c w" nmbrgts/window-map)
-  :bind (("C-c t w" . #'window-toggle-side-windows)
-         ("C-x O" . (lambda ()
+  :bind (("C-x O" . (lambda ()
                       (interactive)
                       (setq repeat-map 'other-window-repeat-map)
                       (other-window -1)))
+         :map nmbrgts/window-map
+         ("s" . #'window-toggle-side-windows)
          :repeat-map nmbrgts/buffer-move-repeat-map
          ("<right>" . #'next-buffer)
          ("<left>" . #'previous-buffer)))
