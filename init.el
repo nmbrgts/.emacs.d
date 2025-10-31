@@ -207,15 +207,21 @@
 
 (use-package windmove
   :ensure nil
-  :bind (("C-c <down>" . #'windmove-down)
-         ("C-c <up>" . #'windmove-up)
-         ("C-c <left>" . #'windmove-left)
-         ("C-c <right>" . #'windmove-right)
-         :repeat-map nmbrgts/windmove-repeat-map
-         ("<down>" . #'windmove-down)
-         ("<up>" . #'windmove-up)
-         ("<left>" . #'windmove-left)
-         ("<right>" . #'windmove-right)))
+  :bind ( :map nmbrgts/window-map
+          ("<down>" . #'windmove-down)
+          ("<up>" . #'windmove-up)
+          ("<left>" . #'windmove-left)
+          ("<right>" . #'windmove-right)
+          :repeat-map nmbrgts/windmove-repeat-map
+          ("<down>" . #'windmove-down)
+          ("<up>" . #'windmove-up)
+          ("<left>" . #'windmove-left)
+          ("<right>" . #'windmove-right)))
+
+(use-package ace-window
+  :ensure t
+  :bind ( :map nmbrgts/window-map
+          ("a" . #'ace-window)))
 
 (use-package winner
   :ensure nil
