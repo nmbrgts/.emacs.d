@@ -220,6 +220,12 @@
           ("<left>" . #'windmove-left)
           ("<right>" . #'windmove-right)))
 
+(use-package winum
+  :ensure t
+  :init
+  (winum-set-keymap-prefix (kbd "C-c w"))
+  (winum-mode))
+
 (use-package ace-window
   :ensure t
   :bind ( :map nmbrgts/window-map
