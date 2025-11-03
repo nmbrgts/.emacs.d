@@ -394,7 +394,7 @@
        nmbrgts/vertico-buffer-mode-set-line-format)
     (setq-local
      mode-line-format (propertize
-                       "  * ↑ make selection above ↑ *"
+                       "" ;"  * ↑ make selection above ↑ *"
                        'face 'mode-line-emphasis)))
 
   (vertico-buffer-mode))
