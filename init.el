@@ -880,27 +880,46 @@ targets."
   :ensure t
   :after project
   :preface
-  (defun project-vterm ()
+  (defun nmbrgts/-launch-vterm-in-dir ()
+    (require 'vterm)
+    (defvar vterm-buffer-name) ; needed for dynamic scoping
+    (let ((vterm-buffer-name
+           (format vterm-buffer-name-string
+                   (substring (shell-command-to-string "fish_title") 0 -1))))
+      (vterm)))
+
+  (defun nmbrgts/project-vterm ()
     (interactive)
-    (let* ((default-directory (project-root (project-current t)))
-           (buff-name (project-prefixed-buffer-name "vterm"))
-           (buff (get-buffer buff-name)))
-      (if (and buff (not current-prefix-arg))
-          (pop-to-buffer buff
-                         (bound-and-true-p display-comint-buffer-action))
-        (vterm buff))))
+    (message "project!")
+    (let ((default-directory (project-root (project-current t))))
+      (nmbrgts/-launch-vterm-in-dir)))
+
+  (defun nmbrgts/dir-vterm ()
+    (interactive)
+    (message "dir!")
+    (nmbrgts/-launch-vterm-in-dir))
+
+  (defun nmbrgts/dwim-vterm ()
+    (interactive)
+    (if (project-current)
+        (call-interactively #'nmbrgts/project-vterm)
+      (call-interactively #'nmbrgts/dir-vterm)))
   :init
-  (add-to-list 'project-switch-commands '(project-vterm "Vterm") t)
+  (add-to-list 'project-switch-commands '(nmbrgts/project-vterm "Vterm") t)
   (add-to-list 'project-kill-buffer-conditions '(major-mode . vterm-mode))
   :custom
   ((vterm-copy-exclude-prompt t)
    (vterm-always-compile-module t)
    (vterm-disable-bold t)
    (vterm-max-scrollback 100000)
+   (vterm-buffer-name-string "*vterm:%s*")
    (vterm-tramp-shells '(("ssh" "/bin/bash")
                          ("podman" "/bin/bash"))))
-  :bind ( :map project-prefix-map
-          ("t" . project-vterm)))
+  :bind (("C-c v" . #'nmbrgts/dwim-vterm)
+         ("C-c C-v" . #'nmbrgts/dir-vterm)
+         ("C-c M-v" . #'vterm)
+         :map project-prefix-map
+         ("t" . #'nmbrgts/project-vterm)))
 
 ;; emulate a terminal
 (use-package eat
