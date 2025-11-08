@@ -885,12 +885,12 @@ targets."
   (defun project-vterm ()
     (interactive)
     (let* ((default-directory (project-root (project-current t)))
-           (vterm-buffer-name (project-prefixed-buffer-name "vterm"))
-           (vterm-buffer (get-buffer vterm-buffer-name)))
-      (if (and vterm-buffer (not current-prefix-arg))
-          (pop-to-buffer vterm-buffer
+           (buff-name (project-prefixed-buffer-name "vterm"))
+           (buff (get-buffer buff-name)))
+      (if (and buff (not current-prefix-arg))
+          (pop-to-buffer buff
                          (bound-and-true-p display-comint-buffer-action))
-        (vterm))))
+        (vterm buff))))
   :init
   (add-to-list 'project-switch-commands '(project-vterm "Vterm") t)
   (add-to-list 'project-kill-buffer-conditions '(major-mode . vterm-mode))
