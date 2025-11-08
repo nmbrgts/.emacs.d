@@ -879,8 +879,6 @@ targets."
 (use-package vterm
   :ensure t
   :after project
-  :bind ( :map project-prefix-map
-          ("t" . project-vterm))
   :preface
   (defun project-vterm ()
     (interactive)
@@ -900,7 +898,9 @@ targets."
    (vterm-disable-bold t)
    (vterm-max-scrollback 100000)
    (vterm-tramp-shells '(("ssh" "/bin/bash")
-                         ("podman" "/bin/bash")))))
+                         ("podman" "/bin/bash"))))
+  :bind ( :map project-prefix-map
+          ("t" . project-vterm)))
 
 ;; emulate a terminal
 (use-package eat
