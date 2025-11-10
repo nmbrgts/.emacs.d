@@ -753,10 +753,16 @@ targets."
         doom-modeline-support-imenu nil
         doom-modeline-height 0
         doom-modeline-bar-width 40
-        doom-modeline-project-detection nil
+        doom-modeline-project-detection 'project
         doom-modeline-battery nil
         doom-modeline-time nil
-        doom-modeline-display-misc-in-all-mode-lines nil)
+        doom-modeline-display-misc-in-all-mode-lines nil
+        doom-modeline-lsp t
+        doom-modeline-workspace-name nil
+        doom-modeline-env-version nil
+        doom-modeline-buffer-encoding nil
+        doom-modeline-window-width-limit 120
+        doom-modeline-buffer-file-name-style 'relative-from-project)
   :hook ((after-init . doom-modeline-mode)
          (after-enable-theme
           . (lambda ()
@@ -1069,6 +1075,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq lsp-keymap-prefix "C-c l"
         lsp-enable-file-watchers nil
         lsp-headerline-breadcrumb-enable nil
+        lsp-modeline-diagnostics-enable nil
+        lsp-modeline-code-actions-enable nil
         lsp-imenu-index-function #'lsp-imenu-create-categorized-index
         ;; list of lsp-mode imenu types for consult-imenu
         nmbrgts/lsp-mode-imenu-types
