@@ -621,6 +621,11 @@ targets."
   :config
   (setq all-the-icons-dired-monochrome nil))
 
+(use-package all-the-icons-ibuffer
+  :ensure t
+  :after (all-the-icons)
+  :hook (ibuffer-mode . #'all-the-icons-ibuffer-mode))
+
 ;;; mac usability tweaks
 
 ;; load system path on startup
