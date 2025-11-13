@@ -1244,6 +1244,68 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
           ("M-<up>" . puni-splice-killing-backward)
           ("M-<down>" . puni-splice-killing-forward)))
 
+;; lint code for common spelling errors (experimental)
+(defun typos-flymake--backend (report-fn &rest _args)
+  "Flymake backend for typos-cli"
+  (unless (executable-find "typos")
+    (error "Cannot find a suitable checker"))
+
+  (when (process-live-p typos-flymake--proc)
+    (kill-process typos-flymake--proc))
+
+  (let ((source (current-buffer)))
+    (save-restriction
+      (widen)
+      (setq typos-flymake--proc
+            (make-process
+             :name "typos-flymake"
+             :noquery t
+             :connection-type 'pipe
+             :buffer (generate-new-buffer " *typos-flymake*")
+             :command '("typos" "--format" "brief" "-")
+             :sentinel
+             (lambda (proc _event)
+               (when (eq 'exit (process-status proc))
+                 (unwind-protect
+                     (when (with-current-buffer source
+                             (eq proc typos-flymake--proc))
+                       (typos-flymake--parse-output source proc report-fn))
+                   (kill-buffer (process-buffer proc)))))
+             ))
+      (process-send-region typos-flymake--proc (point-min) (point-max))
+      (process-send-eof typos-flymake--proc))))
+
+(defun typos-flymake--parse-output (source proc report-fn)
+  (let ((rx "^-:\\(?1:[0-9]+\\):\\(?2:[0-9]+\\): error: \\(?3:.*\\)$")
+        (rowidx 1)
+        (colidx 2)
+        (msgidx 3))
+  (with-current-buffer (process-buffer proc)
+    (goto-char (point-min))
+    (cl-loop
+     while (search-forward-regexp rx nil t)
+     for msg = (match-string msgidx)
+     ;; TODO: `flymake-diag-region' will return the bounds of then entire
+     ;;       identifier. It would be nice to have a function that returns the
+     ;;       bounds of the misspelled sub-word.
+     for (beg . end) = (flymake-diag-region
+                        source
+                        (string-to-number
+                         (match-string rowidx))
+                        (string-to-number
+                         (match-string colidx)))
+     for type = :note
+     collect (flymake-make-diagnostic
+              source beg end type msg)
+     into diags
+     finally (funcall report-fn diags)))))
+
+(defun typos-flymake--setup ()
+  "Enable typos-flymake in the current buffer."
+  (add-hook 'flymake-diagnostic-functions #'typos-flymake--backend nil t))
+
+(add-hook 'prog-mode-hook #'typos-flymake--setup)
+
 ;; insert closing delimiters
 (use-package elec-pair
   :init
