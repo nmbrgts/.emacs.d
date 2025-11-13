@@ -265,6 +265,11 @@
            (side . bottom)
            (slot . 1)
            (window-height . 0.30))
+          ("^\\*vterm:"
+           (display-buffer-reuse-window display-buffer-in-side-window)
+           (side . bottom)
+           (slot . 1)
+           (window-height . 0.30))
           ;; top bar informational
           ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
