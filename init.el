@@ -901,7 +901,7 @@ targets."
     (defvar vterm-buffer-name) ; needed for dynamic scoping
     (let ((vterm-buffer-name
            (format vterm-buffer-name-string
-                   (substring (shell-command-to-string "fish_title") 0 -1))))
+                   (string-replace "\n" "" (substring (shell-command-to-string "fish_title") 0 -1)))))
       (vterm)))
 
   (defun nmbrgts/project-vterm ()
