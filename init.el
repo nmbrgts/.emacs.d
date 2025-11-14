@@ -906,13 +906,12 @@ targets."
 
   (defun nmbrgts/project-vterm ()
     (interactive)
-    (message "project!")
+
     (let ((default-directory (project-root (project-current t))))
       (nmbrgts/-launch-vterm-in-dir)))
 
   (defun nmbrgts/dir-vterm ()
     (interactive)
-    (message "dir!")
     (nmbrgts/-launch-vterm-in-dir))
 
   (defun nmbrgts/dwim-vterm ()
