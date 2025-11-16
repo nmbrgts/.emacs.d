@@ -1248,6 +1248,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
           ("M-<up>" . puni-splice-killing-backward)
           ("M-<down>" . puni-splice-killing-forward)))
 
+;; jump to char
+(use-package avy
+  :ensure t
+  :bind
+  (("M-g c" . #'avy-goto-char)
+   ("M-g C" . #'avy-goto-char-2)
+   ("M-g w" . #'avy-goto-word-1)
+   ("M-g l" . #'avy-goto-line)
+   :map isearch-mode-map
+   ("C-'" . #'avy-isearch)))
+
 ;; lint code for common spelling errors (experimental)
 (use-package emacs
   :ensure nil
