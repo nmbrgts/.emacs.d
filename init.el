@@ -1438,6 +1438,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package python
   :ensure nil
+  :custom
+  (python-flymake-command nil)
   :init
   (setq python-shell-dedicated 'project)
   (add-to-list 'major-mode-remap-alist
