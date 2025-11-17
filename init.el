@@ -87,8 +87,7 @@
 ;; trying to make wrapping less ugly
 (use-package adaptive-wrap
   :ensure t
-  :hook ((visual-line-mode . adaptive-wrap-prefix-mode)
-         (org-mode . (lambda () (setq-local adaptive-wrap-extra-indent 4))))
+  :hook ((visual-line-mode . adaptive-wrap-prefix-mode))
   :init
   (global-visual-line-mode 1))
 
