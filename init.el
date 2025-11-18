@@ -1817,35 +1817,30 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (defun nmbrgts/theme-toggle (&optional light-or-dark)
     (interactive)
     (setq nmbrgts/active-theme
-          (or (and (eq light-or-dark :light) nmbrgts/light-theme)
-              (and (eq light-or-dark :dark) nmbrgts/dark-theme)
+          (or (and (eq light-or-dark 'light) nmbrgts/light-theme)
+              (and (eq light-or-dark 'dark) nmbrgts/dark-theme)
               (and (eq nmbrgts/active-theme nmbrgts/dark-theme) nmbrgts/light-theme)
               (and (eq nmbrgts/active-theme nmbrgts/light-theme) nmbrgts/dark-theme)
-              nmbrgts/dark-theme))
+              nmbrgts/active-theme))
     (mapc 'disable-theme custom-enabled-themes)
     (load-theme nmbrgts/active-theme t))
 
   ;; switch themes with system
   (if (and (eq system-type 'darwin)
-           (boundp 'mac-application-state))
+           (boundp 'ns-system-appearance)
+           (boundp 'ns-system-appearance-change-functions))
       (progn
-        (message "Matching emac theme to system theme...")
-        (defun nmbrgts/match-theme-to-system ()
-          (let ((appearance (plist-get (mac-application-state)
-                                       :appearance)))
-            (nmbrgts/theme-toggle
-             (if (string-equal
-                  appearance
-                  "NSAppearanceNameDarkAqua")
-                 :dark
-               :light))))
-        (add-hook 'mac-effective-appearance-change-hook
-                  #'nmbrgts/match-theme-to-system)
-        (nmbrgts/match-theme-to-system))
+        (message "matching emacs theme to system theme...")
+        (add-to-list 'ns-system-appearance-change-functions #'nmbrgts/theme-toggle)
+        (nmbrgts/theme-toggle ns-system-appearance))
     (progn
-      (message "Loading theme...")
+      (message "loading theme...")
       (load-theme nmbrgts/active-theme t)))
   :bind ("C-c t t" . #'nmbrgts/theme-toggle)
   :hook ((after-enable-theme
           . (lambda ()
-              (setenv "EMACS_THEME" (format "%s" nmbrgts/active-theme))))))
+              (setq vterm-environment
+                    (setenv-internal vterm-environment
+                                     "EMACS_THEME"
+                                     (format "%s" nmbrgts/active-theme)
+                                     t))))))
