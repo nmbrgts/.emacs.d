@@ -1755,7 +1755,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
      (python . t)
      (sql . t)
      (js . t)
-     (emacs-lisp . t)))
+     (emacs-lisp . t)
+     (verb . t)))
 
   (setq org-babel-default-header-args:sh
         '((:session . "sh")
@@ -1763,8 +1764,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; do http requests with org
 (use-package verb
-  :when nil
-  :ensure nil
+  :ensure t
   :after org
   :init
   (bind-key "C-c C-r" verb-command-map org-mode-map))
