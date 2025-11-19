@@ -517,7 +517,23 @@
                              :as #'buffer-name)))
 
     "Set workspace buffer list for consult-buffer.")
-  (add-to-list 'consult-buffer-sources 'consult--source-workspace))
+
+  (add-to-list 'consult-buffer-sources 'consult--source-workspace)
+
+  (defvar consult--source-vterm
+    (list :name "Vterm Buffers"
+          :narrow ?v
+          :history 'bufer-name-history
+          :category 'buffer
+          :state #'consult--buffer-state
+          :hidden t
+          :default nil
+          :items (lambda () (consult--buffer-query
+                             :mode #'vterm-mode
+                             :sort 'visibility
+                             :as #'buffer-name))))
+
+  (add-to-list 'consult-buffer-sources 'consult--source-vterm))
 
 ;;; writable grep buffers
 
