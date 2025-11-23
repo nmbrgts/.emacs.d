@@ -756,10 +756,7 @@ targets."
      :foreground (face-attribute 'default :background)))
 
   (defun nmbrgts/tweak-keycast-faces ()
-    (set-face-attribute 'keycast-key nil
-                        ;; :foreground (face-attribute 'mode-line :background)
-                        ;; :background (face-attribute 'mode-line-emphasis :foreground)
-                        :box nil)
+    (set-face-attribute 'keycast-key nil :box nil)
     (when (bound-and-true-p keycast-tab-bar-mode)
       (keycast-tab-bar-mode -1)
       (keycast-tab-bar-mode +1)))
