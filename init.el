@@ -656,16 +656,8 @@ targets."
 
 ;;; themes
 
-(use-package doom-themes
-  :ensure t
-  :config
-  (doom-themes-visual-bell-config))
-
-(use-package ef-themes
-  :ensure t)
-
 ;; create after theme hook
-(use-package custom
+(use-package emacs
   :config
   (defvar after-enable-theme-hook nil
     "Normal hook run after enabling a theme.")
@@ -675,6 +667,24 @@ targets."
     (run-hooks 'after-enable-theme-hook))
 
   (advice-add 'enable-theme :after #'run-after-enable-theme-hook))
+
+(use-package doom-themes
+  :ensure t
+  :config
+  (doom-themes-visual-bell-config))
+
+(use-package modus-themes
+  :ensure t
+  :config
+  (defun nmbrgts/tweak-doom-modeline-bar ()
+    (modus-themes-with-colors
+      (custom-set-faces
+       `(doom-modeline-bar ((,c :background ,keybind))))))
+  :hook (after-enable-theme-hook . nmbrgts/tweak-doom-modeline-bar))
+
+(use-package ef-themes
+  :ensure t)
+
 
 ;; visual tweaks to apply after theme
 ;; fonts
@@ -774,6 +784,7 @@ targets."
   :ensure t
   :init
   (setq doom-modeline-icon nil
+        doom-modeline-modal nil
         doom-modeline-vcs-max-length 40
         doom-modeline-support-imenu nil
         doom-modeline-height 0
