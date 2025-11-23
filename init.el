@@ -1013,11 +1013,6 @@ targets."
   :after (dired diff-hl)
   :hook (dired-mode . diff-hl-dired-mode))
 
-;; TODO: drop popup for repeat map?
-(use-package diff-hl-inline-popup
-  :bind ( :map diff-hl-inline-popup-transient-mode-map
-          ("s" . #'diff-hl-show-hunk-stage-hunk)))
-
 ;; travel through time
 (use-package git-timemachine
   :ensure t
