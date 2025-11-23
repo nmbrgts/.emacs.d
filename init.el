@@ -523,7 +523,7 @@
   (defvar consult--source-vterm
     (list :name "Vterm Buffers"
           :narrow ?v
-          :history 'bufer-name-history
+          :history 'buffer-name-history
           :category 'buffer
           :state #'consult--buffer-state
           :hidden t
@@ -1032,7 +1032,7 @@ targets."
   :bind ( :map nmbrgts/git-prefix-map
           ("r" . #'browse-at-remote)))
 
-;; handle conflics with a quick menu
+;; handle conflicts with a quick menu
 (use-package smerge-mode
   :after (hydra magit)
   :config
