@@ -680,7 +680,7 @@ targets."
     (modus-themes-with-colors
       (custom-set-faces
        `(doom-modeline-bar ((,c :background ,keybind))))))
-  :hook (after-enable-theme-hook . nmbrgts/tweak-doom-modeline-bar))
+  :hook (after-enable-theme . nmbrgts/tweak-doom-modeline-bar))
 
 (use-package ef-themes
   :ensure t)
