@@ -730,30 +730,23 @@ targets."
   :after (keycast fringe eros)
   :config
   (defun nmbrgts/tweak-tab-bar-faces ()
-    (set-face-attribute
-     'tab-bar nil)
-    (set-face-attribute
-     'tab-bar-tab nil
-     :background (face-attribute 'mode-line :background)
-     :weight 'normal
-     :box nil)
-    (set-face-attribute
-     'tab-bar nil
-     :background (face-attribute 'mode-line-inactive :background)
-     :box nil
-     :weight 'normal)
-    (set-face-attribute
-     'tab-bar-tab-inactive nil
-     :background (face-attribute 'tab-bar :background)
-     :foreground (face-attribute 'mode-line-inactive :foreground)
-     :box nil
-     :weight 'normal))
+    (modus-themes-with-colors
+      (custom-set-faces
+       `(tab-bar-tab ((,c :background ,bg-mode-line-active
+                          :weight normal
+                          :box nil)))
+       `(tab-bar ((,c :background ,bg-mode-line-inactive
+                      :weight normal
+                      :box nil)))
+       `(tab-bar-tab-inactive ((,c :background ,bg-mode-line-inactive
+                                   :foreground ,fg-mode-line-inactive
+                                   :weight normal
+                                   :box nil))))))
 
   (defun nmbrgts/tweak-fringe-faces ()
-    (set-face-attribute
-     'fringe nil
-     :background (face-attribute 'default :background)
-     :foreground (face-attribute 'default :background)))
+    (modus-themes-with-colors
+      (custom-set-faces
+       `(fringe ((,c :background ,bg-main :foreground ,bg-main))))))
 
   (defun nmbrgts/tweak-keycast-faces ()
     (set-face-attribute 'keycast-key nil :box nil)
