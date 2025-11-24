@@ -685,32 +685,41 @@ targets."
 (use-package ef-themes
   :ensure t)
 
-
-;; visual tweaks to apply after theme
-;; fonts
-(use-package faces
+(use-package fontaine
+  :ensure t
   :config
-  (setq nmbrgts/default-fixed-pitch-font "JetBrains Mono"
-        nmbrgts/default-variable-pitch-font "Iosevka Aile"
-        nmbrgts/default-fixed-pitch-height 270
-        nmbrgts/default-variable-pitch-height 270)
+  (setq fontaine-presets
+        '((nmbrgts/regular
+           :default-family "JetBrains Mono"
+           :default-weight light
+           :default-height 270
+           :fixed-pitch-family "Iosevka Aile"
+           :bold-weight light)
+          (nmbrgts/small
+           :default-family "JetBrains Mono"
+           :default-weight light
+           :default-height 200
+           :fixed-pitch-family "Iosevka Aile"
+           :bold-weight light)))
+  (fontaine-mode +1)
+  (fontaine-set-preset 'nmbrgts/regular)
 
-  (defun nmbrgts/apply-preferred-fonts ()
+  (defun nmbrgts/fontaine-toggle()
     (interactive)
-    (set-face-attribute 'default nil
-                        :font nmbrgts/default-fixed-pitch-font
-                        :weight 'light
-                        :height nmbrgts/default-fixed-pitch-height)
-    (set-face-attribute 'fixed-pitch nil
-                        :font nmbrgts/default-fixed-pitch-font
-                        :weight 'light
-                        :height nmbrgts/default-fixed-pitch-height)
-    (set-face-attribute 'variable-pitch nil
-                        :font nmbrgts/default-variable-pitch-font
-                        :weight 'light
-                        :height nmbrgts/default-variable-pitch-height)
-    (set-face-attribute 'bold nil :weight 'light))
-  :hook (after-enable-theme . nmbrgts/apply-preferred-fonts))
+    (if (eq fontaine-current-preset 'nmbrgts/regular)
+        (fontaine-set-preset 'nmbrgts/small)
+      (fontaine-set-preset 'nmbrgts/regular)))
+
+  :bind ("C-c t s" . #'nmbrgts/fontaine-toggle)
+  :hook ((after-enable-theme
+          . (lambda ()
+              (fontaine-set-preset fontaine-current-preset)))
+         (fontaine-set-preset
+          . (lambda ()
+              (setq doom-modeline--font-height-cache (make-hash-table)
+                    doom-modeline-bar-width (floor
+                                             (/ (face-attribute 'default :height)
+                                                6)))))))
 
 ;; lsp faces
 (use-package faces
