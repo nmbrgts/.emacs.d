@@ -717,12 +717,10 @@ targets."
   :after lsp-mode
   :config
   (defun nmbrgts/tweak-lsp-mode-faces ()
-    (set-face-attribute 'lsp-face-highlight-read nil
-                        :weight 'light)
-    (set-face-attribute 'lsp-face-highlight-write nil
-                        :weight 'light)
-    (set-face-attribute 'lsp-face-highlight-textual nil
-                        :weight 'light))
+    (custom-set-faces
+     '(lsp-face-highlight-read ((t (:inherit highlight :weight light))))
+     '(lsp-face-highlight-write ((t (:inherit highlight :weight light))))
+     '(lsp-face-highlight-textual ((t (:inherit highlight :weight light))))))
   :hook ((after-enable-theme lsp-mode) . nmbrgts/tweak-lsp-mode-faces))
 
 ;; color tweaks
@@ -732,12 +730,7 @@ targets."
   (defun nmbrgts/tweak-tab-bar-faces ()
     (modus-themes-with-colors
       (custom-set-faces
-       `(tab-bar-tab ((,c :background ,bg-mode-line-active
-                          :weight normal
-                          :box nil)))
-       `(tab-bar ((,c :background ,bg-mode-line-inactive
-                      :weight normal
-                      :box nil)))
+       `(tab-bar-tab ((,c :box nil)))
        `(tab-bar-tab-inactive ((,c :background ,bg-mode-line-inactive
                                    :foreground ,fg-mode-line-inactive
                                    :weight normal
@@ -749,21 +742,19 @@ targets."
        `(fringe ((,c :background ,bg-main :foreground ,bg-main))))))
 
   (defun nmbrgts/tweak-keycast-faces ()
-    (set-face-attribute 'keycast-key nil :box nil)
-    (when (bound-and-true-p keycast-tab-bar-mode)
-      (keycast-tab-bar-mode -1)
-      (keycast-tab-bar-mode +1)))
+    (modus-themes-with-colors
+      (custom-set-faces
+       `(keycast-key ((,c :box nil))))))
 
   (defun nmbrgts/tweak-miniframe-faces ()
-    (set-face-attribute 'child-frame-border nil
-                        :background (face-attribute 'font-lock-constant-face :foreground)))
+    (modus-themes-with-colors
+      (custom-set-faces
+       `(child-frame-border ((,c :background ,constant))))))
 
   (defun nmbrgts/tweak-eros-faces ()
-    (set-face-attribute 'eros-result-overlay-face
-                        nil
-                        :background nil
-                        :box nil
-                        :inherit 'font-lock-comment-face))
+    (modus-themes-with-colors
+      (custom-set-faces
+       `(eros-result-overlay-face ((,c :inherit modus-themes-slant :foreground ,comment))))))
   :hook ((after-enable-theme . nmbrgts/tweak-tab-bar-faces)
          (after-enable-theme . nmbrgts/tweak-fringe-faces)
          (after-enable-theme . nmbrgts/tweak-keycast-faces)
