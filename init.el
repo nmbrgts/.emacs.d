@@ -654,6 +654,18 @@ targets."
   :init
   (exec-path-from-shell-initialize))
 
+;; mouse bad
+(use-package inhibit-mouse
+  :ensure t
+  :custom
+  (inhibit-mouse-adjust-mouse-highlight t)
+  (inhibit-mouse-adjust-show-help-function t)
+  :config
+  (if (daemonp)
+      (add-hook 'server-after-make-frame-hook #'inhibit-mouse-mode)
+    (inhibit-mouse-mode 1))
+  :bind ("C-c t m" . #'inhibit-mouse-mode))
+
 ;;; themes
 
 ;; create after theme hook
