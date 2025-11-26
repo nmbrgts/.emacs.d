@@ -668,12 +668,6 @@ targets."
 
 ;;; themes
 
-;; create after theme hook
-(use-package emacs
-  :config
-  (defvar after-enable-theme-hook nil
-    "Normal hook run after enabling a theme."))
-
 (use-package doom-themes
   :ensure t
   :config
@@ -699,7 +693,7 @@ targets."
        '(lsp-face-highlight-write ((t (:inherit highlight :weight light))))
        '(lsp-face-highlight-textual ((t (:inherit highlight :weight light))))
        `(doom-modeline-bar ((,c :background ,keybind))))))
-  :hook (after-enable-theme . nmbrgts/tweak-theme))
+  :hook (modus-themes-after-load-theme . nmbrgts/tweak-theme))
 
 (use-package ef-themes
   :ensure t)
@@ -730,7 +724,7 @@ targets."
       (fontaine-set-preset 'nmbrgts/regular)))
 
   :bind ("C-c t s" . #'nmbrgts/fontaine-toggle)
-  :hook ((after-enable-theme
+  :hook ((modus-themes-after-load-theme
           . (lambda ()
               (fontaine-set-preset fontaine-current-preset)))
          (fontaine-set-preset
@@ -765,7 +759,7 @@ targets."
         doom-modeline-window-width-limit 120
         doom-modeline-buffer-file-name-style 'relative-from-project)
   :hook ((after-init . doom-modeline-mode)
-         (after-enable-theme
+         (modus-themes-after-load-theme
           . (lambda ()
               (when (bound-and-true-p doom-modeline-mode)
                 (doom-modeline-mode -1)
@@ -1177,7 +1171,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :quelpa (indent-bars
            :fetcher github
            :repo "jdtsmith/indent-bars")
-  :hook ((after-enable-theme
+  :hook ((modus-themes-after-load-theme
           . (lambda ()
               (when (bound-and-true-p indent-bars-mode)
                 (indent-bars-mode -1)
@@ -1350,7 +1344,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (kind-icon-use-icons nil)
   :config
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
-  :hook (after-enable-theme . kind-icon-reset-cache))
+  :hook (modus-themes-after-load-theme . kind-icon-reset-cache))
 
 ;; snippets
 
@@ -1809,7 +1803,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               (and (eq nmbrgts/active-theme nmbrgts/dark-theme) nmbrgts/light-theme)
               (and (eq nmbrgts/active-theme nmbrgts/light-theme) nmbrgts/dark-theme)
               nmbrgts/active-theme))
-    (modus-themes-load-theme nmbrgts/active-theme 'after-enable-theme-hook))
+    (modus-themes-load-theme nmbrgts/active-theme))
 
   ;; switch themes with system
   (if (and (eq system-type 'darwin)
@@ -1821,9 +1815,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         (nmbrgts/theme-toggle ns-system-appearance))
     (progn
       (message "loading theme...")
-      (modus-themes-load-theme nmbrgts/active-theme 'after-enable-theme-hook)))
+      (modus-themes-load-theme nmbrgts/active-theme)))
   :bind ("C-c t t" . #'nmbrgts/theme-toggle)
-  :hook ((after-enable-theme
+  :hook ((modus-themes-after-load-theme
           . (lambda ()
               (setq vterm-environment
                     (setenv-internal vterm-environment
