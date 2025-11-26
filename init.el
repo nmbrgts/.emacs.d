@@ -733,6 +733,11 @@ targets."
                                              (/ (face-attribute 'default :height)
                                                 6)))))))
 
+(use-package frame
+  :ensure nil
+  :bind (("C-c t f" . #'toggle-frame-maximized)
+         ("C-c t F" . #'toggle-frame-fullscreen)))
+
 ;; lsp faces
 (use-package faces
   :after lsp-mode
