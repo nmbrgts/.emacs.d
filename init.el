@@ -688,11 +688,24 @@ targets."
 (use-package modus-themes
   :ensure t
   :config
-  (defun nmbrgts/tweak-doom-modeline-bar ()
+  (defun nmbrgts/tweak-theme ()
     (modus-themes-with-colors
       (custom-set-faces
+       `(tab-bar-tab ((,c :box nil)))
+       `(tab-bar-tab-inactive ((,c :background ,bg-mode-line-inactive
+                                   :foreground ,fg-mode-line-inactive
+                                   :weight normal
+                                   :box nil)))
+       `(fringe ((,c :background ,bg-main :foreground ,bg-main)))
+       `(keycast-key ((,c :box nil)))
+       `(child-frame-border ((,c :background ,constant)))
+       `(eros-result-overlay-face ((,c :inherit modus-themes-slant
+                                       :foreground ,comment)))
+       '(lsp-face-highlight-read ((t (:inherit highlight :weight light))))
+       '(lsp-face-highlight-write ((t (:inherit highlight :weight light))))
+       '(lsp-face-highlight-textual ((t (:inherit highlight :weight light))))
        `(doom-modeline-bar ((,c :background ,keybind))))))
-  :hook (after-enable-theme . nmbrgts/tweak-doom-modeline-bar))
+  :hook (after-enable-theme . nmbrgts/tweak-theme))
 
 (use-package ef-themes
   :ensure t)
@@ -737,55 +750,6 @@ targets."
   :ensure nil
   :bind (("C-c t f" . #'toggle-frame-maximized)
          ("C-c t F" . #'toggle-frame-fullscreen)))
-
-;; lsp faces
-(use-package faces
-  :after lsp-mode
-  :config
-  (defun nmbrgts/tweak-lsp-mode-faces ()
-    (custom-set-faces
-     '(lsp-face-highlight-read ((t (:inherit highlight :weight light))))
-     '(lsp-face-highlight-write ((t (:inherit highlight :weight light))))
-     '(lsp-face-highlight-textual ((t (:inherit highlight :weight light))))))
-  :hook ((after-enable-theme lsp-mode) . nmbrgts/tweak-lsp-mode-faces))
-
-;; color tweaks
-(use-package faces
-  :after (keycast fringe eros)
-  :config
-  (defun nmbrgts/tweak-tab-bar-faces ()
-    (modus-themes-with-colors
-      (custom-set-faces
-       `(tab-bar-tab ((,c :box nil)))
-       `(tab-bar-tab-inactive ((,c :background ,bg-mode-line-inactive
-                                   :foreground ,fg-mode-line-inactive
-                                   :weight normal
-                                   :box nil))))))
-
-  (defun nmbrgts/tweak-fringe-faces ()
-    (modus-themes-with-colors
-      (custom-set-faces
-       `(fringe ((,c :background ,bg-main :foreground ,bg-main))))))
-
-  (defun nmbrgts/tweak-keycast-faces ()
-    (modus-themes-with-colors
-      (custom-set-faces
-       `(keycast-key ((,c :box nil))))))
-
-  (defun nmbrgts/tweak-miniframe-faces ()
-    (modus-themes-with-colors
-      (custom-set-faces
-       `(child-frame-border ((,c :background ,constant))))))
-
-  (defun nmbrgts/tweak-eros-faces ()
-    (modus-themes-with-colors
-      (custom-set-faces
-       `(eros-result-overlay-face ((,c :inherit modus-themes-slant :foreground ,comment))))))
-  :hook ((after-enable-theme . nmbrgts/tweak-tab-bar-faces)
-         (after-enable-theme . nmbrgts/tweak-fringe-faces)
-         (after-enable-theme . nmbrgts/tweak-keycast-faces)
-         (after-enable-theme . nmbrgts/tweak-miniframe-faces)
-         (after-enable-theme . nmbrgts/tweak-eros-faces)))
 
 (use-package doom-modeline
   :ensure t
