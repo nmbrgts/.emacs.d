@@ -672,13 +672,7 @@ targets."
 (use-package emacs
   :config
   (defvar after-enable-theme-hook nil
-    "Normal hook run after enabling a theme.")
-
-  (defun run-after-enable-theme-hook (&rest _args)
-    "Run `after-enable-theme-hook'."
-    (run-hooks 'after-enable-theme-hook))
-
-  (advice-add 'enable-theme :after #'run-after-enable-theme-hook))
+    "Normal hook run after enabling a theme."))
 
 (use-package doom-themes
   :ensure t
@@ -1800,7 +1794,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; define theme toggle and load
 (use-package emacs
-  :after (faces ef-themes)
+  :after (faces modus-themes ef-themes)
   :config
   ;; my theme selections for toggling
   (setq nmbrgts/light-theme 'ef-melissa-light
@@ -1815,8 +1809,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               (and (eq nmbrgts/active-theme nmbrgts/dark-theme) nmbrgts/light-theme)
               (and (eq nmbrgts/active-theme nmbrgts/light-theme) nmbrgts/dark-theme)
               nmbrgts/active-theme))
-    (mapc 'disable-theme custom-enabled-themes)
-    (load-theme nmbrgts/active-theme t))
+    (modus-themes-load-theme nmbrgts/active-theme 'after-enable-theme-hook))
 
   ;; switch themes with system
   (if (and (eq system-type 'darwin)
@@ -1828,7 +1821,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
         (nmbrgts/theme-toggle ns-system-appearance))
     (progn
       (message "loading theme...")
-      (load-theme nmbrgts/active-theme t)))
+      (modus-themes-load-theme nmbrgts/active-theme 'after-enable-theme-hook)))
   :bind ("C-c t t" . #'nmbrgts/theme-toggle)
   :hook ((after-enable-theme
           . (lambda ()
