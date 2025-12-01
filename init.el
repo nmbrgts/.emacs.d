@@ -862,7 +862,7 @@ targets."
   :init
   (setq display-line-numbers-widen t
         display-line-numbers-grow-only t
-        display-line-numbers-width-start t))
+        display-line-numbers-width-start 4))
 
 ;; display only left fringe
 (use-package fringe
