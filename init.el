@@ -25,6 +25,7 @@
   (package-install 'use-package)
   (require 'use-package))
 
+;; TODO: move custom path logic to use no-littering paths
 ;; use no-littering to manage emacs transient files
 (use-package no-littering
   :when nil
@@ -993,6 +994,7 @@ targets."
   :bind ( :map nmbrgts/git-prefix-map
           ("r" . #'browse-at-remote)))
 
+;; TODO: move to transient?
 ;; handle conflicts with a quick menu
 (use-package smerge-mode
   :after (hydra magit)
