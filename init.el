@@ -1328,6 +1328,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (global-corfu-mode))
 
+(use-package cape
+  :ensure t
+  :bind ("C-c p" . cape-prefix-map))
+
 ;; symbols for completion swag
 (use-package svg-lib
   :ensure t)
