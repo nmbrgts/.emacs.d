@@ -826,10 +826,6 @@ targets."
 (use-package project
   :after tab-bar
   :config
-  ;; (when (not (fboundp 'project-name))
-  ;;   (defun project-name (proj)
-  ;;     (cl-second (reverse (split-string (cdr proj) "/")))))
-
   (defun nmbrgts/project-tab-name ()
     (interactive)
     (tab-bar-rename-tab (project-name (project-current))))
