@@ -730,6 +730,7 @@ targets."
   :ensure t
   :init
   (setq doom-modeline-icon nil
+        doom-modeline-hud nil
         doom-modeline-modal nil
         doom-modeline-vcs-max-length 40
         doom-modeline-support-imenu nil
