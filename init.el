@@ -25,12 +25,11 @@
   (package-install 'use-package)
   (require 'use-package))
 
-;; TODO: move custom path logic to use no-littering paths
-;; use no-littering to manage emacs transient files
+;; better manage emacs transient files
 (use-package no-littering
-  :when nil
   :ensure t
-  :init
+  :demand t
+  :config
   (no-littering-theme-backups))
 
 ;; quelpa
@@ -49,7 +48,7 @@
 (require 'quelpa-use-package)
 
 ;; load private config
-(let ((private-config (expand-file-name "private.el" user-emacs-directory)))
+(let ((private-config (no-littering-expand-etc-file-name "private.el")))
   (if (file-exists-p private-config)
       (load private-config :no-error)))
 
@@ -77,7 +76,7 @@
 ;; set up external custom file
 (use-package cus-edit
   :init
-  (setq custom-file (locate-user-emacs-file "custom.el")))
+  (setq custom-file (no-littering-expand-etc-file-name "custom.el")))
 
 ;; macos native compilation fix
 (use-package comp
@@ -91,12 +90,6 @@
   :hook ((visual-line-mode . adaptive-wrap-prefix-mode))
   :init
   (global-visual-line-mode 1))
-
-;; helper function for setting paths in emacs dir
-(defun nmbrgts/initialize-emacs-dir-path (sub-path)
-  (let ((path (expand-file-name sub-path user-emacs-directory)))
-    (make-directory path t)
-    path))
 
 ;; misc. file settings
 (use-package files
@@ -112,12 +105,7 @@
    ;; reduce nuisance prompts
    confirm-nonexistent-file-or-buffer nil
    ;; automatically refresh any file visiting buffers
-   revert-without-query '(".*")
-   ;; keep transient files tidy (part 1)
-   nmbrgts/transient-files-backup-dir (nmbrgts/initialize-emacs-dir-path "tmp/backups/")
-   nmbrgts/transient-files-auto-save-dir (nmbrgts/initialize-emacs-dir-path "tmp/auto-saves/")
-   backup-directory-alist `(("." . ,nmbrgts/transient-files-backup-dir))
-   auto-save-file-name-transforms `((".*" ,nmbrgts/transient-files-auto-save-dir t)))
+   revert-without-query '(".*"))
   :bind (("C-r" . #'revert-buffer)
          ("C-x C-r" . #'set-visited-file-name)))
 
@@ -128,9 +116,7 @@
   :ensure nil
   :init
   (setq
-   ;; keep transient files tidy (part 2)
-   nmbrgts/transient-files-auto-save-prefix (nmbrgts/initialize-emacs-dir-path "tmp/auto-saves/sessions")
-   auto-save-list-file-prefix nmbrgts/transient-files-auto-save-prefix
+   ;; keep transient files tidy
    create-lockfiles nil)
 
   (defun nmbrgts/recompile-packages ()
