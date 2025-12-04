@@ -1079,7 +1079,21 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
           (?_ "Nulls")
           (?t "Type Parameters")
           (?! "Events")
-          (?d "Files"))))
+          (?d "Files")))
+  :hook (lsp-mode
+         . (lambda ()
+             (require 'consult-imenu)
+             (if (not (boundp 'nmbrgts/consult-imenu-lsp-types))
+                 (setq-local nmbrgts/consult-imenu-lsp-types
+                             `(,major-mode :types ,nmbrgts/lsp-mode-imenu-types)))
+             (if lsp-mode
+                 (progn
+                   (make-local-variable 'consult-imenu-config)
+                   (add-to-list 'consult-imenu-config
+                                nmbrgts/consult-imenu-lsp-types))
+               (setq-local consult-imenu-config
+                           (delq nmbrgts/consult-imenu-lsp-types
+                                 consult-imenu-config))))))
 
 (use-package consult-lsp
   :after (consult lsp-mode)
@@ -1425,15 +1439,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (add-to-list 'major-mode-remap-alist
                '(python-mode . python-ts-mode)))
 
-;; lsp based imenu for python
-(use-package emacs
-  :after (python consult-imenu lsp-mode)
-  :config
-  (dolist (mode '(python-mode
-                  python-ts-mode))
-    (add-to-list 'consult-imenu-config
-                 `(,mode :types ,nmbrgts/lsp-mode-imenu-types))))
-
 ;; setup pyright
 (use-package lsp-pyright
   :ensure t
@@ -1533,12 +1538,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq lsp-go-use-placeholders nil
         lsp-go-use-gofumpt t))
 
-(use-package emacs
-  :after (go-mode consult-imenu lsp-mode)
-  :config
-  (add-to-list 'consult-imenu-config
-               `(go-mode :types ,nmbrgts/lsp-mode-imenu-types)))
-
 ;; formatting
 
 (use-package reformatter
@@ -1578,10 +1577,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (add-to-list 'major-mode-remap-alist
                '(csharp-mode . csharp-ts-mode))
-  (dolist (mode '(csharp-mode
-                  csharp-ts-mode))
-    (add-to-list 'consult-imenu-config
-                 `(,mode :types ,nmbrgts/lsp-mode-imenu-types)))
   :hook ((csharp-mode csharp-ts-mode)
          . (lambda ()
              (require 'lsp-csharp)
