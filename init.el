@@ -1807,4 +1807,33 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                     (setenv-internal vterm-environment
                                      "EMACS_THEME"
                                      (format "%s" nmbrgts/active-theme)
-                                     t))))))
+                                     t))))
+         (modus-themes-after-load-theme
+          . (lambda ()
+              (mapc
+               (lambda (buffer)
+                 (when (s-starts-with? "*vterm:"
+                                       (buffer-name buffer))
+                   (with-current-buffer buffer
+                     (vterm-copy-mode -1)
+                     (vterm-send-stop)
+                     (vterm-send-key "c" nil nil :ctrl)
+                     (vterm-insert "")
+                     (vterm-send-stop)
+                     (vterm-reset-cursor-point)
+                     (vterm-send-start)
+                     (let ((in-proc (not (vterm--at-prompt-p))))
+                       (when in-proc
+                         (vterm-send-key "z" nil nil :ctrl)
+                         (vterm-insert ""))
+                       (vterm-insert (format "fish_config theme choose %s"
+                                             (if (eq nmbrgts/active-theme nmbrgts/light-theme)
+                                                 "light"
+                                               "dark")))
+                       (vterm-send-return)
+                       (vterm-insert "")
+                       (when in-proc
+                         (vterm-insert "fg")
+                         (vterm-send-return)
+                         (vterm-insert ""))))))
+               (buffer-list))))))
