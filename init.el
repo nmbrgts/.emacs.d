@@ -264,7 +264,7 @@
            (slot . 1)
            (window-height . 0.20))
           ;; side bar information
-          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\|lsp-help\\)"
+          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\|lsp-help\\|man\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
