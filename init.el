@@ -1161,10 +1161,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;;; general
 
 (use-package treesit
-  :init
-  (setq
-   treesit-extra-load-path `(,(expand-file-name "tree-sitter" user-emacs-directory)
-                             "/usr/local/lib/")))
+  :config
+  (add-to-list 'treesit-extra-load-path "/usr/local/lib/"))
 
 (use-package indent-bars
   :quelpa (indent-bars
