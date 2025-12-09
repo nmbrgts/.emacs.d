@@ -822,8 +822,8 @@ targets."
 
 ;; TODO: move to early init?
 (use-package tool-bar
-  :init
-  (tool-bar-mode -1))
+  :hook
+  (after-init . (lambda () (tool-bar-mode -1))))
 
 (use-package scroll-bar
   :init
