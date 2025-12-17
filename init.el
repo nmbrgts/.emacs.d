@@ -256,6 +256,11 @@
            (side . bottom)
            (slot . 1)
            (window-height . 0.30))
+          ("^\\*\\gptel-\\(chat\\|agent\\):"
+           (nmbrgts/display-buffer-in-side-window-and-select)
+           (side . right)
+           (slot . 1)
+           (window-width . 0.40))
           ;; top bar informational
           ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
@@ -1161,6 +1166,19 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :custom (terraform-indent-level 4)
   :hook ((terraform-mode . outline-minor-mode)
          (terraform-mode . lsp)))
+
+;;; llm / agentic tools
+
+(use-package gptel
+  :ensure t
+  :config
+  (setq gptel-default-mode #'org-mode
+        gptel-model 'qwen2.5-coder:3b
+        gptel-backend (gptel-make-ollama "gptel-chat:ollama"
+                        :host "localhost:11434"
+                        :stream t
+                        :models '(qwen3-coder:30b
+                                  qwen2.5-coder:3b))))
 
 ;;; programming language support
 
