@@ -47,11 +47,6 @@
    :url "https://github.com/quelpa/quelpa-use-package.git"))
 (require 'quelpa-use-package)
 
-;; load private config
-(let ((private-config (no-littering-expand-etc-file-name "private.el")))
-  (if (file-exists-p private-config)
-      (load private-config :no-error)))
-
 ;; misc. early settings
 (use-package emacs
   :custom
@@ -1859,3 +1854,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                          (vterm-send-return)
                          (vterm-insert ""))))))
                (buffer-list))))))
+
+;; load private config
+(let ((private-config (no-littering-expand-etc-file-name "private.el")))
+  (if (file-exists-p private-config)
+      (load private-config :no-error)))
