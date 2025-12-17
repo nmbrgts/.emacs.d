@@ -535,9 +535,7 @@
   :after which-key
   :bind
   (("C-." . embark-act)
-   ("C-c a a" . embark-act)
    ("C-;" . embark-dwim)
-   ("C-c a d" . embark-dwim)
    ("C-h B" . embark-bindings))
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
@@ -1166,6 +1164,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package gptel
   :ensure t
+  :init
+  (setq nmbrgts/assistant-prefix-map (make-sparse-keymap))
+  (bind-key "C-c a" (cons "assistant" nmbrgts/assistant-prefix-map))
+  :bind ( :map nmbrgts/assistant-prefix-map
+          ("m" . #'gptel-menu)
+          ("c" . #'gptel)
+          ("r" . #'gptel-rewrite))
   :config
   (setq gptel-default-mode #'org-mode
         gptel-model 'qwen2.5-coder:3b
@@ -1174,6 +1179,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                         :stream t
                         :models '(qwen3-coder:30b
                                   qwen2.5-coder:3b))))
+
+(use-package gptel-agent
+  :ensure t
+  :after gptel
+  :bind ( :map nmbrgts/assistant-prefix-map
+          ("a" . #'gptel-agent)))
 
 ;;; programming language support
 
