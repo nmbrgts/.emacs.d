@@ -666,6 +666,10 @@ targets."
   (defun nmbrgts/tweak-theme ()
     (modus-themes-with-colors
       (custom-set-faces
+       `(mode-line ((,c :box nil)))
+       `(mode-line-active ((,c :box nil)))
+       `(mode-line-inactive ((,c :box nil)))
+       `(mode-line-highlight ((,c :box nil)))
        `(tab-bar-tab ((,c :box nil)))
        `(tab-bar-tab-inactive ((,c :background ,bg-mode-line-inactive
                                    :foreground ,fg-mode-line-inactive
@@ -730,6 +734,8 @@ targets."
   :ensure t
   :init
   (setq doom-modeline-icon nil
+        doom-modeline-percent-position nil
+        doom-modeline-position-line-format '("")
         doom-modeline-hud nil
         doom-modeline-modal nil
         doom-modeline-vcs-max-length 40
