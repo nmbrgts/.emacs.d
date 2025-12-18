@@ -104,8 +104,12 @@
   :bind (("C-r" . #'revert-buffer)
          ("C-x C-r" . #'set-visited-file-name)))
 
+(setq nmbrgts/toggle-prefix-map (make-sparse-keymap))
+(bind-key "C-c t" (cons "toggle" nmbrgts/toggle-prefix-map))
+
 (use-package whitespace
-  :bind (("C-c t SPC" . whitespace-mode)))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("SPC" . whitespace-mode)))
 
 (use-package emacs
   :ensure nil
@@ -134,8 +138,9 @@
   :config
   ;; better default behavior for M-SPC
   (global-set-key [remap just-one-space] #'cycle-spacing)
-  :bind (("C-c t RET" . #'toggle-word-wrap)
-         ("C-c s" . #'scratch-buffer)))
+  :bind (("C-c s" . #'scratch-buffer)
+         :map nmbrgts/toggle-prefix-map
+         ("RET" . #'toggle-word-wrap)))
 
 ;; delete selected region on insert
 (use-package delsel
@@ -174,7 +179,7 @@
 ;; helpful window operations
 
 (setq nmbrgts/window-map (make-sparse-keymap))
-(bind-key "C-c w" nmbrgts/window-map)
+(bind-key "C-c w" (cons "window" nmbrgts/window-map))
 
 (use-package window
   :ensure nil
@@ -205,8 +210,8 @@
 (use-package winum
   :ensure t
   :init
-  (winum-set-keymap-prefix (kbd "C-c w"))
-  (winum-mode))
+  (winum-mode)
+  (bind-key "n" winum-keymap nmbrgts/window-map))
 
 (use-package ace-window
   :ensure t
@@ -353,7 +358,8 @@
 (use-package keycast
   :ensure t
   :demand t
-  :bind ("C-c t k" . #'keycast-tab-bar-mode))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("k" . #'keycast-tab-bar-mode)))
 
 ;; get examples in help
 
@@ -649,7 +655,8 @@ targets."
   (if (daemonp)
       (add-hook 'server-after-make-frame-hook #'inhibit-mouse-mode)
     (inhibit-mouse-mode 1))
-  :bind ("C-c t m" . #'inhibit-mouse-mode))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("m" . #'inhibit-mouse-mode)))
 
 ;;; themes
 
@@ -712,7 +719,8 @@ targets."
         (fontaine-set-preset 'nmbrgts/small)
       (fontaine-set-preset 'nmbrgts/regular)))
 
-  :bind ("C-c t s" . #'nmbrgts/fontaine-toggle)
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("s" . #'nmbrgts/fontaine-toggle))
   :hook ((modus-themes-after-load-theme
           . (lambda ()
               (fontaine-set-preset fontaine-current-preset)))
@@ -725,8 +733,9 @@ targets."
 
 (use-package frame
   :ensure nil
-  :bind (("C-c t f" . #'toggle-frame-maximized)
-         ("C-c t F" . #'toggle-frame-fullscreen)))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("f" . #'toggle-frame-maximized)
+          ("F" . #'toggle-frame-fullscreen)))
 
 (use-package doom-modeline
   :ensure t
@@ -837,8 +846,9 @@ targets."
   :init
   (unless (memq window-system '(mac ns))
     (menu-bar-mode -1))
-  :bind (("C-c t e" . #'toggle-debug-on-error)
-         ("C-c t q" . #'toggle-debug-on-quit)))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("e" . #'toggle-debug-on-error)
+          ("q" . #'toggle-debug-on-quit)))
 
 ;; highlight line everywhere
 (use-package hl-line
@@ -920,7 +930,7 @@ targets."
   :ensure t
   :init
   (setq nmbrgts/git-prefix-map (make-sparse-keymap))
-  (bind-key "C-c g" nmbrgts/git-prefix-map)
+  (bind-key "C-c g" (cons "git" nmbrgts/git-prefix-map))
   :config
   (setq magit-bury-buffer-function 'magit-restore-window-configuration
         magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
@@ -1111,7 +1121,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (setq nmbrgts/dap-mode-map (make-sparse-keymap)
         dap-auto-configure-features '(sessions locals))
-  (bind-key "C-c d" nmbrgts/dap-mode-map)
+  (bind-key "C-c d" (cons "debugger" nmbrgts/dap-mode-map))
   :bind ( :map nmbrgts/dap-mode-map
           ("n" . #'dap-next)
           ("i" . #'dap-step-in)
@@ -1203,7 +1213,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               (when (bound-and-true-p indent-bars-mode)
                 (indent-bars-mode -1)
                 (indent-bars-mode +1)))))
-  :bind ("C-c t i" . indent-bars-mode)
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("i" . indent-bars-mode))
   :init
   (setq
    indent-bars-pattern "."
@@ -1428,7 +1439,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package rainbow-delimiters
   :ensure t
-  :bind ("C-c t (" . #'rainbow-delimiters-mode))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("(" . #'rainbow-delimiters-mode)))
 
 ;;; elisp
 
@@ -1534,6 +1546,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; virtual environments
 (use-package pyvenv
   :ensure t
+  :when nil
   :after python
   :init
   (setq nmbrgts/python-venv-map (make-sparse-keymap))
@@ -1709,7 +1722,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :demand t
   :init
   (setq nmbrgts/note-keymap (make-sparse-keymap))
-  (bind-key "C-c n" nmbrgts/note-keymap)
+  (bind-key "C-c n" (cons "notes" nmbrgts/note-keymap))
   :bind ( :map nmbrgts/note-keymap
           ("n" . #'denote-create-note)
           ("l" . #'denote-link)
@@ -1828,7 +1841,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (progn
       (message "loading theme...")
       (modus-themes-load-theme nmbrgts/active-theme)))
-  :bind ("C-c t t" . #'nmbrgts/theme-toggle)
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("t" . #'nmbrgts/theme-toggle))
   :hook ((modus-themes-after-load-theme
           . (lambda ()
               (setq vterm-environment
