@@ -57,7 +57,6 @@
         gc-cons-threshold (* 100 1024 1024)
         read-process-output-max (* 5 1024 1024)
         ring-bell-function 'ignore
-        tabs-always-indent nil
         use-short-answers t
         kill-buffer-query-functions
         (remq 'process-kill-buffer-query-function
@@ -264,7 +263,7 @@
           ;; top bar informational
           ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
-           (select. t)
+           (select . t)
            (side . top)
            (slot . 1)
            (window-height . 0.20))
@@ -321,7 +320,7 @@
   (defun nmbrgts/quit-side-window ()
     (interactive)
     (if (not (window-parameter (selected-window) 'window-side))
-        (message "Error: Selected window is no a side window!")
+        (message "Error: Selected window is not a side window!")
       (progn
         (setq nmbrgts/last-quit-side-window (buffer-name (current-buffer)))
         (delete-window))))
