@@ -25,11 +25,11 @@
   (package-install 'use-package)
   (require 'use-package))
 
-;; use no-littering to manage emacs transient files
+;; better manage emacs transient files
 (use-package no-littering
-  :when nil
   :ensure t
-  :init
+  :demand t
+  :config
   (no-littering-theme-backups))
 
 ;; quelpa
@@ -47,11 +47,6 @@
    :url "https://github.com/quelpa/quelpa-use-package.git"))
 (require 'quelpa-use-package)
 
-;; load private config
-(let ((private-config (expand-file-name "private.el" user-emacs-directory)))
-  (if (file-exists-p private-config)
-      (load private-config :no-error)))
-
 ;; misc. early settings
 (use-package emacs
   :custom
@@ -62,7 +57,6 @@
         gc-cons-threshold (* 100 1024 1024)
         read-process-output-max (* 5 1024 1024)
         ring-bell-function 'ignore
-        tabs-always-indent nil
         use-short-answers t
         kill-buffer-query-functions
         (remq 'process-kill-buffer-query-function
@@ -76,7 +70,7 @@
 ;; set up external custom file
 (use-package cus-edit
   :init
-  (setq custom-file (locate-user-emacs-file "custom.el")))
+  (setq custom-file (no-littering-expand-etc-file-name "custom.el")))
 
 ;; macos native compilation fix
 (use-package comp
@@ -87,16 +81,9 @@
 ;; trying to make wrapping less ugly
 (use-package adaptive-wrap
   :ensure t
-  :hook ((visual-line-mode . adaptive-wrap-prefix-mode)
-         (org-mode . (lambda () (setq-local adaptive-wrap-extra-indent 4))))
+  :hook ((visual-line-mode . adaptive-wrap-prefix-mode))
   :init
   (global-visual-line-mode 1))
-
-;; helper function for setting paths in emacs dir
-(defun nmbrgts/initialize-emacs-dir-path (sub-path)
-  (let ((path (expand-file-name sub-path user-emacs-directory)))
-    (make-directory path t)
-    path))
 
 ;; misc. file settings
 (use-package files
@@ -112,25 +99,22 @@
    ;; reduce nuisance prompts
    confirm-nonexistent-file-or-buffer nil
    ;; automatically refresh any file visiting buffers
-   revert-without-query '(".*")
-   ;; keep transient files tidy (part 1)
-   nmbrgts/transient-files-backup-dir (nmbrgts/initialize-emacs-dir-path "tmp/backups/")
-   nmbrgts/transient-files-auto-save-dir (nmbrgts/initialize-emacs-dir-path "tmp/auto-saves/")
-   backup-directory-alist `(("." . ,nmbrgts/transient-files-backup-dir))
-   auto-save-file-name-transforms `((".*" ,nmbrgts/transient-files-auto-save-dir t)))
+   revert-without-query '(".*"))
   :bind (("C-r" . #'revert-buffer)
          ("C-x C-r" . #'set-visited-file-name)))
 
+(setq nmbrgts/toggle-prefix-map (make-sparse-keymap))
+(bind-key "C-c t" (cons "toggle" nmbrgts/toggle-prefix-map))
+
 (use-package whitespace
-  :bind (("C-c t SPC" . whitespace-mode)))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("SPC" . whitespace-mode)))
 
 (use-package emacs
   :ensure nil
   :init
   (setq
-   ;; keep transient files tidy (part 2)
-   nmbrgts/transient-files-auto-save-prefix (nmbrgts/initialize-emacs-dir-path "tmp/auto-saves/sessions")
-   auto-save-list-file-prefix nmbrgts/transient-files-auto-save-prefix
+   ;; keep transient files tidy
    create-lockfiles nil)
 
   (defun nmbrgts/recompile-packages ()
@@ -153,8 +137,9 @@
   :config
   ;; better default behavior for M-SPC
   (global-set-key [remap just-one-space] #'cycle-spacing)
-  :bind (("C-c t RET" . #'toggle-word-wrap)
-         ("C-c s" . #'scratch-buffer)))
+  :bind (("C-c s" . #'scratch-buffer)
+         :map nmbrgts/toggle-prefix-map
+         ("RET" . #'toggle-word-wrap)))
 
 ;; delete selected region on insert
 (use-package delsel
@@ -193,7 +178,7 @@
 ;; helpful window operations
 
 (setq nmbrgts/window-map (make-sparse-keymap))
-(bind-key "C-c w" nmbrgts/window-map)
+(bind-key "C-c w" (cons "window" nmbrgts/window-map))
 
 (use-package window
   :ensure nil
@@ -224,8 +209,8 @@
 (use-package winum
   :ensure t
   :init
-  (winum-set-keymap-prefix (kbd "C-c w"))
-  (winum-mode))
+  (winum-mode)
+  (bind-key "n" winum-keymap nmbrgts/window-map))
 
 (use-package ace-window
   :ensure t
@@ -265,19 +250,29 @@
            (side . bottom)
            (slot . 1)
            (window-height . 0.30))
+          ("^\\*vterm:"
+           (display-buffer-reuse-window display-buffer-in-side-window)
+           (side . bottom)
+           (slot . 1)
+           (window-height . 0.30))
+          ("^\\*\\gptel-\\(chat\\|agent\\):"
+           (nmbrgts/display-buffer-in-side-window-and-select)
+           (side . right)
+           (slot . 1)
+           (window-width . 0.40))
           ;; top bar informational
           ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
-           (select. t)
+           (select . t)
            (side . top)
            (slot . 1)
            (window-height . 0.20))
           ;; side bar information
-          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\|lsp-help\\)"
+          ("^\\*\\(\[Hh]elp\\|info\\|documentation\\|Metahelp\\|lsp-help\\|man\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
-           (window-width . 0.30))
+           (window-width . 0.40))
           ;; quick doodling
           ("^\\*\\(.*scratch\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
@@ -290,7 +285,7 @@
            (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
-           (window-width . 0.30))))
+           (window-width . 0.40))))
 
   (defun nmbrgts/promote-side-window-buffer (arg)
     (interactive "P")
@@ -325,7 +320,7 @@
   (defun nmbrgts/quit-side-window ()
     (interactive)
     (if (not (window-parameter (selected-window) 'window-side))
-        (message "Error: Selected window is no a side window!")
+        (message "Error: Selected window is not a side window!")
       (progn
         (setq nmbrgts/last-quit-side-window (buffer-name (current-buffer)))
         (delete-window))))
@@ -362,7 +357,8 @@
 (use-package keycast
   :ensure t
   :demand t
-  :bind ("C-c t k" . #'keycast-tab-bar-mode))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("k" . #'keycast-tab-bar-mode)))
 
 ;; get examples in help
 
@@ -513,7 +509,23 @@
                              :as #'buffer-name)))
 
     "Set workspace buffer list for consult-buffer.")
-  (add-to-list 'consult-buffer-sources 'consult--source-workspace))
+
+  (add-to-list 'consult-buffer-sources 'consult--source-workspace)
+
+  (defvar consult--source-vterm
+    (list :name "Vterm Buffers"
+          :narrow ?v
+          :history 'buffer-name-history
+          :category 'buffer
+          :state #'consult--buffer-state
+          :hidden t
+          :default nil
+          :items (lambda () (consult--buffer-query
+                             :mode #'vterm-mode
+                             :sort 'visibility
+                             :as #'buffer-name))))
+
+  (add-to-list 'consult-buffer-sources 'consult--source-vterm))
 
 ;;; writable grep buffers
 
@@ -528,9 +540,7 @@
   :after which-key
   :bind
   (("C-." . embark-act)
-   ("C-c a a" . embark-act)
    ("C-;" . embark-dwim)
-   ("C-c a d" . embark-dwim)
    ("C-h B" . embark-bindings))
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
@@ -621,6 +631,11 @@ targets."
   :config
   (setq all-the-icons-dired-monochrome nil))
 
+(use-package all-the-icons-ibuffer
+  :ensure t
+  :after (all-the-icons)
+  :hook (ibuffer-mode . #'all-the-icons-ibuffer-mode))
+
 ;;; mac usability tweaks
 
 ;; load system path on startup
@@ -629,6 +644,19 @@ targets."
   :init
   (exec-path-from-shell-initialize))
 
+;; mouse bad
+(use-package inhibit-mouse
+  :ensure t
+  :custom
+  (inhibit-mouse-adjust-mouse-highlight t)
+  (inhibit-mouse-adjust-show-help-function t)
+  :config
+  (if (daemonp)
+      (add-hook 'server-after-make-frame-hook #'inhibit-mouse-mode)
+    (inhibit-mouse-mode 1))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("m" . #'inhibit-mouse-mode)))
+
 ;;; themes
 
 (use-package doom-themes
@@ -636,129 +664,102 @@ targets."
   :config
   (doom-themes-visual-bell-config))
 
+(use-package modus-themes
+  :ensure t
+  :config
+  (defun nmbrgts/tweak-theme ()
+    (modus-themes-with-colors
+      (custom-set-faces
+       `(mode-line ((,c :box nil)))
+       `(mode-line-active ((,c :box nil)))
+       `(mode-line-inactive ((,c :box nil)))
+       `(mode-line-highlight ((,c :box nil)))
+       `(tab-bar-tab ((,c :box nil)))
+       `(tab-bar-tab-inactive ((,c :background ,bg-mode-line-inactive
+                                   :foreground ,fg-mode-line-inactive
+                                   :weight normal
+                                   :box nil)))
+       `(fringe ((,c :background ,bg-main :foreground ,bg-main)))
+       `(keycast-key ((,c :box nil)))
+       `(child-frame-border ((,c :background ,constant)))
+       `(eros-result-overlay-face ((,c :inherit modus-themes-slant
+                                       :foreground ,comment)))
+       '(lsp-face-highlight-read ((t (:inherit highlight :weight light))))
+       '(lsp-face-highlight-write ((t (:inherit highlight :weight light))))
+       '(lsp-face-highlight-textual ((t (:inherit highlight :weight light))))
+       `(doom-modeline-bar ((,c :background ,keybind))))))
+  :hook (modus-themes-after-load-theme . nmbrgts/tweak-theme))
+
 (use-package ef-themes
   :ensure t)
 
-;; create after theme hook
-(use-package custom
+(use-package fontaine
+  :ensure t
   :config
-  (defvar after-enable-theme-hook nil
-    "Normal hook run after enabling a theme.")
+  (setq fontaine-presets
+        '((nmbrgts/regular
+           :default-family "JetBrains Mono"
+           :default-weight light
+           :default-height 270
+           :fixed-pitch-family "Iosevka Aile"
+           :bold-weight light)
+          (nmbrgts/small
+           :default-family "JetBrains Mono"
+           :default-weight light
+           :default-height 200
+           :fixed-pitch-family "Iosevka Aile"
+           :bold-weight light)))
+  (fontaine-mode +1)
+  (fontaine-set-preset 'nmbrgts/regular)
 
-  (defun run-after-enable-theme-hook (&rest _args)
-    "Run `after-enable-theme-hook'."
-    (run-hooks 'after-enable-theme-hook))
-
-  (advice-add 'enable-theme :after #'run-after-enable-theme-hook))
-
-;; visual tweaks to apply after theme
-;; fonts
-(use-package faces
-  :config
-  (setq nmbrgts/default-fixed-pitch-font "JetBrains Mono"
-        nmbrgts/default-variable-pitch-font "Iosevka Aile"
-        nmbrgts/default-fixed-pitch-height 270
-        nmbrgts/default-variable-pitch-height 270)
-
-  (defun nmbrgts/apply-preferred-fonts ()
+  (defun nmbrgts/fontaine-toggle()
     (interactive)
-    (set-face-attribute 'default nil
-                        :font nmbrgts/default-fixed-pitch-font
-                        :weight 'light
-                        :height nmbrgts/default-fixed-pitch-height)
-    (set-face-attribute 'fixed-pitch nil
-                        :font nmbrgts/default-fixed-pitch-font
-                        :weight 'light
-                        :height nmbrgts/default-fixed-pitch-height)
-    (set-face-attribute 'variable-pitch nil
-                        :font nmbrgts/default-variable-pitch-font
-                        :weight 'light
-                        :height nmbrgts/default-variable-pitch-height)
-    (set-face-attribute 'bold nil :weight 'light))
-  :hook (after-enable-theme . nmbrgts/apply-preferred-fonts))
+    (if (eq fontaine-current-preset 'nmbrgts/regular)
+        (fontaine-set-preset 'nmbrgts/small)
+      (fontaine-set-preset 'nmbrgts/regular)))
 
-;; lsp faces
-(use-package faces
-  :after lsp-mode
-  :config
-  (defun nmbrgts/tweak-lsp-mode-faces ()
-    (set-face-attribute 'lsp-face-highlight-read nil
-                        :weight 'light)
-    (set-face-attribute 'lsp-face-highlight-write nil
-                        :weight 'light)
-    (set-face-attribute 'lsp-face-highlight-textual nil
-                        :weight 'light))
-  :hook ((after-enable-theme lsp-mode) . nmbrgts/tweak-lsp-mode-faces))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("s" . #'nmbrgts/fontaine-toggle))
+  :hook ((modus-themes-after-load-theme
+          . (lambda ()
+              (fontaine-set-preset fontaine-current-preset)))
+         (fontaine-set-preset
+          . (lambda ()
+              (setq doom-modeline--font-height-cache (make-hash-table)
+                    doom-modeline-bar-width (floor
+                                             (/ (face-attribute 'default :height)
+                                                6)))))))
 
-;; color tweaks
-(use-package faces
-  :after (keycast fringe eros)
-  :config
-  (defun nmbrgts/tweak-tab-bar-faces ()
-    (set-face-attribute
-     'tab-bar nil)
-    (set-face-attribute
-     'tab-bar-tab nil
-     :background (face-attribute 'mode-line :background)
-     :weight 'normal
-     :box nil)
-    (set-face-attribute
-     'tab-bar nil
-     :background (face-attribute 'mode-line-inactive :background)
-     :box nil
-     :weight 'normal)
-    (set-face-attribute
-     'tab-bar-tab-inactive nil
-     :background (face-attribute 'tab-bar :background)
-     :foreground (face-attribute 'mode-line-inactive :foreground)
-     :box nil
-     :weight 'normal))
-
-  (defun nmbrgts/tweak-fringe-faces ()
-    (set-face-attribute
-     'fringe nil
-     :background (face-attribute 'default :background)
-     :foreground (face-attribute 'default :background)))
-
-  (defun nmbrgts/tweak-keycast-faces ()
-    (set-face-attribute 'keycast-key nil
-                        ;; :foreground (face-attribute 'mode-line :background)
-                        ;; :background (face-attribute 'mode-line-emphasis :foreground)
-                        :box nil)
-    (when (bound-and-true-p keycast-tab-bar-mode)
-      (keycast-tab-bar-mode -1)
-      (keycast-tab-bar-mode +1)))
-
-  (defun nmbrgts/tweak-miniframe-faces ()
-    (set-face-attribute 'child-frame-border nil
-                        :background (face-attribute 'font-lock-constant-face :foreground)))
-
-  (defun nmbrgts/tweak-eros-faces ()
-    (set-face-attribute 'eros-result-overlay-face
-                        nil
-                        :background nil
-                        :box nil
-                        :inherit 'font-lock-comment-face))
-  :hook ((after-enable-theme . nmbrgts/tweak-tab-bar-faces)
-         (after-enable-theme . nmbrgts/tweak-fringe-faces)
-         (after-enable-theme . nmbrgts/tweak-keycast-faces)
-         (after-enable-theme . nmbrgts/tweak-miniframe-faces)
-         (after-enable-theme . nmbrgts/tweak-eros-faces)))
+(use-package frame
+  :ensure nil
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("f" . #'toggle-frame-maximized)
+          ("F" . #'toggle-frame-fullscreen)))
 
 (use-package doom-modeline
   :ensure t
   :init
   (setq doom-modeline-icon nil
+        doom-modeline-percent-position nil
+        doom-modeline-position-line-format '("")
+        doom-modeline-hud nil
+        doom-modeline-modal nil
         doom-modeline-vcs-max-length 40
         doom-modeline-support-imenu nil
         doom-modeline-height 0
         doom-modeline-bar-width 40
-        doom-modeline-project-detection nil
+        doom-modeline-project-detection 'project
         doom-modeline-battery nil
         doom-modeline-time nil
-        doom-modeline-display-misc-in-all-mode-lines nil)
+        doom-modeline-display-misc-in-all-mode-lines nil
+        doom-modeline-lsp t
+        doom-modeline-workspace-name nil
+        doom-modeline-env-version nil
+        doom-modeline-buffer-encoding nil
+        doom-modeline-window-width-limit 120
+        doom-modeline-buffer-file-name-style 'relative-from-project)
   :hook ((after-init . doom-modeline-mode)
-         (after-enable-theme
+         (modus-themes-after-load-theme
           . (lambda ()
               (when (bound-and-true-p doom-modeline-mode)
                 (doom-modeline-mode -1)
@@ -825,10 +826,6 @@ targets."
 (use-package project
   :after tab-bar
   :config
-  ;; (when (not (fboundp 'project-name))
-  ;;   (defun project-name (proj)
-  ;;     (cl-second (reverse (split-string (cdr proj) "/")))))
-
   (defun nmbrgts/project-tab-name ()
     (interactive)
     (tab-bar-rename-tab (project-name (project-current))))
@@ -837,8 +834,8 @@ targets."
 
 ;; TODO: move to early init?
 (use-package tool-bar
-  :init
-  (tool-bar-mode -1))
+  :hook
+  (after-init . (lambda () (tool-bar-mode -1))))
 
 (use-package scroll-bar
   :init
@@ -848,8 +845,9 @@ targets."
   :init
   (unless (memq window-system '(mac ns))
     (menu-bar-mode -1))
-  :bind (("C-c t e" . #'toggle-debug-on-error)
-         ("C-c t q" . #'toggle-debug-on-quit)))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("e" . #'toggle-debug-on-error)
+          ("q" . #'toggle-debug-on-quit)))
 
 ;; highlight line everywhere
 (use-package hl-line
@@ -865,7 +863,7 @@ targets."
   :init
   (setq display-line-numbers-widen t
         display-line-numbers-grow-only t
-        display-line-numbers-width-start t))
+        display-line-numbers-width-start 4))
 
 ;; display only left fringe
 (use-package fringe
@@ -880,27 +878,45 @@ targets."
   :ensure t
   :after project
   :preface
-  (defun project-vterm ()
+  (defun nmbrgts/-launch-vterm-in-dir ()
+    (require 'vterm)
+    (defvar vterm-buffer-name) ; needed for dynamic scoping
+    (let ((vterm-buffer-name
+           (format vterm-buffer-name-string
+                   (string-replace "\n" "" (substring (shell-command-to-string "fish_title") 0 -1)))))
+      (vterm)))
+
+  (defun nmbrgts/project-vterm ()
     (interactive)
-    (let* ((default-directory (project-root (project-current t)))
-           (buff-name (project-prefixed-buffer-name "vterm"))
-           (buff (get-buffer buff-name)))
-      (if (and buff (not current-prefix-arg))
-          (pop-to-buffer buff
-                         (bound-and-true-p display-comint-buffer-action))
-        (vterm buff))))
+
+    (let ((default-directory (project-root (project-current t))))
+      (nmbrgts/-launch-vterm-in-dir)))
+
+  (defun nmbrgts/dir-vterm ()
+    (interactive)
+    (nmbrgts/-launch-vterm-in-dir))
+
+  (defun nmbrgts/dwim-vterm ()
+    (interactive)
+    (if (project-current)
+        (call-interactively #'nmbrgts/project-vterm)
+      (call-interactively #'nmbrgts/dir-vterm)))
   :init
-  (add-to-list 'project-switch-commands '(project-vterm "Vterm") t)
+  (add-to-list 'project-switch-commands '(nmbrgts/project-vterm "Vterm") t)
   (add-to-list 'project-kill-buffer-conditions '(major-mode . vterm-mode))
   :custom
   ((vterm-copy-exclude-prompt t)
    (vterm-always-compile-module t)
    (vterm-disable-bold t)
    (vterm-max-scrollback 100000)
+   (vterm-buffer-name-string "*vterm:%s*")
    (vterm-tramp-shells '(("ssh" "/bin/bash")
                          ("podman" "/bin/bash"))))
-  :bind ( :map project-prefix-map
-          ("t" . project-vterm)))
+  :bind (("C-c v" . #'nmbrgts/dwim-vterm)
+         ("C-c C-v" . #'nmbrgts/dir-vterm)
+         ("C-c M-v" . #'vterm)
+         :map project-prefix-map
+         ("t" . #'nmbrgts/project-vterm)))
 
 ;; emulate a terminal
 (use-package eat
@@ -913,7 +929,7 @@ targets."
   :ensure t
   :init
   (setq nmbrgts/git-prefix-map (make-sparse-keymap))
-  (bind-key "C-c g" nmbrgts/git-prefix-map)
+  (bind-key "C-c g" (cons "git" nmbrgts/git-prefix-map))
   :config
   (setq magit-bury-buffer-function 'magit-restore-window-configuration
         magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
@@ -964,11 +980,6 @@ targets."
   :after (dired diff-hl)
   :hook (dired-mode . diff-hl-dired-mode))
 
-;; TODO: drop popup for repeat map?
-(use-package diff-hl-inline-popup
-  :bind ( :map diff-hl-inline-popup-transient-mode-map
-          ("s" . #'diff-hl-show-hunk-stage-hunk)))
-
 ;; travel through time
 (use-package git-timemachine
   :ensure t
@@ -983,7 +994,8 @@ targets."
   :bind ( :map nmbrgts/git-prefix-map
           ("r" . #'browse-at-remote)))
 
-;; handle conflics with a quick menu
+;; TODO: move to transient?
+;; handle conflicts with a quick menu
 (use-package smerge-mode
   :after (hydra magit)
   :config
@@ -1050,6 +1062,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq lsp-keymap-prefix "C-c l"
         lsp-enable-file-watchers nil
         lsp-headerline-breadcrumb-enable nil
+        lsp-modeline-diagnostics-enable nil
+        lsp-modeline-code-actions-enable nil
         lsp-imenu-index-function #'lsp-imenu-create-categorized-index
         ;; list of lsp-mode imenu types for consult-imenu
         nmbrgts/lsp-mode-imenu-types
@@ -1078,7 +1092,21 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
           (?_ "Nulls")
           (?t "Type Parameters")
           (?! "Events")
-          (?d "Files"))))
+          (?d "Files")))
+  :hook (lsp-mode
+         . (lambda ()
+             (require 'consult-imenu)
+             (if (not (boundp 'nmbrgts/consult-imenu-lsp-types))
+                 (setq-local nmbrgts/consult-imenu-lsp-types
+                             `(,major-mode :types ,nmbrgts/lsp-mode-imenu-types)))
+             (if lsp-mode
+                 (progn
+                   (make-local-variable 'consult-imenu-config)
+                   (add-to-list 'consult-imenu-config
+                                nmbrgts/consult-imenu-lsp-types))
+               (setq-local consult-imenu-config
+                           (delq nmbrgts/consult-imenu-lsp-types
+                                 consult-imenu-config))))))
 
 (use-package consult-lsp
   :after (consult lsp-mode)
@@ -1092,7 +1120,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (setq nmbrgts/dap-mode-map (make-sparse-keymap)
         dap-auto-configure-features '(sessions locals))
-  (bind-key "C-c d" nmbrgts/dap-mode-map)
+  (bind-key "C-c d" (cons "debugger" nmbrgts/dap-mode-map))
   :bind ( :map nmbrgts/dap-mode-map
           ("n" . #'dap-next)
           ("i" . #'dap-step-in)
@@ -1141,26 +1169,51 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :hook ((terraform-mode . outline-minor-mode)
          (terraform-mode . lsp)))
 
+;;; llm / agentic tools
+
+(use-package gptel
+  :ensure t
+  :init
+  (setq nmbrgts/assistant-prefix-map (make-sparse-keymap))
+  (bind-key "C-c a" (cons "assistant" nmbrgts/assistant-prefix-map))
+  :bind ( :map nmbrgts/assistant-prefix-map
+          ("m" . #'gptel-menu)
+          ("c" . #'gptel)
+          ("r" . #'gptel-rewrite))
+  :config
+  (setq gptel-default-mode #'org-mode
+        gptel-model 'qwen2.5-coder:3b
+        gptel-backend (gptel-make-ollama "gptel-chat:ollama"
+                        :host "localhost:11434"
+                        :stream t
+                        :models '(qwen3-coder:30b
+                                  qwen2.5-coder:3b))))
+
+(use-package gptel-agent
+  :ensure t
+  :after gptel
+  :bind ( :map nmbrgts/assistant-prefix-map
+          ("a" . #'gptel-agent)))
+
 ;;; programming language support
 
 ;;; general
 
 (use-package treesit
-  :init
-  (setq
-   treesit-extra-load-path `(,(expand-file-name "tree-sitter" user-emacs-directory)
-                             "/usr/local/lib/")))
+  :config
+  (add-to-list 'treesit-extra-load-path "/usr/local/lib/"))
 
 (use-package indent-bars
   :quelpa (indent-bars
            :fetcher github
            :repo "jdtsmith/indent-bars")
-  :hook ((after-enable-theme
+  :hook ((modus-themes-after-load-theme
           . (lambda ()
               (when (bound-and-true-p indent-bars-mode)
                 (indent-bars-mode -1)
                 (indent-bars-mode +1)))))
-  :bind ("C-c t i" . indent-bars-mode)
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("i" . indent-bars-mode))
   :init
   (setq
    indent-bars-pattern "."
@@ -1212,6 +1265,85 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
           ("M-<up>" . puni-splice-killing-backward)
           ("M-<down>" . puni-splice-killing-forward)))
 
+;; jump to char
+(use-package avy
+  :ensure t
+  :bind
+  (("M-g c" . #'avy-goto-char)
+   ("M-g C" . #'avy-goto-char-2)
+   ("M-g w" . #'avy-goto-word-1)
+   ("M-g l" . #'avy-goto-line)
+   :map isearch-mode-map
+   ("C-'" . #'avy-isearch)))
+
+;; lint code for common spelling errors (experimental)
+(use-package emacs
+  :ensure nil
+  :init
+  (defvar typos-flymake--proc nil)
+
+  (defun typos-flymake--parse-output (source proc report-fn)
+    (let ((rx "^-:\\(?1:[0-9]+\\):\\(?2:[0-9]+\\): error: \\(?3:.*\\)$")
+          (rowidx 1)
+          (colidx 2)
+          (msgidx 3))
+      (with-current-buffer (process-buffer proc)
+        (goto-char (point-min))
+        (cl-loop
+         while (search-forward-regexp rx nil t)
+         for msg = (match-string msgidx)
+         ;; TODO: `flymake-diag-region' will return the bounds of then entire
+         ;;       identifier. It would be nice to have a function that returns the
+         ;;       bounds of the misspelled sub-word.
+         for (beg . end) = (flymake-diag-region
+                            source
+                            (string-to-number
+                             (match-string rowidx))
+                            (string-to-number
+                             (match-string colidx)))
+         for type = :note
+         collect (flymake-make-diagnostic
+                  source beg end type msg)
+         into diags
+         finally (funcall report-fn diags)))))
+
+  (defun typos-flymake--backend (report-fn &rest _args)
+    "Flymake backend for typos-cli"
+    (unless (executable-find "typos")
+      (error "Cannot find a suitable checker"))
+
+    (when (process-live-p typos-flymake--proc)
+      (kill-process typos-flymake--proc))
+
+    (let ((source (current-buffer)))
+      (save-restriction
+        (widen)
+        (setq typos-flymake--proc
+              (make-process
+               :name "typos-flymake"
+               :noquery t
+               :connection-type 'pipe
+               :buffer (generate-new-buffer " *typos-flymake*")
+               :command '("typos" "--format" "brief" "-")
+               :sentinel
+               (lambda (proc _event)
+                 (when (eq 'exit (process-status proc))
+                   (unwind-protect
+                       (when (with-current-buffer source
+                               (eq proc typos-flymake--proc))
+                         (typos-flymake--parse-output source proc report-fn))
+                     (kill-buffer (process-buffer proc)))))
+               ))
+        (process-send-region typos-flymake--proc (point-min) (point-max))
+        (process-send-eof typos-flymake--proc))))
+
+  (defun typos-flymake--setup ()
+    "Enable typos-flymake in the current buffer."
+    (add-hook 'flymake-diagnostic-functions #'typos-flymake--backend nil t))
+  :hook
+  ((prog-mode . flymake-mode)
+   (prog-mode . typos-flymake--setup)))
+
 ;; insert closing delimiters
 (use-package elec-pair
   :init
@@ -1237,6 +1369,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (global-corfu-mode))
 
+(use-package cape
+  :ensure t
+  :bind ("C-c p" . cape-prefix-map))
+
 ;; symbols for completion swag
 (use-package svg-lib
   :ensure t)
@@ -1249,7 +1385,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (kind-icon-use-icons nil)
   :config
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
-  :hook (after-enable-theme . kind-icon-reset-cache))
+  :hook (modus-themes-after-load-theme . kind-icon-reset-cache))
 
 ;; snippets
 
@@ -1302,7 +1438,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package rainbow-delimiters
   :ensure t
-  :bind ("C-c t (" . #'rainbow-delimiters-mode))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("(" . #'rainbow-delimiters-mode)))
 
 ;;; elisp
 
@@ -1334,19 +1471,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package python
   :ensure nil
+  :custom
+  (python-flymake-command nil)
   :init
   (setq python-shell-dedicated 'project)
   (add-to-list 'major-mode-remap-alist
                '(python-mode . python-ts-mode)))
-
-;; lsp based imenu for python
-(use-package emacs
-  :after (python consult-imenu lsp-mode)
-  :config
-  (dolist (mode '(python-mode
-                  python-ts-mode))
-    (add-to-list 'consult-imenu-config
-                 `(,mode :types ,nmbrgts/lsp-mode-imenu-types))))
 
 ;; setup pyright
 (use-package lsp-pyright
@@ -1415,6 +1545,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; virtual environments
 (use-package pyvenv
   :ensure t
+  :when nil
   :after python
   :init
   (setq nmbrgts/python-venv-map (make-sparse-keymap))
@@ -1446,12 +1577,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (setq lsp-go-use-placeholders nil
         lsp-go-use-gofumpt t))
-
-(use-package emacs
-  :after (go-mode consult-imenu lsp-mode)
-  :config
-  (add-to-list 'consult-imenu-config
-               `(go-mode :types ,nmbrgts/lsp-mode-imenu-types)))
 
 ;; formatting
 
@@ -1492,10 +1617,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (add-to-list 'major-mode-remap-alist
                '(csharp-mode . csharp-ts-mode))
-  (dolist (mode '(csharp-mode
-                  csharp-ts-mode))
-    (add-to-list 'consult-imenu-config
-                 `(,mode :types ,nmbrgts/lsp-mode-imenu-types)))
   :hook ((csharp-mode csharp-ts-mode)
          . (lambda ()
              (require 'lsp-csharp)
@@ -1600,7 +1721,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :demand t
   :init
   (setq nmbrgts/note-keymap (make-sparse-keymap))
-  (bind-key "C-c n" nmbrgts/note-keymap)
+  (bind-key "C-c n" (cons "notes" nmbrgts/note-keymap))
   :bind ( :map nmbrgts/note-keymap
           ("n" . #'denote-create-note)
           ("l" . #'denote-link)
@@ -1617,14 +1738,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; org config
 (use-package org
-  :hook ((org-mode . org-indent-mode)
-         (org-mode
-          . (lambda ()
-              (setq-local electric-pair-inhibit-predicate
-                          `(lambda (c)
-                             (if (char-equal c ?<)
-                                 t
-                               (,electric-pair-inhibit-predicate c)))))))
+  :hook (org-mode
+         . (lambda ()
+             (setq-local electric-pair-inhibit-predicate
+                         `(lambda (c)
+                            (if (char-equal c ?<)
+                                t
+                              (,electric-pair-inhibit-predicate c))))))
   :config
   (setq org-default-notes-file "~/org/notes.org"
         org-startup-with-inline-images nil
@@ -1640,7 +1760,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
      (python . t)
      (sql . t)
      (js . t)
-     (emacs-lisp . t)))
+     (emacs-lisp . t)
+     (verb . t)))
 
   (setq org-babel-default-header-args:sh
         '((:session . "sh")
@@ -1648,8 +1769,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; do http requests with org
 (use-package verb
-  :when nil
-  :ensure nil
+  :ensure t
   :after org
   :init
   (bind-key "C-c C-r" verb-command-map org-mode-map))
@@ -1692,7 +1812,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; define theme toggle and load
 (use-package emacs
-  :after (faces ef-themes)
+  :after (faces modus-themes ef-themes)
   :config
   ;; my theme selections for toggling
   (setq nmbrgts/light-theme 'ef-melissa-light
@@ -1702,35 +1822,64 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (defun nmbrgts/theme-toggle (&optional light-or-dark)
     (interactive)
     (setq nmbrgts/active-theme
-          (or (and (eq light-or-dark :light) nmbrgts/light-theme)
-              (and (eq light-or-dark :dark) nmbrgts/dark-theme)
+          (or (and (eq light-or-dark 'light) nmbrgts/light-theme)
+              (and (eq light-or-dark 'dark) nmbrgts/dark-theme)
               (and (eq nmbrgts/active-theme nmbrgts/dark-theme) nmbrgts/light-theme)
               (and (eq nmbrgts/active-theme nmbrgts/light-theme) nmbrgts/dark-theme)
-              nmbrgts/dark-theme))
-    (mapc 'disable-theme custom-enabled-themes)
-    (load-theme nmbrgts/active-theme t))
+              nmbrgts/active-theme))
+    (modus-themes-load-theme nmbrgts/active-theme))
 
   ;; switch themes with system
   (if (and (eq system-type 'darwin)
-           (boundp 'mac-application-state))
+           (boundp 'ns-system-appearance)
+           (boundp 'ns-system-appearance-change-functions))
       (progn
-        (message "Matching emac theme to system theme...")
-        (defun nmbrgts/match-theme-to-system ()
-          (let ((appearance (plist-get (mac-application-state)
-                                       :appearance)))
-            (nmbrgts/theme-toggle
-             (if (string-equal
-                  appearance
-                  "NSAppearanceNameDarkAqua")
-                 :dark
-               :light))))
-        (add-hook 'mac-effective-appearance-change-hook
-                  #'nmbrgts/match-theme-to-system)
-        (nmbrgts/match-theme-to-system))
+        (message "matching emacs theme to system theme...")
+        (add-to-list 'ns-system-appearance-change-functions #'nmbrgts/theme-toggle)
+        (nmbrgts/theme-toggle ns-system-appearance))
     (progn
-      (message "Loading theme...")
-      (load-theme nmbrgts/active-theme t)))
-  :bind ("C-c t t" . #'nmbrgts/theme-toggle)
-  :hook ((after-enable-theme
+      (message "loading theme...")
+      (modus-themes-load-theme nmbrgts/active-theme)))
+  :bind ( :map nmbrgts/toggle-prefix-map
+          ("t" . #'nmbrgts/theme-toggle))
+  :hook ((modus-themes-after-load-theme
           . (lambda ()
-              (setenv "EMACS_THEME" (format "%s" nmbrgts/active-theme))))))
+              (setq vterm-environment
+                    (setenv-internal vterm-environment
+                                     "EMACS_THEME"
+                                     (format "%s" nmbrgts/active-theme)
+                                     t))))
+         (modus-themes-after-load-theme
+          . (lambda ()
+              (mapc
+               (lambda (buffer)
+                 (when (s-starts-with? "*vterm:"
+                                       (buffer-name buffer))
+                   (with-current-buffer buffer
+                     (vterm-copy-mode -1)
+                     (vterm-send-stop)
+                     (vterm-send-key "c" nil nil :ctrl)
+                     (vterm-insert "")
+                     (vterm-send-stop)
+                     (vterm-reset-cursor-point)
+                     (vterm-send-start)
+                     (let ((in-proc (not (vterm--at-prompt-p))))
+                       (when in-proc
+                         (vterm-send-key "z" nil nil :ctrl)
+                         (vterm-insert ""))
+                       (vterm-insert (format "fish_config theme choose %s"
+                                             (if (eq nmbrgts/active-theme nmbrgts/light-theme)
+                                                 "light"
+                                               "dark")))
+                       (vterm-send-return)
+                       (vterm-insert "")
+                       (when in-proc
+                         (vterm-insert "fg")
+                         (vterm-send-return)
+                         (vterm-insert ""))))))
+               (buffer-list))))))
+
+;; load private config
+(let ((private-config (no-littering-expand-etc-file-name "private.el")))
+  (if (file-exists-p private-config)
+      (load private-config :no-error)))
