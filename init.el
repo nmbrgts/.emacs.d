@@ -1497,14 +1497,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package python-black
   :ensure t
   :demand t
-  :after python
-  :hook ((python-mode python-ts-mode) . python-black-on-save-mode))
+  :after python)
 
 (use-package python-isort
   :ensure t
   :demand t
-  :after python
-  :hook ((python-mode python-ts-mode) . python-isort-on-save-mode))
+  :after python)
 
 (use-package reformatter
   :ensure t
