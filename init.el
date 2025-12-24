@@ -32,21 +32,6 @@
   :config
   (no-littering-theme-backups))
 
-;; quelpa
-(unless (package-installed-p 'quelpa)
-  (with-temp-buffer
-    (url-insert-file-contents
-     "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
-    (eval-buffer)
-    (quelpa-self-upgrade)))
-
-;; quelpa use-package integration
-(quelpa
- '(quelpa-use-package
-   :fetcher git
-   :url "https://github.com/quelpa/quelpa-use-package.git"))
-(require 'quelpa-use-package)
-
 ;; misc. early settings
 (use-package emacs
   :custom
@@ -1204,9 +1189,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (add-to-list 'treesit-extra-load-path "/usr/local/lib/"))
 
 (use-package indent-bars
-  :quelpa (indent-bars
-           :fetcher github
-           :repo "jdtsmith/indent-bars")
+  :ensure t
+  :vc ( :url "https://github.com/jdtsmith/indent-bars"
+        :rev :newest)
   :hook ((modus-themes-after-load-theme
           . (lambda ()
               (when (bound-and-true-p indent-bars-mode)
