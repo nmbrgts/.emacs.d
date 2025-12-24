@@ -244,7 +244,7 @@
            (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
-           (window-width . 0.40))
+           (window-width . 0.45))
           ;; top bar informational
           ("^\\*\\(Occur\\|Flymake\\|xref\\|grep\\|docker-\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
@@ -257,7 +257,7 @@
            (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
-           (window-width . 0.40))
+           (window-width . 0.45))
           ;; quick doodling
           ("^\\*\\(.*scratch\\)"
            (nmbrgts/display-buffer-in-side-window-and-select)
@@ -270,7 +270,7 @@
            (nmbrgts/display-buffer-in-side-window-and-select)
            (side . right)
            (slot . 1)
-           (window-width . 0.40))))
+           (window-width . 0.45))))
 
   (defun nmbrgts/promote-side-window-buffer (arg)
     (interactive "P")
