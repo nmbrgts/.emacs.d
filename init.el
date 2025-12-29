@@ -1512,12 +1512,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (reformatter-define python-ruff-fix
     :program "ruff"
     :args (list "check" "--fix" (or (buffer-file-name) input-file))
-    :lighter " ruff-fix")
+    :lighter " ruff-fix"
+    :stdout nil)
 
   (reformatter-define python-ruff-format
     :program "ruff"
     :args (list "format" (or (buffer-file-name) input-file))
-    :lighter " ruff-format")
+    :lighter " ruff-format"
+    :stdout nil)
 
   (reformatter-define python-reorder-python-imports
     :program "reorder-python-imports"
@@ -1526,7 +1528,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
             "--py39-plus"
             "-")
     :lighter " reorder-python-imports")
-  :hook ((python-mode python-ts-mode) . python-ruff-fix-on-save-mode))
+  :hook (((python-mode python-ts-mode) . python-ruff-format-on-save-mode)
+         ((python-mode python-ts-mode) . python-ruff-fix-on-save-mode)))
 
 ;; virtual environments
 (use-package pyvenv
