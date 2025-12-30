@@ -1511,15 +1511,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :init
   (reformatter-define python-ruff-fix
     :program "ruff"
-    :args (list "check" "--fix" (or (buffer-file-name) input-file))
-    :lighter " ruff-fix"
-    :stdout nil)
+    :args (list "check" "--fix" "--stdin-filename" (or (buffer-file-name) input-file))
+    :lighter " ruff-fix")
 
   (reformatter-define python-ruff-format
     :program "ruff"
-    :args (list "format" (or (buffer-file-name) input-file))
-    :lighter " ruff-format"
-    :stdout nil)
+    :args (list "format" "--stdin-filename" (or (buffer-file-name) input-file))
+    :lighter " ruff-format")
 
   (reformatter-define python-reorder-python-imports
     :program "reorder-python-imports"
