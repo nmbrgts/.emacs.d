@@ -174,6 +174,7 @@
          :map nmbrgts/window-map
          ("s" . #'window-toggle-side-windows)
          ("=" . #'balance-windows)
+         ("m" . #'maximize-window)
          :repeat-map nmbrgts/buffer-move-repeat-map
          ("<right>" . #'next-buffer)
          ("<left>" . #'previous-buffer)))
