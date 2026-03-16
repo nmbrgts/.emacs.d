@@ -1519,6 +1519,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     :args (list "check" "--fix" "--stdin-filename" (or (buffer-file-name) input-file))
     :lighter " ruff-fix")
 
+  (reformatter-define python-ruff-isort
+    :program "ruff"
+    :args (list "check" "--fix" "--select" "I" "--stdin-filename" (or (buffer-file-name) input-file))
+    :lighter " ruff-fix")
+
   (reformatter-define python-ruff-format
     :program "ruff"
     :args (list "format" "--stdin-filename" (or (buffer-file-name) input-file))
@@ -1531,8 +1536,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
             "--py39-plus"
             "-")
     :lighter " reorder-python-imports")
+
   :hook (((python-mode python-ts-mode) . python-ruff-format-on-save-mode)
-         ((python-mode python-ts-mode) . python-ruff-fix-on-save-mode)))
+         ((python-mode python-ts-mode) . python-ruff-isort-on-save-mode)))
 
 ;; virtual environments
 (use-package pyvenv
