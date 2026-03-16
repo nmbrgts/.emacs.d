@@ -175,6 +175,10 @@
          ("s" . #'window-toggle-side-windows)
          ("=" . #'balance-windows)
          ("m" . #'maximize-window)
+         :repeat-map nmmbrgts/window-manipulation-repeat-map
+         ("s" . #'window-toggle-side-windows)
+         ("=" . #'balance-windows)
+         ("m" . #'maximize-window)
          :repeat-map nmbrgts/buffer-move-repeat-map
          ("<right>" . #'next-buffer)
          ("<left>" . #'previous-buffer)))
@@ -211,7 +215,7 @@
   :bind ( :map nmbrgts/window-map
           ("u" . #'winner-undo)
           ("r" . #'winner-redo)
-          :repeat-map nmbrgts/winner-repeat-map
+          :repeat-map nmmbrgts/window-manipulation-repeat-map
           ("u" . #'winner-undo)
           ("r" . #'winner-redo)))
 
