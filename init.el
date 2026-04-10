@@ -664,7 +664,8 @@ targets."
        `(mode-line-active ((,c :box nil)))
        `(mode-line-inactive ((,c :box nil)))
        `(mode-line-highlight ((,c :box nil)))
-       `(tab-bar-tab ((,c :box nil)))
+       `(tab-bar-tab ((,c :box nil
+                          :background ,bg-mode-line-inactive)))
        `(tab-bar-tab-inactive ((,c :background ,bg-mode-line-inactive
                                    :foreground ,fg-mode-line-inactive
                                    :weight normal
@@ -764,9 +765,9 @@ targets."
     (let ((current-p (eq (car tab) 'current-tab)))
       (propertize
        (concat (if tab-bar-tab-hints (format "%d " i) "")
-               " "
+               (if current-p "> " "  ")
                (alist-get 'name tab)
-               " "
+               "  "
                (or (and tab-bar-close-button-show
                         (not (eq tab-bar-close-button-show
                                  (if current-p 'non-selected 'selected)))
