@@ -689,17 +689,17 @@ targets."
   :config
   (setq fontaine-presets
         '((nmbrgts/regular
-           :default-family "JetBrains Mono"
-           :default-weight light
+           :default-family "Iosevka"
+           :default-weight normal
            :default-height 270
            :fixed-pitch-family "Iosevka Aile"
-           :bold-weight light)
+           :bold-weight normal)
           (nmbrgts/small
-           :default-family "JetBrains Mono"
-           :default-weight light
+           :default-family "Iosevka"
+           :default-weight normal
            :default-height 200
            :fixed-pitch-family "Iosevka Aile"
-           :bold-weight light)))
+           :bold-weight normal)))
   (fontaine-mode +1)
   (fontaine-set-preset 'nmbrgts/regular)
 
