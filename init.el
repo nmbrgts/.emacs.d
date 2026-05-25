@@ -670,6 +670,8 @@ targets."
                                    :foreground ,fg-mode-line-inactive
                                    :weight normal
                                    :box nil)))
+       `(line-number ((,c :background ,bg-main)))
+       `(line-number-current-line ((,c :background ,bg-hl-line)))
        `(fringe ((,c :background ,bg-main :foreground ,bg-main)))
        `(keycast-key ((,c :box nil)))
        `(child-frame-border ((,c :background ,constant)))
@@ -1814,8 +1816,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :after (faces modus-themes ef-themes)
   :config
   ;; my theme selections for toggling
-  (setq nmbrgts/light-theme 'ef-melissa-light
-        nmbrgts/dark-theme 'ef-melissa-dark
+  (setq nmbrgts/light-theme 'modus-operandi-tinted
+        nmbrgts/dark-theme 'modus-vivendi-tinted
         nmbrgts/active-theme nmbrgts/dark-theme)
   ;; toggle theme
   (defun nmbrgts/theme-toggle (&optional light-or-dark)
