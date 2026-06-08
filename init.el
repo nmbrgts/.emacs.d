@@ -665,21 +665,22 @@ targets."
        `(mode-line-inactive ((,c :box nil)))
        `(mode-line-highlight ((,c :box nil)))
        `(tab-bar-tab ((,c :box nil
-                          :background ,bg-mode-line-inactive)))
-       `(tab-bar-tab-inactive ((,c :background ,bg-mode-line-inactive
+                          :background ,bg-tab-bar)))
+       `(tab-bar-tab-inactive ((,c :background ,bg-tab-bar
                                    :foreground ,fg-mode-line-inactive
                                    :weight normal
                                    :box nil)))
        `(line-number ((,c :background ,bg-main)))
        `(line-number-current-line ((,c :background ,bg-hl-line)))
        `(fringe ((,c :background ,bg-main :foreground ,bg-main)))
+       `(olivetti-fringe ((,c :background ,bg-main :foreground ,bg-main)))
        `(keycast-key ((,c :box nil)))
        `(child-frame-border ((,c :background ,constant)))
        `(eros-result-overlay-face ((,c :inherit modus-themes-slant
                                        :foreground ,comment)))
-       '(lsp-face-highlight-read ((t (:inherit highlight :weight light))))
-       '(lsp-face-highlight-write ((t (:inherit highlight :weight light))))
-       '(lsp-face-highlight-textual ((t (:inherit highlight :weight light))))
+       '(lsp-face-highlight-read ((t (:inherit highlight :weight normal))))
+       '(lsp-face-highlight-write ((t (:inherit highlight :weight normal))))
+       '(lsp-face-highlight-textual ((t (:inherit highlight :weight normal))))
        `(doom-modeline-bar ((,c :background ,keybind))))))
   :hook (modus-themes-after-load-theme . nmbrgts/tweak-theme))
 
