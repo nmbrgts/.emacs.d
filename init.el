@@ -694,13 +694,13 @@ targets."
         '((nmbrgts/regular
            :default-family "Iosevka"
            :default-weight normal
-           :default-height 270
+           :default-height 240
            :fixed-pitch-family "Iosevka Aile"
            :bold-weight normal)
           (nmbrgts/small
            :default-family "Iosevka"
            :default-weight normal
-           :default-height 200
+           :default-height 170
            :fixed-pitch-family "Iosevka Aile"
            :bold-weight normal)))
   (fontaine-mode +1)
